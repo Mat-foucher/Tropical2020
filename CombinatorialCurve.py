@@ -55,12 +55,13 @@ class leg(object):
     def vertices(self):
         return {self.root}
 
-# A Combinatorial Tropical Curve has a name and set of edges
+# A Combinatorial Tropical Curve has a name, set of edges, and set of legs
 class CombCurve(object):
 
     def __init__(self, name):
         self.name = name
         self._edges = {}
+        self._legs = {}
 
 
     @property
@@ -72,14 +73,21 @@ class CombCurve(object):
         self._edges = edges_
 
     @property
+    def legs(self):
+        return self._legs
+
+    @legs.setter
+    def legs(self, legs_):
+        self._legs = legs_
+
+    @property
     def vertices(self):
-        unflattened_vertex_list = [e.vertices for e in self.edges]
+        unflattened_vertex_list = [e.vertices for e in self.edges] + [l.vertices for l in self.legs]
         flattened_vertex_list = []
         for sublist in unflattened_vertex_list:
             for vertex in sublist:
                 flattened_vertex_list.append(vertex)
         return set(flattened_vertex_list)
-
 
     @property
     def vertexNumber(self):
@@ -98,4 +106,8 @@ class CombCurve(object):
 
     def showEdges(self):
         print [e.name for e in self.edges]
+
+    def showLegs(self):
+        print [l.name for l in self.legs]
+
 
