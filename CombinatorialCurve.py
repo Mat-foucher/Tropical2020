@@ -1,78 +1,99 @@
-
-class vertex:
+class vertex(object):
     # The vertex Class will assign each vertex their distinct properties, such as the genus.
-    def __init__(self, vname, genus, numEdges):
-        self.vname = vname
-        self.genus = genus
-    
-    def setName(self, name_):
-        self.vname = name_
+    def __init__(self, vname_, genus_, numEdges):
+        if genus_ < 0:
+            raise ValueError("Genus must be nonnegative")
 
-    def setGenus(self, genus_):
-        self.genus = genus_
-    
-    def getName(self):
-        return self.vname
-    
-    def getGenus(self):
+        self._vname = vname_
+        self._genus = genus_
+
+    @property
+    def vname(self):
+        return self._vname
+
+    @vname.setter
+    def vname(self, vname_):
+        self._vname = vname_
+
+    @property
+    def genus(self):
         return self.genus
 
+    @genus.setter
+    def genus(self, genus_):
+        if genus_ < 0:
+            raise ValueError("Genus must be non-negative.")
+        self._genus = genus_
 
 
 # The EDGES of the combinatorial tropical curve will only have a name and length (for now).
 class edge:
-    def __init__(self, ename, length):
-        self.ename = ename
-        self.length = length
+    def __init__(self, ename_, length_):
+        if length_ < 0.0:
+            raise ValueError("Length must be non-negative.")
+        self._ename = ename_
+        self._length = length_
 
-    def setName(self, name_):
-        self.ename = name_
+    @property
+    def ename(self):
+        return self._ename
 
+    @ename.setter
+    def ename(self, ename_):
+        self._ename = ename_
+
+    @property
+    def length(self):
+        return self._length
+
+    @length.setter
     def setLength(self, length_):
-        self.length = length_
-
-    def getName(self):
-        return self.ename
-    
-    def getLength(self):
-        return self.length
+        if length_ < 0.0:
+            raise ValueError("Length must be non-negative.")
+        self._length = length_
 
 
 class CombCurve(vertex, edge):
-   
+
     def __init__(self, name, vertexNumber, edgeNumber):
-        self.name = name
-        self.vertexNumber = vertexNumber
-        self.edgeNumber = edgeNumber
-        self.vertices = []
-        self.edges = []
+        self._name = name
+        self._vertexNumber = vertexNumber
+        self._edgeNumber = edgeNumber
+        self._vertices = []
+        self._edges = []
 
-    def setName(self, name_):
-        self.name = name_        
-    
-    def setVertexNumber(self, number_):
-        self.vertexNumber = number_
-    
-    def setEdgeNumber(self, number_1):
-        self.edgeNumber = number_1
+    @property
+    def name(self):
+        return self._name
 
-    def getName(self):
-        return self.name
+    @name.setter
+    def name(self, name_):
+        self._name = name_
 
-    def getVertexNumber(self):
-        return self.vertexNumber
-    
-    def getEdgeNumber(self)
-        return self.edgeNumber
+    @property
+    def vertexNumber(self):
+        return self._vertexNumber
+
+    @property
+    def edgeNumber(self):
+        return self._edgeNumber
+
+    @property
+    def vertices(self):
+        return self._vertices
+
+    @vertices.setter
+    def vertices(self, vertices_):
+        self._vertices = vertices_
+
+    @property
+    def edges(self):
+        return self._edges
+
+    @edges.setter
+    def edges(self, edges_):
+        self._edges = edges_
 
     def showNumbers(self):
-        print "Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber
-
-
-
-
-
-Curve1 = CombCurve("Curve1", 3 , 3)
-
-Curve1.showNumbers()
-
+        print
+        "Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber
