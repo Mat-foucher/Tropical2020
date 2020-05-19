@@ -1,4 +1,3 @@
-
 # A vertex has a name and non-negative genus
 class vertex(object):
     def __init__(self, name_, genus_):
@@ -122,19 +121,57 @@ class CombCurve(object):
         return self.bettiNumber + sum([v.genus for v in self.vertices])
 
 
+class StrictPiecewiseLinearFunction(object):
+    def __init__(self, domain_, functionValues_):
+        self._domain = domain_
+        self._functionValues = functionValues_
+        self.assertIsAffineLinear()
+
+    @property
+    def domain(self):
+        return self._domain 
+
+    @property
+    def functionValues(self):
+        return self._functionValues
+
+    def assertIsAffineLinear(self):
+        # Assert Non-Negativity at every iteration of the loop!
+        
+        for i in self.functionValues.values():
+            assert i >= 0.0
+
+        for v in self.domain.vertices:
+            assert v in self.functionValues
+        for l in self.domain.legs:
+            assert l in self.functionValues
+            assert self.functionValues[l].is_integer()
+        for e in self.domain.edges:
+            if e.length > 0.0:
+                assert ((self.functionValues[e.vec1] - self.functionValues[e.vec2]) / e.length).is_integer()
+    
+
+
+
+    
+
 C = CombCurve("Example 3.5")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
 v3 = vertex("v3", 1)
-e1 = edge("e1", 0.0, v1, v2)
-e2 = edge("e2", 0.0, v2, v3)
-e3 = edge("e3", 0.0, v1, v3)
-e4 = edge("e4", 0.0, v1, v1)
+e1 = edge("e1", 1.0, v1, v2)
+e2 = edge("e2", 1.0, v2, v3)
+e3 = edge("e3", 1.0, v1, v3)
+e4 = edge("e4", 1.0, v1, v1)
 l = leg("l", v1)
-
 
 C.edges = {e1, e2, e3, e4}
 C.legs = {l}
+
+dict = {v1: 0, v2: 0, v3: 0, l: 0}
+
+f = StrictPiecewiseLinearFunction(C, dict)
+
 assert C.vertices == {v1, v2, v3}
 
 assert C.degree(v1) == 5
