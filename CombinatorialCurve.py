@@ -70,13 +70,15 @@ class CombCurve(vertex, edge):
     def name(self, name_):
         self._name = name_
 
+
     @property
     def vertexNumber(self):
-        return self._vertexNumber
+        return len(self.vertices)
 
     @property
     def edgeNumber(self):
-        return self._edgeNumber
+        return len(self.edges)
+
 
     @property
     def vertices(self):
@@ -86,6 +88,7 @@ class CombCurve(vertex, edge):
     def vertices(self, vertices_):
         self._vertices = vertices_
 
+
     @property
     def edges(self):
         return self._edges
@@ -94,6 +97,6 @@ class CombCurve(vertex, edge):
     def edges(self, edges_):
         self._edges = edges_
 
+
     def showNumbers(self):
-        print
-        "Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber
+        print "Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber
