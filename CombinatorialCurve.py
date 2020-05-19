@@ -4,16 +4,8 @@ class vertex(object):
         if genus_ < 0:
             raise ValueError("Genus must be nonnegative")
 
-        self._vname = vname_
+        self.vname = vname_
         self._genus = genus_
-
-    @property
-    def vname(self):
-        return self._vname
-
-    @vname.setter
-    def vname(self, vname_):
-        self._vname = vname_
 
     @property
     def genus(self):
@@ -30,20 +22,12 @@ class edge:
     def __init__(self, ename_, length_, vec1_, vec2_):
         if length_ < 0.0:
             raise ValueError("Length must be non-negative.")
-        self._ename = ename_
+        self.ename = ename_
         self._length = length_
 
         #Endpoints
         self.vec1 = vec1_
         self.vec2 = vec2_
-
-    @property
-    def ename(self):
-        return self._ename
-
-    @ename.setter
-    def ename(self, ename_):
-        self._ename = ename_
 
     @property
     def length(self):
@@ -65,18 +49,9 @@ class edge:
 class CombCurve(object):
 
     def __init__(self, name):
-        self._name = name
+        self.name = name
         self._vertices = []
         self._edges = []
-
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, name_):
-        self._name = name_
-
 
     @property
     def vertices(self):
@@ -86,7 +61,6 @@ class CombCurve(object):
     def vertices(self, vertices_):
         self._vertices = vertices_
 
-
     @property
     def edges(self):
         return self._edges
@@ -94,10 +68,6 @@ class CombCurve(object):
     @edges.setter
     def edges(self, edges_):
         self._edges = edges_
-
-
-
-
 
     @property
     def vertexNumber(self):
