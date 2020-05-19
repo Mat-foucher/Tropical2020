@@ -10,7 +10,7 @@ class vertex(object):
 
     @property
     def genus(self):
-        return self.genus
+        return self._genus
 
     @genus.setter
     def genus(self, genus_):
@@ -110,8 +110,15 @@ class CombCurve(object):
     def showLegs(self):
         print [l.name for l in self.legs]
 
-    def degree(self, v):
+    def getVertexDegree(self, v):
         return sum(1 for e in self.edges if e.vec1 == v) + sum(1 for e in self.edges if e.vec2 == v) + sum(1 for l in self.legs if l.root == v)
 
+    @property
+    def bettiNumber(self):
+        return self.edgeNumber - self.vertexNumber + 1
+
+    @property
+    def genus(self):
+        return self.bettiNumber + sum([v.genus for v in self.vertices])
 
 
