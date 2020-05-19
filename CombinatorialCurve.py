@@ -110,4 +110,8 @@ class CombCurve(object):
     def showLegs(self):
         print [l.name for l in self.legs]
 
+    def degree(self, v):
+        return sum(1 for e in self.edges if e.vec1 == v) + sum(1 for e in self.edges if e.vec2 == v) + sum(1 for l in self.legs if l.root == v)
+
+
 
