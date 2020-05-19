@@ -26,13 +26,16 @@ class vertex(object):
         self._genus = genus_
 
 
-# The EDGES of the combinatorial tropical curve will only have a name and length (for now).
 class edge:
-    def __init__(self, ename_, length_):
+    def __init__(self, ename_, length_, vec1_, vec2_):
         if length_ < 0.0:
             raise ValueError("Length must be non-negative.")
         self._ename = ename_
         self._length = length_
+
+        #Endpoints
+        self.vec1 = vec1_
+        self.vec2 = vec2_
 
     @property
     def ename(self):
@@ -52,13 +55,17 @@ class edge:
             raise ValueError("Length must be non-negative.")
         self._length = length_
 
+    @property
+    def vertices(self):
+        return Set(self._vec1, self._vec2)
 
-class CombCurve(vertex, edge):
 
-    def __init__(self, name, vertexNumber, edgeNumber):
+
+
+class CombCurve(object):
+
+    def __init__(self, name):
         self._name = name
-        self._vertexNumber = vertexNumber
-        self._edgeNumber = edgeNumber
         self._vertices = []
         self._edges = []
 
@@ -69,15 +76,6 @@ class CombCurve(vertex, edge):
     @name.setter
     def name(self, name_):
         self._name = name_
-
-
-    @property
-    def vertexNumber(self):
-        return len(self.vertices)
-
-    @property
-    def edgeNumber(self):
-        return len(self.edges)
 
 
     @property
@@ -98,5 +96,19 @@ class CombCurve(vertex, edge):
         self._edges = edges_
 
 
+
+
+
+    @property
+    def vertexNumber(self):
+        return len(self.vertices)
+
+    @property
+    def edgeNumber(self):
+        return len(self.edges)
+
+
     def showNumbers(self):
         print "Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber
+
+
