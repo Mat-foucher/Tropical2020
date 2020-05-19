@@ -18,7 +18,7 @@ class vertex(object):
         self._genus = genus_
 
 
-class edge:
+class edge(object):
     def __init__(self, ename_, length_, vec1_, vec2_):
         if length_ < 0.0:
             raise ValueError("Length must be non-negative.")
