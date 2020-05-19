@@ -1,8 +1,9 @@
+
+# A vertex has a name and non-negative genus
 class vertex(object):
-    # The vertex Class will assign each vertex their distinct properties, such as the genus.
-    def __init__(self, name_, genus_, numEdges):
+    def __init__(self, name_, genus_):
         if genus_ < 0:
-            raise ValueError("Genus must be nonnegative")
+            raise ValueError("Genus must be non-negative")
 
         self.name = name_
         self._genus = genus_
@@ -17,7 +18,7 @@ class vertex(object):
             raise ValueError("Genus must be non-negative.")
         self._genus = genus_
 
-
+# An edge has a name, non-negative length, and endpoints
 class edge(object):
     def __init__(self, name_, length_, vec1_, vec2_):
         self.name = name_
@@ -44,9 +45,17 @@ class edge(object):
     def vertices(self):
         return {self.vec1, self.vec2}
 
+#A leg has a name and root
+class leg(object):
+    def __init__(self, name_, root_):
+        self.name = name_
+        self.root = root_
 
+    @property
+    def vertices(self):
+        return {self.root}
 
-
+# A Combinatorial Tropical Curve has a name and set of edges
 class CombCurve(object):
 
     def __init__(self, name):
