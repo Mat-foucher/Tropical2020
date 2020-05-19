@@ -84,4 +84,9 @@ class CombCurve(object):
     def showNumbers(self):
         print "Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber
 
+    def showVertices(self):
+        print [v.name for v in self.vertices]
+
+    def showEdges(self):
+        print [e.name for e in self.edges]
 
