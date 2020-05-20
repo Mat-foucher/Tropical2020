@@ -1,3 +1,5 @@
+import copy
+
 # A vertex has a name and non-negative genus
 class vertex(object):
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
@@ -183,7 +185,7 @@ class CombCurve(object):
         e1 = edge("(subdivision 1 of " + e.name + ")", length1, e.vert1, v)
         e2 = edge("(subdivision 2 of " + e.name + ")", length2, v, e.vert2)
 
-        subdivision = self
+        subdivision = copy.copy(self)
 
         subdivision.edges = subdivision.edges - {e}
         subdivision.edges = subdivision.edges | {e1}
