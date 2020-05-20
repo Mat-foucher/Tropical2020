@@ -87,6 +87,8 @@ class CombCurve(object):
         self._genusCacheValid = False
         self._genusCache = 0
 
+
+
     @property
     def edges(self):
         return self._edges
@@ -140,6 +142,57 @@ class CombCurve(object):
     def edgeNumber(self):
         return len(self.edges)
 
+
+
+    # The Betti number is a read only property computed upon access
+    @property
+    def bettiNumber(self):
+        return self.edgeNumber - self.vertexNumber + 1
+
+    # Genus is a read only property computed upon access
+    @property
+    def genus(self):
+        if not self._genusCacheValid:
+            self._genusCahce = self.bettiNumber + sum([v.genus for v in self.vertices])
+            self._genusCacheValid = True
+        return self.bettiNumber + sum([v.genus for v in self.vertices])
+
+
+
+    # Returns the degree of vertex v accounting for legs and self loops
+    def degree(self, v):
+        return sum(1 for e in self.edges if e.vert1 == v) + sum(1 for e in self.edges if e.vert2 == v) + sum(1 for l in self.legs if l.root == v)
+
+    # e should be an edge and the lengths should be doubles
+    # genus should be a non-negative integer
+    # returns a new CombCurve with edge e subdivided
+    def getSubdivision(self, e, length1, length2, genus = 0):
+        # Ensure the lengths are non-negative
+        if length1 < 0.0:
+            raise ValueError("length1 must be non-negative")
+        if length2 < 0.0:
+            raise ValueError("length2 must be non-negative")
+
+        # Ensure the lengths sum to the length of e
+        assert length1 + length2 == e.length
+
+        # Don't split a nonexistent edge
+        assert e in self.edges
+
+        v = vertex("(vertex splitting " + e.name + ")", genus)
+        e1 = edge("(subdivision 1 of " + e.name + ")", length1, e.vert1, v)
+        e2 = edge("(subdivision 2 of " + e.name + ")", length2, v, e.vert2)
+
+        subdivision = self
+
+        subdivision.edges = subdivision.edges - e
+        subdivision.edges = subdivision.edges + e1
+        subdivision.edges = subdivision.edges + e2
+
+        return subdivision
+
+
+
     def showNumbers(self):
         print "Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber
 
@@ -154,23 +207,6 @@ class CombCurve(object):
     # Prints the names of legs
     def showLegs(self):
         print [l.name for l in self.legs]
-
-    # Returns the degree of vertex v accounting for legs and self loops
-    def degree(self, v):
-        return sum(1 for e in self.edges if e.vert1 == v) + sum(1 for e in self.edges if e.vert2 == v) + sum(1 for l in self.legs if l.root == v)
-
-    # The Betti number is a read only property computed upon access
-    @property
-    def bettiNumber(self):
-        return self.edgeNumber - self.vertexNumber + 1
-
-    # Genus is a read only property computed upon access
-    @property
-    def genus(self):
-        if not self._genusCacheValid:
-            self._genusCahce = self.bettiNumber + sum([v.genus for v in self.vertices])
-            self._genusCacheValid = True
-        return self.bettiNumber + sum([v.genus for v in self.vertices])
 
 
 class StrictPiecewiseLinearFunction(object):
