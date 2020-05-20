@@ -26,4 +26,13 @@ assert C.degree(v3) == 2
 assert C.genus == 3
 assert C.bettiNumber == 2
 
+subdiv = C.getSubdivision(e4, 0.5, 0.5)
+assert subdiv.degree(v1) == 5
+assert subdiv.degree(v2) == 2
+assert subdiv.degree(v3) == 2
+assert subdiv.genus == 3
+assert subdiv.bettiNumber == 2
+assert subdiv.vertexNumber == C.vertexNumber + 1
+assert subdiv.edgeNumber == C.edgeNumber + 1
+
 print "If you see this, then all previous assertations were true!"
