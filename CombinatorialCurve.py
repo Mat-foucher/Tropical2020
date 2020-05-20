@@ -79,6 +79,14 @@ class CombCurve(object):
         self._edges = {}
         self._legs = {}
 
+        # Variables for caching vertices
+        self._vertexCacheValid = False
+        self._vertexCache = {}
+
+        # Variables for caching genus
+        self._genusCacheValid = False
+        self._genusCache = 0
+
     @property
     def edges(self):
         return self._edges
@@ -88,6 +96,8 @@ class CombCurve(object):
     @edges.setter
     def edges(self, edges_):
         self._edges = edges_
+        self._vertexCacheValid = False
+        self._genusCacheValid = False
 
     @property
     def legs(self):
@@ -98,18 +108,25 @@ class CombCurve(object):
     @legs.setter
     def legs(self, legs_):
         self._legs = legs_
+        self._vertexCacheValid = False
+        self._genusCacheValid = False
 
-    # The set of vertices is a read only property computed upon access
+    # The set of vertices is a read only property computed upon access, unless a valid cache is available
     # It is the collection of vertices that are endpoints of edges or roots of legs
     @property
     def vertices(self):
-        # Flatmap self.edges with the function e => e.vertices
-        unflattened_vertex_list = [e.vertices for e in self.edges] + [l.vertices for l in self.legs]
-        flattened_vertex_list = []
-        for sublist in unflattened_vertex_list:
-            for vertex in sublist:
-                flattened_vertex_list.append(vertex)
-        return set(flattened_vertex_list)
+        if not self._vertexCacheValid:
+            # Flatmap self.edges with the function e => e.vertices
+            unflattened_vertex_list = [e.vertices for e in self.edges] + [l.vertices for l in self.legs]
+            flattened_vertex_list = []
+            for sublist in unflattened_vertex_list:
+                for vertex in sublist:
+                    flattened_vertex_list.append(vertex)
+
+            self._vertexCache = set(flattened_vertex_list)
+            self._vertexCacheValid = True
+
+        return self._vertexCache
 
     # The number of vertices is a read only property computed upon access
     # It is the number of vertices
@@ -148,9 +165,11 @@ class CombCurve(object):
         return self.edgeNumber - self.vertexNumber + 1
 
     # Genus is a read only property computed upon access
-    # TODO: Consider caching this - slower for large graphs
     @property
     def genus(self):
+        if not self._genusCacheValid:
+            self._genusCahce = self.bettiNumber + sum([v.genus for v in self.vertices])
+            self._genusCacheValid = True
         return self.bettiNumber + sum([v.genus for v in self.vertices])
 
 
