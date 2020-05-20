@@ -185,9 +185,9 @@ class CombCurve(object):
 
         subdivision = self
 
-        subdivision.edges = subdivision.edges - e
-        subdivision.edges = subdivision.edges + e1
-        subdivision.edges = subdivision.edges + e2
+        subdivision.edges = subdivision.edges - {e}
+        subdivision.edges = subdivision.edges | {e1}
+        subdivision.edges = subdivision.edges | {e2}
 
         return subdivision
 
