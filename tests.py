@@ -1,4 +1,5 @@
 from CombinatorialCurve import *
+from StrictPiecewiseLinearFunction import *
 
 C = CombCurve("Example 3.5")
 v1 = vertex("v1", 0)
@@ -74,4 +75,4 @@ for v in C.vertices:
 
 
 
-print "If you see this, then all previous assertations were true!"
+print("If you see this, then all previous assertations were true!")
