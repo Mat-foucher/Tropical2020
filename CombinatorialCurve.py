@@ -245,4 +245,36 @@ class StrictPiecewiseLinearFunction(object):
             if e.length > 0.0:
                 # Ensure the function has integer slope
                 assert ((self.functionValues[e.vert1] - self.functionValues[e.vert2]) / e.length).is_integer()
+
+    def __add__(self, other):
+        assert other.domain == self.domain
+
+        newFunctionValues = {}
+        for v in self.domain.vertices:
+            newFunctionValues[v] = self.functionValues[v] + other.functionValues[v]
+        for leg in self.domain.legs:
+            newFunctionValues[leg] = self.functionValues[leg] + other.functionValues[leg]
+
+        return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
     
+    def __sub__(self, other):
+        assert other.domain == self.domain
+
+        newFunctionValues = {}
+        for v in self.domain.vertices:
+            newFunctionValues[v] = self.functionValues[v] - other.functionValues[v]
+        for leg in self.domain.legs:
+            newFunctionValues[leg] = self.functionValues[leg] - other.functionValues[leg]
+
+        return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
+
+    def __mul__(self, other):
+        assert other.domain == self.domain
+
+        newFunctionValues = {}
+        for v in self.domain.vertices:
+            newFunctionValues[v] = self.functionValues[v] * other.functionValues[v]
+        for leg in self.domain.legs:
+            newFunctionValues[leg] = self.functionValues[leg] * other.functionValues[leg]
+
+        return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)

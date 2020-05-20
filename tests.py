@@ -13,9 +13,15 @@ l = leg("l", v1)
 C.edges = {e1, e2, e3, e4}
 C.legs = {l}
 
-dict = {v1: 0.0, v2: 0.0, v3: 0.0, l: 0.0}
+dict = {v1: 1.0, v2: 0.0, v3: 0.0, l: 0.0}
 
 f = StrictPiecewiseLinearFunction(C, dict)
+
+assert f.functionValues[v1] == 1.0
+for v in C.vertices:
+    assert (f + f).functionValues[v] == f.functionValues[v] + f.functionValues[v]
+    assert (f - f).functionValues[v] == f.functionValues[v] - f.functionValues[v]
+    assert (f * f).functionValues[v] == f.functionValues[v] * f.functionValues[v]
 
 assert C.vertices == {v1, v2, v3}
 
