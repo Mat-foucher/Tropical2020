@@ -193,6 +193,20 @@ class CombCurve(object):
 
         return subdivision
 
+    # v should be a vector
+    # Returns the set of all elements of the form (e, n), where e is an edge, n is 1 or 2, and the n^th endpoint of e is v
+    def getEndpointsOfEdges(self, v):
+        endpoints = []
+        for e in self.edges:
+            if e.vert1 == v:
+                endpoints += [(e, 1)]
+            if e.vert2 == v:
+                endpoints += [(e, 2)]
+        for leg in self.legs:
+            if leg.root == v:
+                endpoints += [(leg, 1)]
+        return set(endpoints)
+
 
 
     def showNumbers(self):
