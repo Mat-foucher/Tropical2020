@@ -26,6 +26,10 @@ for v in C.vertices:
 
 assert C.vertices == {v1, v2, v3}
 
+assert C.getEndpointsOfEdges(v1) == {(e1, 1), (e3, 1), (e4, 1), (e4, 2), (l, 1)}
+assert C.getEndpointsOfEdges(v2) == {(e1, 2), (e2, 1)}
+assert C.getEndpointsOfEdges(v3) == {(e2, 2), (e3, 2)}
+
 assert C.degree(v1) == 5
 assert C.degree(v2) == 2
 assert C.degree(v3) == 2
@@ -41,6 +45,8 @@ assert subdiv.genus == 3
 assert subdiv.bettiNumber == 2
 assert subdiv.vertexNumber == C.vertexNumber + 1
 assert subdiv.edgeNumber == C.edgeNumber + 1
+
+
 
 
 C = CombCurve("Exercise 3.15 part 1")
