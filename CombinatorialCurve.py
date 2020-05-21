@@ -89,8 +89,6 @@ class CombCurve(object):
         self._genusCacheValid = False
         self._genusCache = 0
 
-
-
     @property
     def edges(self):
         return self._edges
@@ -114,7 +112,7 @@ class CombCurve(object):
         self._legs = legs_
         self._vertexCacheValid = False
         self._genusCacheValid = False
-
+    
     # The set of vertices is a read only property computed upon access, unless a valid cache is available
     # It is the collection of vertices that are endpoints of edges or roots of legs
     @property
@@ -155,9 +153,9 @@ class CombCurve(object):
     @property
     def genus(self):
         if not self._genusCacheValid:
-            self._genusCahce = self.bettiNumber + sum([v.genus for v in self.vertices])
+            self._genusCache = self.bettiNumber + sum([v.genus for v in self.vertices])
             self._genusCacheValid = True
-        return self.bettiNumber + sum([v.genus for v in self.vertices])
+        return self._genusCache
 
 
 
@@ -165,32 +163,29 @@ class CombCurve(object):
     def degree(self, v):
         return sum(1 for e in self.edges if e.vert1 == v) + sum(1 for e in self.edges if e.vert2 == v) + sum(1 for l in self.legs if l.root == v)
 
-    # e should be an edge and the lengths should be doubles
+    # e should be an edge and the length should be a double
     # genus should be a non-negative integer
-    # returns a new CombCurve with edge e subdivided
-    def getSubdivision(self, e, length1, length2, genus = 0):
-        # Ensure the lengths are non-negative
-        if length1 < 0.0:
-            raise ValueError("length1 must be non-negative")
-        if length2 < 0.0:
-            raise ValueError("length2 must be non-negative")
-
-        # Ensure the lengths sum to the length of e
-        assert length1 + length2 == e.length
+    def subdivide(self, e, length, genus = 0):
+        # Don't force a negative length
+        assert 0.0 <= length and length <= e.length
 
         # Don't split a nonexistent edge
         assert e in self.edges
 
         v = vertex("(vertex splitting " + e.name + ")", genus)
-        e1 = edge("(subdivision 1 of " + e.name + ")", length1, e.vert1, v)
-        e2 = edge("(subdivision 2 of " + e.name + ")", length2, v, e.vert2)
+        e1 = edge("(subdivision 1 of " + e.name + ")", length, e.vert1, v)
+        e2 = edge("(subdivision 2 of " + e.name + ")", e.length - length, v, e.vert2)
 
+        self.edges = self.edges - {e}
+        self.edges = self.edges | {e1}
+        self.edges = self.edges | {e2}
+
+    # e should be an edge and the length should be a double
+    # genus should be a non-negative integer
+    # returns a new CombCurve with edge e subdivided
+    def getSubdivision(self, e, length, genus = 0):
         subdivision = copy.copy(self)
-
-        subdivision.edges = subdivision.edges - {e}
-        subdivision.edges = subdivision.edges | {e1}
-        subdivision.edges = subdivision.edges | {e2}
-
+        subdivision.subdivide(e, length, genus)
         return subdivision
 
     # v should be a vector
