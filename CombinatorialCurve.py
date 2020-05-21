@@ -229,3 +229,42 @@ class CombCurve(object):
     # Prints the names of legs
     def showLegs(self):
         print([l.name for l in self.legs])
+
+    # This function will check if the tropical curve is connected (in the style of Def 3.10)
+    def isConnected(self):
+
+        A = np.zeros((self.vertexNumber, self.vertexNumber))
+        _vertices = list(self.vertices)
+
+        for x in self.edges:
+            v1 = x.vec1
+            v2 = x.vec2
+
+            i = _vertices.index(v1)
+            j = _vertices.index(v2)
+
+            # print(i, j)
+            # So that the connections made by the edges are symmetric ((v1,v2) = (v2,v1))
+            A[i][j] = 1
+            A[j][i] = 1
+
+        # So that the while loop works
+        go = True
+        numbers = []
+        newNumbers = [0]
+
+        while go:
+            numbers.extend(newNumbers)
+            brandNewNumbers = []
+            for i in newNumbers:
+                for k in range(self.vertexNumber):
+                    if A[i][k] == 1:
+                        if k not in numbers:
+                            brandNewNumbers.append(k)
+
+            newNumbers = []
+            newNumbers.extend(brandNewNumbers)
+            brandNewNumbers = []
+            go = len(newNumbers) > 0
+
+        return len(numbers) == self.vertexNumber
