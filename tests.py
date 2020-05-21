@@ -120,6 +120,9 @@ assert C.vertices == {v1}
 assert C.edgesWithVertices == {e1}
 assert C.edges == {e1, e2, e3}
 
+dict = {v1: 1.0}
+
+f = StrictPiecewiseLinearFunction(C, dict)
 
 
 
