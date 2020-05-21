@@ -237,8 +237,8 @@ class CombCurve(object):
         _vertices = list(self.vertices)
 
         for x in self.edges:
-            v1 = x.vec1
-            v2 = x.vec2
+            v1 = x.vert1
+            v2 = x.vert2
 
             i = _vertices.index(v1)
             j = _vertices.index(v2)
