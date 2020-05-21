@@ -102,8 +102,16 @@ class CombCurve(object):
         self._genusCacheValid = False
 
     @property
+    def edgesWithVertices(self):
+        return {e for e in self.edges if not (e.vert1 is None or e.vert2 is None)}
+
+    @property
     def legs(self):
         return self._legs
+
+    @property
+    def legsWithVertices(self):
+        return {leg for leg in self.legs if not leg.root is None}
 
     # Control how legs are set
     # legs_ should be a set of legs
@@ -125,7 +133,7 @@ class CombCurve(object):
                 for vertex in sublist:
                     flattened_vertex_list.append(vertex)
 
-            self._vertexCache = set(flattened_vertex_list)
+            self._vertexCache = set(flattened_vertex_list) - {None}
             self._vertexCacheValid = True
 
         return self._vertexCache
@@ -136,18 +144,21 @@ class CombCurve(object):
     def vertexNumber(self):
         return len(self.vertices)
 
+
     # The number of edges is a read only property computed upon access
     # It is the number of edges
     @property
     def edgeNumber(self):
         return len(self.edges)
 
-
+    @property
+    def numEdgesWithVertices(self):
+        return len(self.edgesWithVertices)
 
     # The Betti number is a read only property computed upon access
     @property
     def bettiNumber(self):
-        return self.edgeNumber - self.vertexNumber + 1
+        return self.numEdgesWithVertices - self.vertexNumber + 1
 
     # Genus is a read only property computed upon access
     @property

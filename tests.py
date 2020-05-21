@@ -1,6 +1,12 @@
 from CombinatorialCurve import *
 from StrictPiecewiseLinearFunction import *
 
+
+
+
+
+
+
 C = CombCurve("Example 3.5")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
@@ -49,6 +55,16 @@ assert subdiv.edgeNumber == C.edgeNumber + 1
 
 
 
+
+
+
+
+
+
+
+
+
+
 C = CombCurve("Exercise 3.15 part 1")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
@@ -66,6 +82,13 @@ assert C.genus == 5
 
 
 
+
+
+
+
+
+
+
 C = CombCurve("Exercise 3.15 parts 2 and 3")
 v1 = vertex("v1", 1)
 v2 = vertex("v2", 1)
@@ -77,6 +100,29 @@ assert C.bettiNumber == 0
 assert C.genus == 5
 for v in C.vertices:
     assert v.genus <= 1
+
+
+
+
+
+
+
+C = CombCurve("Curve with some vertices missing")
+v1 = vertex("v1", 1)
+e1 = edge("e1", 1.0, v1, v1)
+e2 = edge("e2", 1.0, v1, None)
+e3 = edge("e3", 1.0, None, None)
+C.edges = {e1, e2, e3}
+
+assert C.bettiNumber == 1
+assert C.genus == 2
+assert C.vertices == {v1}
+assert C.edgesWithVertices == {e1}
+assert C.edges == {e1, e2, e3}
+
+dict = {v1: 1.0}
+
+f = StrictPiecewiseLinearFunction(C, dict)
 
 
 

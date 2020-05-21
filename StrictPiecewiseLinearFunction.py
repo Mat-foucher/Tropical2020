@@ -30,7 +30,7 @@ class StrictPiecewiseLinearFunction(object):
             assert l in self.functionValues
             # Ensure that each m(l) is an integer
             assert self.functionValues[l].is_integer()
-        for e in self.domain.edges:
+        for e in self.domain.edgesWithVertices:
             if e.length > 0.0:
                 # Ensure the function has integer slope
                 assert ((self.functionValues[e.vert1] - self.functionValues[e.vert2]) / e.length).is_integer()
