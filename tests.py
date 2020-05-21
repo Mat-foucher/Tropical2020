@@ -37,7 +37,7 @@ assert C.degree(v3) == 2
 assert C.genus == 3
 assert C.bettiNumber == 2
 
-subdiv = C.getSubdivision(e4, 0.5, 0.5)
+subdiv = C.getSubdivision(e4, 0.5)
 assert subdiv.degree(v1) == 5
 assert subdiv.degree(v2) == 2
 assert subdiv.degree(v3) == 2
