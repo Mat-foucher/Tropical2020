@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 
 # A vertex has a name and non-negative genus
 class vertex(object):
@@ -89,6 +90,10 @@ class CombCurve(object):
         self._genusCacheValid = False
         self._genusCache = 0
 
+        # Variables for caching the core
+        self._coreCacheValid = False
+        self._coreCache = None
+
     @property
     def edges(self):
         return self._edges
@@ -100,6 +105,7 @@ class CombCurve(object):
         self._edges = edges_
         self._vertexCacheValid = False
         self._genusCacheValid = False
+        self._coreCacheValid = False
 
     @property
     def edgesWithVertices(self):
@@ -231,6 +237,7 @@ class CombCurve(object):
         print([l.name for l in self.legs])
 
     # This function will check if the tropical curve is connected (in the style of Def 3.10)
+    @property
     def isConnected(self):
 
         A = np.zeros((self.vertexNumber, self.vertexNumber))
@@ -268,3 +275,25 @@ class CombCurve(object):
             go = len(newNumbers) > 0
 
         return len(numbers) == self.vertexNumber
+
+    @property
+    def core(self):
+
+        if self._coreCacheValid == False:
+            assert self.genus > 0
+
+            core = copy.copy(self)
+
+            core.legs = {}
+
+            assert core.isConnected
+
+            for x in self.edges:
+                core.edges = core.edges - {x}
+                if core.genus < self.genus or core.isConnected == False:
+                    core.edges = core.edges | {x}
+
+            self._coreCache = core
+            self._coreCacheValid = True
+
+        return self._coreCache
