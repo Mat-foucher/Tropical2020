@@ -1,9 +1,5 @@
-from CombinatorialCurve import *
-from StrictPiecewiseLinearFunction import *
-
-
-
-
+from Tropical2020.CombinatorialCurve import *
+from Tropical2020.StrictPiecewiseLinearFunction import *
 
 
 
