@@ -47,3 +47,24 @@ class TropicalModuliSpace(object):
         c = copy.copy(curve)
         self.specializeBySplittingAtVertex(self, curve, vert, g1, g2, S, T)
         return c
+
+    def specializeByReducingGenus(self, curve, vert):
+        assert vert.genus > 0
+
+        endpoints = curve.getEndpointsOfEdges(vert)
+
+        v = vertex("(Genus reduction of " + vert.name + ")", vert.genus - 1)
+
+        for p in endpoints:
+            e, edgeNum = p
+            if isinstance(e, edge):
+                if edgeNum == 1:
+                    e.vert1 = v
+                else:
+                    e.vert2 = v
+            else:
+                e.root = v
+
+        e = edge("(Genus reduction loop for " + vert.name + ")", 1.0, v, v)
+
+        curve.edges = curve.edges | {e}
