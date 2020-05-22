@@ -193,15 +193,15 @@ for e in C.edges:
     print("Vertices of edge ", e.name, ": (", e.vert1.name, ", ", e.vert2.name, ")")
 for l in C.legs:
     print ("Root of leg ", l.name, ": ", l.root.name)
-
+'''
 
 m = TropicalModuliSpace(1, 2)
 s = m.generateSpace()
 m.reduceByIsomorphism()
 print("\n\n\n\n\n\n\n\n\n")
-for c in m._curves:
-    m.printCurve(c)
+#for c in m._curves:
+#    m.printCurve(c)
 
-'''
+print(C.getBijections({0: [["a", "b"], ["b", "a"]], 1: [["c", "d"], ["d", "c"]]}))
 
 print("If you see this, then all previous assertations were true!")
