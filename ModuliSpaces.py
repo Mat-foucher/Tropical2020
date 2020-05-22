@@ -50,11 +50,14 @@ class TropicalModuliSpace(object):
         for l in curve.legs:
             print(l.name)
 
-    def reduceByIsomorphism(self):
-
+    def reduceByIsomorphism(self, curves = None):
         isotypes = []
 
-        for curve in self._curves:
+        modifySelf = (curves == None)
+        if modifySelf:
+            curves = self._curves
+
+        for curve in curves:
             newIsotype = True
             for t in isotypes:
                 if t[0].isIsomorphicTo(curve):
@@ -62,9 +65,12 @@ class TropicalModuliSpace(object):
                     newIsotype = False
                     break
             if newIsotype:
-                 isotypes.append([curve])
+                isotypes.append([curve])
 
-        self._curves = [t[0] for t in isotypes]
+        if modifySelf:
+            self._curves = [t[0] for t in isotypes]
+            return self._curves
+        return [t[0] for t in isotypes]
 
 
     def generateSpace(self):
@@ -78,7 +84,7 @@ class TropicalModuliSpace(object):
         newCurves = [seedCurve]
 
         while newCurves != []:
-            curveBuffer = newCurves
+            curveBuffer = self.reduceByIsomorphism(newCurves)
             newCurves = []
             # print("\n\n\n\n\n\n########################### Moving to next level ###########################\n\n\n\n\n\n")
             while curveBuffer:
