@@ -236,6 +236,88 @@ class CombCurve(object):
     def getNumSelfLoops(self):
         return sum(1 for e in self.edges if len(e.vertices) == 1)
 
+    def getVerticesByDegree(self):
+        dict = {}
+        for v in self.vertices:
+            d = self.degree(v)
+            if d in dict:
+                dict[d].append(v)
+            else:
+                dict[d] = [v]
+        return dict
+
+    def getPermutations(self, lst):
+        # If lst is empty then there are no permutations
+        if len(lst) == 0:
+            return []
+
+            # If there is only one element in lst then, only
+        # one permuatation is possible
+        if len(lst) == 1:
+            return [lst]
+
+            # Find the permutations for lst if there are
+        # more than 1 characters
+
+        l = []  # empty list that will store current permutation
+
+        # Iterate the input(lst) and calculate the permutation
+        for i in range(len(lst)):
+            m = lst[i]
+
+            # Extract lst[i] or m from the list.  remLst is
+            # remaining list
+            remLst = lst[:i] + lst[i + 1:]
+
+            # Generating all permutations where m is first
+            # element
+            for p in self.getPermutations(remLst):
+                l.append([m] + p)
+        return l
+
+    def checkIfBijectionIsIsomorphism(self, other, domainOrderingDict, codomainOrderingDict):
+        return False
+
+    def getBijections(self, permDict):
+
+        if len(permDict) == 0:
+            return [{}]
+
+        nextDegree = list(permDict.keys())[0]
+        permsOfThatDegree = permDict.pop(nextDegree)
+        remaining = self.getBijections(permDict)
+
+        perms = []
+
+
+        for perm in permsOfThatDegree:
+            for subPerm in remaining:
+                # Unioning dictionaries in python is next to impossible to do nicely :(
+                newDict = {nextDegree: perm}
+                for k in subPerm:
+                    newDict[k] = subPerm[k]
+                perms.append(newDict)
+        return perms
+
+
+
+    def isBruteForceIsomorphicTo(self, other):
+        selfDegreeVertexDict = self.getVerticesByDegree()
+        otherDegreeVertexDict = self.getVerticesByDegree()
+
+        permDict = {}
+        for d in selfDegreeVertexDict:
+            permDict[d] = self.getPermutations(selfDegreeVertexDict[d])
+        domainOrderingDicts = self.getBijections(permDict)
+
+        for domainOrderingDict in domainOrderingDicts:
+            if self.checkIfBijectionIsIsomorphism(other, domainOrderingDict, otherDegreeVertexDict):
+                return True
+
+        return False
+
+
+
     def isIsomorphicTo(self, other):
         if self.edgeNumber != other.edgeNumber:
             return False
@@ -258,7 +340,7 @@ class CombCurve(object):
         if loop1 != loop2:
             return False
 
-        return True
+        return self.isBruteForceIsomorphicTo(other)
 
 
 
