@@ -24,6 +24,14 @@ dict = {v1: 1.0, v2: 0.0, v3: 0.0, l: 0.0}
 
 f = StrictPiecewiseLinearFunction(C, dict)
 
+s = f.getSpecialSupportPartition()
+
+print(s)
+
+for x in s:
+    for e in x:
+        print e.name
+
 assert f.functionValues[v1] == 1.0
 for v in C.vertices:
     assert (f + f).functionValues[v] == f.functionValues[v] + f.functionValues[v]
@@ -124,6 +132,29 @@ dict = {v1: 1.0}
 
 f = StrictPiecewiseLinearFunction(C, dict)
 
+
+# Test the core property
+C = CombCurve("Example 3.5")
+v1 = vertex("v1", 0)
+v2 = vertex("v2", 0)
+v3 = vertex("v3", 1)
+e1 = edge("e1", 1.0, v1, v2)
+e2 = edge("e2", 1.0, v2, v3)
+e3 = edge("e3", 1.0, v1, v3)
+e4 = edge("e4", 1.0, v1, v1)
+l = leg("l", v1)
+
+C.edges = {e1, e3, e4}
+C.legs = {l}
+
+core_ = C.core
+
+#core_.showVertices()
+#core_.showEdges()
+
+assert core_.isConnected
+assert core_.genus == C.genus
+assert core_.vertices == {v1, v3}
 
 
 
