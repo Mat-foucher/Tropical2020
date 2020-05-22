@@ -84,34 +84,6 @@ class StrictPiecewiseLinearFunction(object):
 
         return (supportEdges, supportVertices)
 
-    def floodfillBoilerplate(self, vert):
-
-        edgesToCheck = {e for e in self.domain.edges if vert in e.vertices}
-        edgesVisited = set()
-
-        foundANonsupportVertex = False
-        foundACoreVertex = False
-
-        while len(edgesToCheck) > 0:
-            nextEdge = edgesToCheck.pop()
-            edgesVisited = edgesVisited | {nextEdge}
-
-            # Check something here
-            '''
-            if e.vert1 in core or e.vert2 in core:
-                foundACoreVertex = True
-            if e.vert1 not in supportVertices or e.vert2 not in supportVertices:
-                foundANonsupportVertex = True
-            if foundACoreVertex and foundANonsupportVertex:
-                return True
-            '''
-
-            edgesToCheck = edgesToCheck | (
-                        {e for e in self.domain.edges if nextEdge.vert1 in e.vertices} - edgesVisited)
-            edgesToCheck = edgesToCheck | (
-                        {e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesVisited)
-
-        return False
 
     def getSpecialSupportPartition(self):
 
