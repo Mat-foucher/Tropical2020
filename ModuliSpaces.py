@@ -1,4 +1,5 @@
 from CombinatorialCurve import *
+import copy
 
 class TropicalModuliSpace(object):
     def __init__(self, g_, n_):
@@ -13,7 +14,7 @@ class TropicalModuliSpace(object):
     # Returns the specialization of 'curve' at 'vert' as determined by g1, g2, S, and T
     # Specifically, 'vert' is split into two vertices, v1 and v2, of genuses g1 and g2 respectively, where g1+g2 == vert.genus
     # S and T partition the endpoints of edges on vert, and we move the endpoints of edges in S to v1 and those in T to v2
-    def specializeAtVertex(self, curve, vert, g1, g2, S, T):
+    def specializeBySplittingAtVertex(self, curve, vert, g1, g2, S, T):
         assert g1 + g2 == vert.genus
         v1 = vertex("(First split of " + vert.name + ")", g1)
         v2 = vertex("(Second split of " + vert.name + ")", g2)
@@ -41,3 +42,8 @@ class TropicalModuliSpace(object):
         e = edge("(Edge splitting " + vert.name + ")", 1.0, v1, v2)
 
         curve.edges = curve.edges | {e}
+
+    def getSplittingSpecialization(self, curve, vert, g1, g2, S, T):
+        c = copy.copy(curve)
+        self.specializeBySplittingAtVertex(self, curve, vert, g1, g2, S, T)
+        return c
