@@ -1,6 +1,6 @@
-from CombinatorialCurve import *
-from StrictPiecewiseLinearFunction import *
-from ModuliSpaces import *
+from Tropical2020.CombinatorialCurve import *
+from Tropical2020.StrictPiecewiseLinearFunction import *
+from Tropical2020.ModuliSpaces import *
 
 
 
@@ -193,7 +193,7 @@ for e in C.edges:
     print("Vertices of edge ", e.name, ": (", e.vert1.name, ", ", e.vert2.name, ")")
 for l in C.legs:
     print ("Root of leg ", l.name, ": ", l.root.name)
-'''
+
 
 m = TropicalModuliSpace(1, 2)
 s = m.generateSpace()
@@ -201,5 +201,7 @@ m.reduceByIsomorphism()
 print("\n\n\n\n\n\n\n\n\n")
 for c in m._curves:
     m.printCurve(c)
+
+'''
 
 print("If you see this, then all previous assertations were true!")
