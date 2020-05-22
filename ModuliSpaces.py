@@ -52,8 +52,6 @@ class TropicalModuliSpace(object):
             if newIsotype:
                  isotypes.append([curve])
 
-        print(isotypes)
-
         self._curves = [t[0] for t in isotypes]
 
 
@@ -65,16 +63,13 @@ class TropicalModuliSpace(object):
 
         self._curves = self._curves | {seedCurve}
 
-        curveBuffer = []
         newCurves = [seedCurve]
-        #for i in range(4):
-        #while newCurves != []:
 
         while newCurves != []:
             curveBuffer = newCurves
             newCurves = []
             print("\n\n\n\n\n\n########################### Moving to next level ###########################\n\n\n\n\n\n")
-            while curveBuffer != []:
+            while curveBuffer:
                 currentCurve = curveBuffer[0]
 
                 print("\n\n\nCurrent curve:")
