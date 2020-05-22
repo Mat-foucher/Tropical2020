@@ -67,3 +67,56 @@ class StrictPiecewiseLinearFunction(object):
             newFunctionValues[leg] = self.functionValues[leg] * other.functionValues[leg]
 
         return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
+
+    def getSpecialSupport(self):
+        
+        supportEdges = set()
+        supportVertices = set()
+
+        for x in self.domain.edges:
+            if x.vert1 != None and x.vert2 != None:
+                if self.functionValues[x.vert1] > 0 or self.functionValues[x.vert2] > 0:
+                    supportEdges = supportEdges | {x}
+        
+        for i in self.domain.vertices:
+            if self.functionValues[i] > 0:
+                supportVertices = supportVertices | {i}
+
+        return (supportEdges, supportVertices)
+
+    def getSpecialSupportPartition(self):
+
+        supportEdges, supportVertices = self.getSpecialSupport()
+        connectedComponents = []
+        supportVerticesNeedingComponent = list(supportVertices)
+        while supportVerticesNeedingComponent != []:
+            v = supportVerticesNeedingComponent[0]
+            verticesToCheck = [v]
+            supportComponentEdges = set()
+            while verticesToCheck != []:
+                currentVertex = verticesToCheck[0]
+                for e in supportEdges - supportComponentEdges:
+                    if currentVertex in e.vertices:
+                        supportComponentEdges = supportComponentEdges | {e}
+                        if e.vert1 in supportVertices:
+                            verticesToCheck = verticesToCheck + [e.vert1]
+                        if e.vert2 in supportVertices:
+                            verticesToCheck = verticesToCheck + [e.vert2]
+                
+                verticesToCheck.remove(currentVertex)
+                if currentVertex in supportVerticesNeedingComponent:
+                    supportVerticesNeedingComponent.remove(currentVertex)
+            
+            connectedComponents.append(supportComponentEdges)
+
+        return connectedComponents
+
+
+    @property
+    def mesaTest(self):
+
+        for i in self.domain.legs:
+            if self.functionValues[i] != 0:
+                return False 
+        
+        
