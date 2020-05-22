@@ -1,4 +1,4 @@
-from CombinatorialCurve import *
+from Tropical2020.CombinatorialCurve import *
 import copy
 
 class TropicalModuliSpace(object):
