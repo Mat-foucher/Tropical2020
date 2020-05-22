@@ -78,12 +78,12 @@ class CombCurve(object):
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
     def __init__(self, name_):
         self.name = name_
-        self._edges = {}
-        self._legs = {}
+        self._edges = set()
+        self._legs = set()
 
         # Variables for caching vertices
         self._vertexCacheValid = False
-        self._vertexCache = {}
+        self._vertexCache = set()
 
         # Variables for caching genus
         self._genusCacheValid = False
