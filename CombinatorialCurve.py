@@ -276,7 +276,32 @@ class CombCurve(object):
         return l
 
     def checkIfBijectionIsIsomorphism(self, other, domainOrderingDict, codomainOrderingDict):
-        return False
+
+        degreeList = list(domainOrderingDict.keys())
+
+        inputList = []
+        outputList = []
+        for d in degreeList:
+            inputList = inputList + domainOrderingDict[d]
+            outputList = outputList + codomainOrderingDict[d]
+
+        for i in range(len(inputList)):
+            if inputList[i].genus != outputList[i].genus:
+                return False
+            numInputLegs = sum(1 for l in self.legs if l.root == inputList[i])
+            numOutputLegs = sum(1 for l in other.legs if l.root == outputList[i])
+            if numInputLegs != numOutputLegs:
+                return False
+
+        for i in range(len(inputList)):
+            for j in range(len(inputList)):
+                # Number of edges connecting inputList[i] and inputList[j]
+                numInputEdges = sum(1 for e in self.edges if e.vertices == {inputList[i], inputList[j]})
+                numOutputEdges = sum(1 for e in other.edges if e.vertices == [outputList[i], outputList[j]])
+                if numInputEdges != numOutputEdges:
+                    return False
+
+        return True
 
     def getBijections(self, permDict):
 
