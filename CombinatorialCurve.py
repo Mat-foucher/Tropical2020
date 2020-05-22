@@ -285,22 +285,29 @@ class CombCurve(object):
             inputList = inputList + domainOrderingDict[d]
             outputList = outputList + codomainOrderingDict[d]
 
+        # print("Checking input list: ", [v.name for v in inputList])
+        # print("With corresponding output list: ", [v.name for v in outputList])
+
         for i in range(len(inputList)):
             if inputList[i].genus != outputList[i].genus:
+                # print("Function does not preserve genus")
                 return False
             numInputLegs = sum(1 for l in self.legs if l.root == inputList[i])
             numOutputLegs = sum(1 for l in other.legs if l.root == outputList[i])
             if numInputLegs != numOutputLegs:
+                # print("Function does not preserve number of legs")
                 return False
 
         for i in range(len(inputList)):
             for j in range(len(inputList)):
                 # Number of edges connecting inputList[i] and inputList[j]
                 numInputEdges = sum(1 for e in self.edges if e.vertices == {inputList[i], inputList[j]})
-                numOutputEdges = sum(1 for e in other.edges if e.vertices == [outputList[i], outputList[j]])
+                numOutputEdges = sum(1 for e in other.edges if e.vertices == {outputList[i], outputList[j]})
                 if numInputEdges != numOutputEdges:
+                    # print("Function does not preserve number of connecting edges")
                     return False
 
+        # print("This was an isomorphism!")
         return True
 
     def getBijections(self, permDict):
@@ -328,7 +335,7 @@ class CombCurve(object):
 
     def isBruteForceIsomorphicTo(self, other):
         selfDegreeVertexDict = self.getVerticesByDegree()
-        otherDegreeVertexDict = self.getVerticesByDegree()
+        otherDegreeVertexDict = other.getVerticesByDegree()
 
         permDict = {}
         for d in selfDegreeVertexDict:
@@ -345,29 +352,42 @@ class CombCurve(object):
 
     def isIsomorphicTo(self, other):
         if self.edgeNumber != other.edgeNumber:
+            # print("Different Number of Edges")
             return False
 
         if self.vertexNumber != other.vertexNumber:
+            # print("Different Number of Vertices")
             return False
 
         deg1 = self.getDegreeDict()
         deg2 = other.getDegreeDict()
         if deg1 != deg2:
+            # print("Different Degree Dictionaries")
             return False
 
         gen1 = self.getGenusDict()
         gen2 = other.getGenusDict()
         if gen1 != gen2:
+            # print("Different Genus Dictionaries")
             return False
 
         loop1 = self.getNumSelfLoops()
         loop2 = other.getNumSelfLoops()
         if loop1 != loop2:
+            # print("Different Number of Self Loops")
             return False
 
+        # print("Easy tests were inconclusive - switching to brute force")
         return self.isBruteForceIsomorphicTo(other)
 
-
+    def simplifyNames(self):
+        orderedVertices = list(self.vertices)
+        for i in range(len(orderedVertices)):
+            orderedVertices[i].name = "v" + str(i)
+        for e in self.edges:
+            e.name = "edge: " + e.vert1.name + ", " + e.vert2.name
+        for l in self.legs:
+            l.name = "leg: " + l.root.name
 
     def showNumbers(self):
         print("Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber)

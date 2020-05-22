@@ -1,6 +1,6 @@
-from Tropical2020.CombinatorialCurve import *
-from Tropical2020.StrictPiecewiseLinearFunction import *
-from Tropical2020.ModuliSpaces import *
+from CombinatorialCurve import *
+from StrictPiecewiseLinearFunction import *
+from ModuliSpaces import *
 
 
 
@@ -195,13 +195,49 @@ for l in C.legs:
     print ("Root of leg ", l.name, ": ", l.root.name)
 '''
 
-m = TropicalModuliSpace(1, 2)
+m = TropicalModuliSpace(1, 4)
 s = m.generateSpace()
+print("number of curves before reducing: ", len(m._curves))
 m.reduceByIsomorphism()
+print("Number of curves after reducing: ", len(m._curves))
 print("\n\n\n\n\n\n\n\n\n")
-#for c in m._curves:
-#    m.printCurve(c)
 
-print(C.getBijections({0: [["a", "b"], ["b", "a"]], 1: [["c", "d"], ["d", "c"]]}))
+for c in sorted(list(m._curves), key = lambda x: x.edgeNumber):
+    c.simplifyNames()
+    m.printCurve(c)
+
+
+
+
+
+
+
+
+C = CombCurve("Isomorphism Domain")
+D = CombCurve("Isomorphism Codomain")
+
+v1 = vertex("v1", 0)
+v2 = vertex("v2", 1)
+s1 = leg("s1", v1)
+s2 = leg("s2", v2)
+w1 = vertex("w1", 1)
+t1 = leg("t1", w1)
+
+C.legs = {s1}
+D.legs = {t1}
+
+assert C.isBruteForceIsomorphicTo(C)
+assert C.isIsomorphicTo(C)
+
+assert not C.isBruteForceIsomorphicTo(D)
+assert not C.isIsomorphicTo(D)
+
+C.legs = {s2}
+
+assert C.isIsomorphicTo(D)
+
+
+
+
 
 print("If you see this, then all previous assertations were true!")

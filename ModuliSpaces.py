@@ -1,4 +1,4 @@
-from Tropical2020.CombinatorialCurve import *
+from CombinatorialCurve import *
 import copy
 
 class TropicalModuliSpace(object):
@@ -29,6 +29,7 @@ class TropicalModuliSpace(object):
         return partition
 
     def printCurve(self, curve):
+        '''
         print("\nPrinting a new curve")
         print("Vertices:")
         for v in curve.vertices:
@@ -37,6 +38,17 @@ class TropicalModuliSpace(object):
             print("Edge ", e.name, " with vertices ", e.vert1.name, " and ", e.vert2.name)
         for l in curve.legs:
             print("Leg ", l.name, " with root ", l.root.name)
+        '''
+
+        print("\n\nVertices:")
+        for v in curve.vertices:
+            print(v.name, " with genus ", v.genus)
+        print("Edges:")
+        for e in curve.edges:
+            print(e.name)
+        print("Legs:")
+        for l in curve.legs:
+            print(l.name)
 
     def reduceByIsomorphism(self):
 
@@ -68,38 +80,38 @@ class TropicalModuliSpace(object):
         while newCurves != []:
             curveBuffer = newCurves
             newCurves = []
-            print("\n\n\n\n\n\n########################### Moving to next level ###########################\n\n\n\n\n\n")
+            # print("\n\n\n\n\n\n########################### Moving to next level ###########################\n\n\n\n\n\n")
             while curveBuffer:
                 currentCurve = curveBuffer[0]
 
-                print("\n\n\nCurrent curve:")
-                self.printCurve(currentCurve)
+                # print("\n\n\nCurrent curve:")
+                # self.printCurve(currentCurve)
 
                 for vert in currentCurve.vertices:
 
                     endpointPartitions = self.getPartitions(currentCurve.getEndpointsOfEdges(vert))
 
                     if vert.genus > 0:
-                        print("\nGenus reducing vertex: " + vert.name)
+                        # print("\nGenus reducing vertex: " + vert.name)
                         genusReducedCurve = self.getGenusReductionSpecialization(currentCurve, vert)
                         self._curves = self._curves | {genusReducedCurve}
                         newCurves.append(genusReducedCurve)
-                        self.printCurve(genusReducedCurve)
+                        # self.printCurve(genusReducedCurve)
 
                     for g in range(vert.genus + 1):
                         for p in endpointPartitions:
                             S, T = p
                             if not ((g == 0 and len(S) < 2) or (g == vert.genus and len(T) < 2)):
-                                print("\nSplitting vertex: " + vert.name)
+                                # print("\nSplitting vertex: " + vert.name)
                                 vertexSplitCurve = self.getSplittingSpecialization(currentCurve, vert, g, vert.genus - g, S, T)
                                 self._curves = self._curves | {vertexSplitCurve}
                                 newCurves.append(vertexSplitCurve)
-                                self.printCurve(vertexSplitCurve)
+                                # self.printCurve(vertexSplitCurve)
                 curveBuffer.remove(currentCurve)
 
 
-                print("Current buffer length: ", len(curveBuffer))
-                print("Number of new curves this loop: ", len(newCurves))
+                # print("Current buffer length: ", len(curveBuffer))
+                # print("Number of new curves this loop: ", len(newCurves))
 
         return self._curves
 
