@@ -111,12 +111,62 @@ class StrictPiecewiseLinearFunction(object):
 
         return connectedComponents
 
+    def floodfillVertices(self, vert, supportEdges, core):        
+        edgesToCheck = {e for e in self.domain.edges if vert in e.vertices}
+        edgesVisited = set()
+        foundANonsupportVertex = False        
+        foundACoreVertex = False
 
-    @property
+        while len(edgesToCheck) > 0:            
+            nextEdge = edgesToCheck.pop()            
+            edgesVisited = edgesVisited | {nextEdge}                        
+            # Check something here            
+                       
+            if nextEdge.vert1 in core.vertices or nextEdge.vert2 in core.vertices:                
+                foundACoreVertex = True       
+
+            for i in supportEdges: 
+                if nextEdge.vert1 not in i.vertices or nextEdge.vert2 not in i.vertices:                
+                    foundANonsupportVertex = True     
+
+            if foundACoreVertex and foundANonsupportVertex:
+                return True            
+                                    
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if nextEdge.vert1 in e.vertices} - edgesVisited)
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesVisited)
+
+        return False
+            
+        
+    
     def mesaTest(self):
-
+        
         for i in self.domain.legs:
             if self.functionValues[i] != 0:
                 return False 
         
+        potentialMesa = copy.copy(self)
+
+        connectedSupportComponents = potentialMesa.getSpecialSupportPartition()
+
+        # Make a new curve whomst vertices are the support vertices.
+        
+        # Testing the connectedness of the cores of the supports
+        for x in connectedSupportComponents:
+            curve = CombCurve("Curve")
+
+            curve.edges = x
+
+            curveCore = curve.core
+
+            if not curveCore.isConnected or curveCore.genus != 1:
+                return False
+
+            for i in x:
+                assert potentialMesa.floodfillVertices(i.vert1, x, curveCore) and potentialMesa.floodfillVertices(i.vert2, x, curveCore)
+            
+            
+        return True
+
+
         
