@@ -1,6 +1,6 @@
 from CombinatorialCurve import *
 from StrictPiecewiseLinearFunction import *
-
+from ModuliSpaces import *
 
 
 
@@ -124,6 +124,41 @@ dict = {v1: 1.0}
 
 f = StrictPiecewiseLinearFunction(C, dict)
 
+
+
+
+
+
+
+# Test out some specialization code
+m = TropicalModuliSpace(1, 3)
+C = CombCurve("Specialization Test Curve")
+v = vertex("v", 2)
+leg1 = leg("leg1", v)
+leg2 = leg("leg2", v)
+leg3 = leg("leg3", v)
+
+C.legs = {leg1, leg2, leg3}
+
+print("Before specialization:")
+C.showVertices()
+C.showEdges()
+C.showLegs()
+print("Graph structure of ", C.name)
+for e in C.edges:
+    print("Vertices of edge ", e.name, ": (", e.vert1.name, ", ", e.vert2.name, ")")
+for l in C.legs:
+    print ("Root of leg ", l.name, ": ", l.root.name)
+print("After splitting v:")
+m.specializeAtVertex(C, v, 1, 1, {(leg1, 1)}, {(leg2, 1), (leg3, 1)})
+C.showVertices()
+C.showEdges()
+C.showLegs()
+print("Graph structure of ", C.name)
+for e in C.edges:
+    print("Vertices of edge ", e.name, ": (", e.vert1.name, ", ", e.vert2.name, ")")
+for l in C.legs:
+    print ("Root of leg ", l.name, ": ", l.root.name)
 
 
 
