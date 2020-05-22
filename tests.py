@@ -150,7 +150,7 @@ for e in C.edges:
 for l in C.legs:
     print ("Root of leg ", l.name, ": ", l.root.name)
 print("After splitting v:")
-m.specializeAtVertex(C, v, 1, 1, {(leg1, 1)}, {(leg2, 1), (leg3, 1)})
+m.specializeBySplittingAtVertex(C, v, 1, 1, {(leg1, 1)}, {(leg2, 1), (leg3, 1)})
 C.showVertices()
 C.showEdges()
 C.showLegs()
