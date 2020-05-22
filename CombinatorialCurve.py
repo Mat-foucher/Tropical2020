@@ -49,7 +49,7 @@ class edge(object):
     # Control how the length property is set
     # length_ should be a non-negative double
     @length.setter
-    def setLength(self, length_):
+    def length(self, length_):
         # Don't allow negative lengths!
         if length_ < 0.0:
             raise ValueError("Length must be non-negative.")
@@ -212,6 +212,53 @@ class CombCurve(object):
             if leg.root == v:
                 endpoints += [(leg, 1)]
         return set(endpoints)
+
+    def getDegreeDict(self):
+        degrees = {}
+        for v in self.vertices:
+            d = self.degree(v)
+            if d in degrees:
+                degrees[d] += 1
+            else:
+                degrees[d] = 1
+        return degrees
+
+    def getGenusDict(self):
+        genuses = {}
+        for v in self.vertices:
+            g = v.genus
+            if g in genuses:
+                genuses[g] += 1
+            else:
+                genuses[g] = 1
+        return genuses
+
+    def getNumSelfLoops(self):
+        return sum(1 for e in self.edges if len(e.vertices) == 1)
+
+    def isIsomorphicTo(self, other):
+        if self.edgeNumber != other.edgeNumber:
+            return False
+
+        if self.vertexNumber != other.vertexNumber:
+            return False
+
+        deg1 = self.getDegreeDict()
+        deg2 = other.getDegreeDict()
+        if deg1 != deg2:
+            return False
+
+        gen1 = self.getGenusDict()
+        gen2 = other.getGenusDict()
+        if gen1 != gen2:
+            return False
+
+        loop1 = self.getNumSelfLoops()
+        loop2 = other.getNumSelfLoops()
+        if loop1 != loop2:
+            return False
+
+        return True
 
 
 
