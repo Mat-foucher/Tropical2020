@@ -129,8 +129,8 @@ f = StrictPiecewiseLinearFunction(C, dict)
 
 
 
-
 # Test out some specialization code
+'''
 m = TropicalModuliSpace(1, 3)
 C = CombCurve("Specialization Test Curve")
 v = vertex("v", 2)
@@ -161,5 +161,42 @@ for l in C.legs:
     print ("Root of leg ", l.name, ": ", l.root.name)
 
 
+
+
+
+
+m = TropicalModuliSpace(1, 3)
+C = CombCurve("Specialization Test Curve")
+v = vertex("v", 2)
+leg1 = leg("leg1", v)
+leg2 = leg("leg2", v)
+leg3 = leg("leg3", v)
+
+C.legs = {leg1, leg2, leg3}
+
+print("Before specialization:")
+C.showVertices()
+C.showEdges()
+C.showLegs()
+print("Graph structure of ", C.name)
+for e in C.edges:
+    print("Vertices of edge ", e.name, ": (", e.vert1.name, ", ", e.vert2.name, ")")
+for l in C.legs:
+    print ("Root of leg ", l.name, ": ", l.root.name)
+print("After genus reducing v:")
+m.specializeByReducingGenus(C, v)
+C.showVertices()
+C.showEdges()
+C.showLegs()
+print("Graph structure of ", C.name)
+for e in C.edges:
+    print("Vertices of edge ", e.name, ": (", e.vert1.name, ", ", e.vert2.name, ")")
+for l in C.legs:
+    print ("Root of leg ", l.name, ": ", l.root.name)
+'''
+
+m = TropicalModuliSpace(1, 2)
+s = m.generateSpace()
+print(m.getPartitions({1, 2, 3, 4}))
 
 print("If you see this, then all previous assertations were true!")
