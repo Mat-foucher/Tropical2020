@@ -38,6 +38,73 @@ class TropicalModuliSpace(object):
         for l in curve.legs:
             print("Leg ", l.name, " with root ", l.root.name)
 
+    def getDegreeDict(self, curve):
+        degrees = {}
+        for v in curve.vertices:
+            d = curve.degree(v)
+            if d in degrees:
+                degrees[d] += 1
+            else:
+                degrees[d] = 1
+        return degrees
+
+    def getGenusDict(self, curve):
+        genuses = {}
+        for v in curve.vertices:
+            g = v.genus
+            if g in genuses:
+                genuses[g] += 1
+            else:
+                genuses[g] = 1
+        return genuses
+
+    def getNumSelfLoops(self, curve):
+        return sum(1 for e in curve.edges if len(e.vertices) == 1)
+
+    def isomorphic(self, curve1, curve2):
+
+        if curve1.edgeNumber != curve2.edgeNumber:
+            return False
+
+        if curve1.vertexNumber != curve2.vertexNumber:
+            return False
+
+        deg1 = self.getDegreeDict(curve1)
+        deg2 = self.getDegreeDict(curve2)
+        if deg1 != deg2:
+            return False
+
+        gen1 = self.getGenusDict(curve1)
+        gen2 = self.getGenusDict(curve2)
+        if gen1 != gen2:
+            return False
+
+        loop1 = self.getNumSelfLoops(curve1)
+        loop2 = self.getNumSelfLoops(curve2)
+        if loop1 != loop2:
+            return False
+
+        return True
+
+    def reduceByIsomorphism(self):
+
+        isotypes = []
+
+        for curve in self._curves:
+            newIsotype = True
+            for t in isotypes:
+                if self.isomorphic(t[0], curve):
+                    t.append(curve)
+                    newIsotype = False
+                    break
+            if newIsotype:
+                 isotypes.append([curve])
+
+        print(isotypes)
+
+        self._curves = [t[0] for t in isotypes]
+
+
     def generateSpace(self):
 
         seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
@@ -54,6 +121,7 @@ class TropicalModuliSpace(object):
         while newCurves != []:
             curveBuffer = newCurves
             newCurves = []
+            print("\n\n\n\n\n\n########################### Moving to next level ###########################\n\n\n\n\n\n")
             while curveBuffer != []:
                 currentCurve = curveBuffer[0]
 
@@ -85,10 +153,6 @@ class TropicalModuliSpace(object):
 
                 print("Current buffer length: ", len(curveBuffer))
                 print("Number of new curves this loop: ", len(newCurves))
-
-        print("\n\n\n\n\nFinal collection of curves:")
-        for c in self._curves:
-            self.printCurve(c)
 
         return self._curves
 

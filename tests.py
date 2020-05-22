@@ -197,6 +197,9 @@ for l in C.legs:
 
 m = TropicalModuliSpace(1, 2)
 s = m.generateSpace()
-print(m.getPartitions({1, 2, 3, 4}))
+m.reduceByIsomorphism()
+print("\n\n\n\n\n\n\n\n\n")
+for c in m._curves:
+    m.printCurve(c)
 
 print("If you see this, then all previous assertations were true!")
