@@ -84,7 +84,10 @@ class TropicalModuliSpace(object):
         newCurves = [seedCurve]
 
         while newCurves != []:
+            print("Found ", len(newCurves), " new curves. Reducing now.")
             curveBuffer = self.reduceByIsomorphism(newCurves)
+            print("Reduced to ", len(curveBuffer), " new curves.")
+            self._curves = self._curves | set(curveBuffer)
             newCurves = []
             # print("\n\n\n\n\n\n########################### Moving to next level ###########################\n\n\n\n\n\n")
             while curveBuffer:
@@ -100,7 +103,6 @@ class TropicalModuliSpace(object):
                     if vert.genus > 0:
                         # print("\nGenus reducing vertex: " + vert.name)
                         genusReducedCurve = self.getGenusReductionSpecialization(currentCurve, vert)
-                        self._curves = self._curves | {genusReducedCurve}
                         newCurves.append(genusReducedCurve)
                         # self.printCurve(genusReducedCurve)
 
@@ -110,7 +112,6 @@ class TropicalModuliSpace(object):
                             if not ((g == 0 and len(S) < 2) or (g == vert.genus and len(T) < 2)):
                                 # print("\nSplitting vertex: " + vert.name)
                                 vertexSplitCurve = self.getSplittingSpecialization(currentCurve, vert, g, vert.genus - g, S, T)
-                                self._curves = self._curves | {vertexSplitCurve}
                                 newCurves.append(vertexSplitCurve)
                                 # self.printCurve(vertexSplitCurve)
                 curveBuffer.remove(currentCurve)
