@@ -89,6 +89,18 @@ class CombCurve(object):
         self._genusCacheValid = False
         self._genusCache = 0
 
+        # Variables for caching vertex degree counts
+        self._vertexDegreesCacheValid = False
+        self._vertexDegreesCache = {}
+
+        # Variables for caching vertex genus counts
+        self._vertexGenusesCacheValid = False
+        self._vertexGenusesCache = {}
+
+        # Variables for caching vertex self loop counts
+        self._vertexSelfLoopsCacheValid = False
+        self._vertexSelfLoopsCache = {}
+
     @property
     def edges(self):
         return self._edges
@@ -100,6 +112,9 @@ class CombCurve(object):
         self._edges = edges_
         self._vertexCacheValid = False
         self._genusCacheValid = False
+        self._vertexDegreesCacheValid = False
+        self._vertexGenusesCacheValid = False
+        self._vertexSelfLoopsCacheValid = False
 
     @property
     def edgesWithVertices(self):
@@ -120,6 +135,8 @@ class CombCurve(object):
         self._legs = legs_
         self._vertexCacheValid = False
         self._genusCacheValid = False
+        self._vertexDegreesCacheValid = False
+        self._vertexGenusesCacheValid = False
     
     # The set of vertices is a read only property computed upon access, unless a valid cache is available
     # It is the collection of vertices that are endpoints of edges or roots of legs
@@ -213,28 +230,49 @@ class CombCurve(object):
                 endpoints += [(leg, 1)]
         return set(endpoints)
 
-    def getDegreeDict(self):
-        degrees = {}
-        for v in self.vertices:
-            d = self.degree(v)
-            if d in degrees:
-                degrees[d] += 1
-            else:
-                degrees[d] = 1
-        return degrees
+    @property
+    def vertexDegreeDict(self):
+        if not self._vertexDegreesCacheValid:
+            self._vertexDegreesCache = {}
+            for v in self.vertices:
+                d = self.degree(v)
+                if d in self._vertexDegreesCache:
+                    self._vertexDegreesCache[d] += 1
+                else:
+                    self._vertexDegreesCache[d] = 1
 
-    def getGenusDict(self):
-        genuses = {}
-        for v in self.vertices:
-            g = v.genus
-            if g in genuses:
-                genuses[g] += 1
-            else:
-                genuses[g] = 1
-        return genuses
+            self._vertexDegreesCacheValid = True
+        return self._vertexDegreesCache
+
+    @property
+    def vertexGenusDict(self):
+        if not self._vertexGenusesCacheValid:
+            self._vertexGenusesCache = {}
+            for v in self.vertices:
+                g = v.genus
+                if g in self._vertexGenusesCache:
+                    self._vertexGenusesCache[g] += 1
+                else:
+                    self._vertexGenusesCache[g] = 1
+
+            self._vertexGenusesCacheValid = True
+        return self._vertexGenusesCache
 
     def getNumSelfLoops(self):
         return sum(1 for e in self.edges if len(e.vertices) == 1)
+
+    @property
+    def vertexSelfLoopDict(self):
+        if not self._vertexSelfLoopsCacheValid:
+            self._vertexSelfLoopsCache = {}
+            for v in self.vertices:
+                numLoops = sum(1 for e in self.edges if e.vertices == {v})
+                if numLoops in self._vertexSelfLoopsCache:
+                    self._vertexSelfLoopsCache[numLoops] += 1
+                else:
+                    self._vertexSelfLoopsCache[numLoops] = 1
+            self._vertexSelfLoopsCacheValid = True
+        return self._vertexSelfLoopsCache
 
     def getVerticesByDegree(self):
         dict = {}
@@ -359,22 +397,24 @@ class CombCurve(object):
             # print("Different Number of Vertices")
             return False
 
-        deg1 = self.getDegreeDict()
-        deg2 = other.getDegreeDict()
+        deg1 = self.vertexDegreeDict
+        deg2 = other.vertexDegreeDict
         if deg1 != deg2:
             # print("Different Degree Dictionaries")
             return False
 
-        gen1 = self.getGenusDict()
-        gen2 = other.getGenusDict()
+        gen1 = self.vertexGenusDict
+        gen2 = other.vertexGenusDict
         if gen1 != gen2:
             # print("Different Genus Dictionaries")
+            # print(gen1)
+            # print(gen2)
             return False
 
-        loop1 = self.getNumSelfLoops()
-        loop2 = other.getNumSelfLoops()
+        loop1 = self.vertexSelfLoopDict
+        loop2 = other.vertexSelfLoopDict
         if loop1 != loop2:
-            # print("Different Number of Self Loops")
+            # print("Different Instances of Self Loops")
             return False
 
         # print("Easy tests were inconclusive - switching to brute force")
