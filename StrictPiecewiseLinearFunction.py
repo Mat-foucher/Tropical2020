@@ -84,6 +84,7 @@ class StrictPiecewiseLinearFunction(object):
 
         return (supportEdges, supportVertices)
 
+
     def getSpecialSupportPartition(self):
 
         supportEdges, supportVertices = self.getSpecialSupport()
