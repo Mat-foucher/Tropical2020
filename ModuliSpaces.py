@@ -8,6 +8,14 @@ class TropicalModuliSpace(object):
         self._n = n_
         self._curves = set()
 
+    @property
+    def curves(self):
+        return self._curves
+
+    @curves.setter
+    def curves(self, curves_):
+        self._curves = curves_
+
     # TODO: Figure out whether python passes by reference or value so we can avoid the silly pop/add lines
     def getPartitions(self, s):
 
@@ -73,6 +81,16 @@ class TropicalModuliSpace(object):
             self._curves = [t[0] for t in isotypes]
             return self._curves
         return [t[0] for t in isotypes]
+
+    def containsUpToIsomorphism(self, curve):
+        for c in self.curves:
+            if c.isIsomorphicTo(curve):
+                return True
+        return False
+
+    def addCurve(self, curve):
+        if not self.containsUpToIsomorphism(curve):
+            self.curves = self.curves | {curve}
 
     def generateSpace(self, suppressComments=True):
 
