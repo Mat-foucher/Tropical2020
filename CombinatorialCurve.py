@@ -89,18 +89,6 @@ class CombCurve(object):
         self._genusCacheValid = False
         self._genusCache = 0
 
-        # Variables for caching vertex degree counts
-        self._vertexDegreesCacheValid = False
-        self._vertexDegreesCache = {}
-
-        # Variables for caching vertex degree counts
-        self._vertexSplitDegreesCacheValid = False
-        self._vertexSplitDegreesCache = {}
-
-        # Variables for caching vertex genus counts
-        self._vertexGenusesCacheValid = False
-        self._vertexGenusesCache = {}
-
         # Variables for caching vertex self loop counts
         self._vertexSelfLoopsCacheValid = False
         self._vertexSelfLoopsCache = {}
@@ -120,9 +108,6 @@ class CombCurve(object):
         self._edges = edges_
         self._vertexCacheValid = False
         self._genusCacheValid = False
-        self._vertexDegreesCacheValid = False
-        self._vertexSplitDegreesCacheValid = False
-        self._vertexGenusesCacheValid = False
         self._vertexSelfLoopsCacheValid = False
         self._vertexEverythingCacheValid = False
 
@@ -145,9 +130,6 @@ class CombCurve(object):
         self._legs = legs_
         self._vertexCacheValid = False
         self._genusCacheValid = False
-        self._vertexDegreesCacheValid = False
-        self._vertexSplitDegreesCacheValid = False
-        self._vertexGenusesCacheValid = False
         self._vertexEverythingCacheValid = False
     
     # The set of vertices is a read only property computed upon access, unless a valid cache is available
@@ -249,35 +231,6 @@ class CombCurve(object):
         return set(endpoints)
 
     @property
-    def vertexDegreeDict(self):
-        if not self._vertexDegreesCacheValid:
-            self._vertexDegreesCache = {}
-            for v in self.vertices:
-                d = self.degree(v)
-                if d in self._vertexDegreesCache:
-                    self._vertexDegreesCache[d] += 1
-                else:
-                    self._vertexDegreesCache[d] = 1
-
-            self._vertexDegreesCacheValid = True
-        return self._vertexDegreesCache
-
-    @property
-    def vertexSplitDegreeDict(self):
-        if not self._vertexSplitDegreesCacheValid:
-            self._vertexSplitDegreesCache = {}
-            for v in self.vertices:
-                numEdgesAttached = self.numEdgesAttached(v)
-                numLegsAttached = self.numLegsAttached(v)
-                key = (numEdgesAttached, numLegsAttached)
-                if key in self._vertexSplitDegreesCache:
-                    self._vertexSplitDegreesCache[key] += 1
-                else:
-                    self._vertexSplitDegreesCache[key] = 1
-            self._vertexSplitDegreesCacheValid = True
-        return self._vertexSplitDegreesCache
-
-    @property
     def vertexEverythingDict(self):
         if not self._vertexEverythingCacheValid:
             self._vertexEverythingCache = {}
@@ -306,20 +259,6 @@ class CombCurve(object):
             else:
                 dict[key] = [v]
         return dict
-
-    @property
-    def vertexGenusDict(self):
-        if not self._vertexGenusesCacheValid:
-            self._vertexGenusesCache = {}
-            for v in self.vertices:
-                g = v.genus
-                if g in self._vertexGenusesCache:
-                    self._vertexGenusesCache[g] += 1
-                else:
-                    self._vertexGenusesCache[g] = 1
-
-            self._vertexGenusesCacheValid = True
-        return self._vertexGenusesCache
 
     def getNumSelfLoops(self):
         return sum(1 for e in self.edges if len(e.vertices) == 1)
