@@ -1,5 +1,6 @@
 import copy
 
+
 # A vertex has a name and non-negative genus
 class vertex(object):
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
@@ -23,6 +24,7 @@ class vertex(object):
         if genus_ < 0:
             raise ValueError("Genus must be non-negative.")
         self._genus = genus_
+
 
 # An edge has a name, non-negative length, and endpoints
 class edge(object):
@@ -60,7 +62,8 @@ class edge(object):
     def vertices(self):
         return {self.vert1, self.vert2}
 
-#A leg has a name and root
+
+# A leg has a name and root
 class leg(object):
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
     # root_ should be a vertex
@@ -72,6 +75,7 @@ class leg(object):
     @property
     def vertices(self):
         return {self.root}
+
 
 # A Combinatorial Tropical Curve has a name, set of edges, and set of legs
 class CombCurve(object):
@@ -121,7 +125,7 @@ class CombCurve(object):
 
     @property
     def legsWithVertices(self):
-        return {leg for leg in self.legs if not leg.root is None}
+        return {nextLeg for nextLeg in self.legs if nextLeg.root is not None}
 
     # Control how legs are set
     # legs_ should be a set of legs
@@ -131,18 +135,18 @@ class CombCurve(object):
         self._vertexCacheValid = False
         self._genusCacheValid = False
         self._vertexEverythingCacheValid = False
-    
+
     # The set of vertices is a read only property computed upon access, unless a valid cache is available
     # It is the collection of vertices that are endpoints of edges or roots of legs
     @property
     def vertices(self):
         if not self._vertexCacheValid:
             # Flatmap self.edges with the function e => e.vertices
-            unflattened_vertex_list = [e.vertices for e in self.edges] + [l.vertices for l in self.legs]
+            unflattened_vertex_list = [e.vertices for e in self.edges] + [nextLeg.vertices for nextLeg in self.legs]
             flattened_vertex_list = []
             for sublist in unflattened_vertex_list:
-                for vertex in sublist:
-                    flattened_vertex_list.append(vertex)
+                for v in sublist:
+                    flattened_vertex_list.append(v)
 
             self._vertexCache = set(flattened_vertex_list) - {None}
             self._vertexCacheValid = True
@@ -154,7 +158,6 @@ class CombCurve(object):
     @property
     def vertexNumber(self):
         return len(self.vertices)
-
 
     # The number of edges is a read only property computed upon access
     # It is the number of edges
@@ -179,8 +182,6 @@ class CombCurve(object):
             self._genusCacheValid = True
         return self._genusCache
 
-
-
     # Returns the degree of vertex v accounting for legs and self loops
     def degree(self, v):
         return self.numEdgesAttached(v) + self.numLegsAttached(v)
@@ -189,13 +190,13 @@ class CombCurve(object):
         return sum(1 for e in self.edges if e.vert1 == v) + sum(1 for e in self.edges if e.vert2 == v)
 
     def numLegsAttached(self, v):
-        return sum(1 for l in self.legs if l.root == v)
+        return sum(1 for attachedLeg in self.legs if attachedLeg.root == v)
 
     # e should be an edge and the length should be a double
     # genus should be a non-negative integer
-    def subdivide(self, e, length, genus = 0):
+    def subdivide(self, e, length, genus=0):
         # Don't force a negative length
-        assert 0.0 <= length and length <= e.length
+        assert 0.0 <= length <= e.length
 
         # Don't split a nonexistent edge
         assert e in self.edges
@@ -211,13 +212,14 @@ class CombCurve(object):
     # e should be an edge and the length should be a double
     # genus should be a non-negative integer
     # returns a new CombCurve with edge e subdivided
-    def getSubdivision(self, e, length, genus = 0):
+    def getSubdivision(self, e, length, genus=0):
         subdivision = copy.copy(self)
         subdivision.subdivide(e, length, genus)
         return subdivision
 
     # v should be a vector
-    # Returns the set of all elements of the form (e, n), where e is an edge, n is 1 or 2, and the n^th endpoint of e is v
+    # Returns the set of all elements of the form (e, n), where e is an edge, n is 1 or 2,
+    # and the n^th endpoint of e is v
     def getEndpointsOfEdges(self, v):
         endpoints = []
         for e in self.edges:
@@ -225,9 +227,9 @@ class CombCurve(object):
                 endpoints += [(e, 1)]
             if e.vert2 == v:
                 endpoints += [(e, 2)]
-        for leg in self.legs:
-            if leg.root == v:
-                endpoints += [(leg, 1)]
+        for nextLeg in self.legs:
+            if nextLeg.root == v:
+                endpoints += [(nextLeg, 1)]
         return set(endpoints)
 
     @property
@@ -248,17 +250,17 @@ class CombCurve(object):
         return self._vertexEverythingCache
 
     def getVerticesByEverything(self):
-        dict = {}
+        vertexDict = {}
         for v in self.vertices:
             numEdgesAttached = self.numEdgesAttached(v)
             numLegsAttached = self.numLegsAttached(v)
             g = v.genus
             key = (numEdgesAttached, numLegsAttached, g)
-            if key in dict:
-                dict[key].append(v)
+            if key in vertexDict:
+                vertexDict[key].append(v)
             else:
-                dict[key] = [v]
-        return dict
+                vertexDict[key] = [v]
+        return vertexDict
 
     def getNumSelfLoops(self):
         return sum(1 for e in self.edges if len(e.vertices) == 1)
@@ -277,42 +279,39 @@ class CombCurve(object):
         return self._vertexSelfLoopsCache
 
     def getVerticesByDegree(self):
-        dict = {}
+        vertexDict = {}
         for v in self.vertices:
             d = self.degree(v)
-            if d in dict:
-                dict[d].append(v)
+            if d in vertexDict:
+                vertexDict[d].append(v)
             else:
-                dict[d] = [v]
-        return dict
+                vertexDict[d] = [v]
+        return vertexDict
 
     def getVerticesBySplitDegree(self):
-        dict = {}
+        vertexDict = {}
         for v in self.vertices:
             numEdgesAttached = self.numEdgesAttached(v)
             numLegsAttached = self.numLegsAttached(v)
             key = (numEdgesAttached, numLegsAttached)
-            if key in dict:
-                dict[key].append(v)
+            if key in vertexDict:
+                vertexDict[key].append(v)
             else:
-                dict[key] = [v]
-        return dict
-
+                vertexDict[key] = [v]
+        return vertexDict
 
     def getPermutations(self, lst):
         # If lst is empty then there are no permutations
         if len(lst) == 0:
             return []
 
-            # If there is only one element in lst then, only
-        # one permuatation is possible
+        # If there is only one element in lst then, only one permutation is possible
         if len(lst) == 1:
             return [lst]
 
-            # Find the permutations for lst if there are
-        # more than 1 characters
+        # Find the permutations for lst if there are more than 1 characters
 
-        l = []  # empty list that will store current permutation
+        perms = []  # empty list that will store current permutation
 
         # Iterate the input(lst) and calculate the permutation
         for i in range(len(lst)):
@@ -325,8 +324,8 @@ class CombCurve(object):
             # Generating all permutations where m is first
             # element
             for p in self.getPermutations(remLst):
-                l.append([m] + p)
-        return l
+                perms.append([m] + p)
+        return perms
 
     def checkIfBijectionIsIsomorphism(self, other, domainOrderingDict, codomainOrderingDict):
 
@@ -354,13 +353,11 @@ class CombCurve(object):
             if inputList[i].genus != outputList[i].genus:
                 # print("Function does not preserve genus")
                 return False
-            numInputLegs = sum(1 for l in self.legs if l.root == inputList[i])
-            numOutputLegs = sum(1 for l in other.legs if l.root == outputList[i])
+            numInputLegs = sum(1 for nextLeg in self.legs if nextLeg.root == inputList[i])
+            numOutputLegs = sum(1 for nextLeg in other.legs if nextLeg.root == outputList[i])
             if numInputLegs != numOutputLegs:
                 # print("Function does not preserve number of legs")
                 return False
-
-
 
         # print("This was an isomorphism!")
         return True
@@ -376,17 +373,14 @@ class CombCurve(object):
 
         perms = []
 
-
         for perm in permsOfThatKey:
             for subPerm in remaining:
-                # Unioning dictionaries in python is next to impossible to do nicely :(
+                # Taking the union of dictionaries in python is next to impossible to do nicely :(
                 newDict = {nextKey: perm}
                 for k in subPerm:
                     newDict[k] = subPerm[k]
                 perms.append(newDict)
         return perms
-
-
 
     def isBruteForceIsomorphicTo(self, other):
         selfEverythingVertexDict = self.getVerticesByEverything()
@@ -403,8 +397,6 @@ class CombCurve(object):
 
         return False
 
-
-
     def isIsomorphicTo(self, other):
         if self.edgeNumber != other.edgeNumber:
             # print("Different Number of Edges")
@@ -414,18 +406,6 @@ class CombCurve(object):
             # print("Different Number of Vertices")
             return False
 
-        #deg1 = self.vertexDegreeDict
-        #deg2 = other.vertexDegreeDict
-        #if deg1 != deg2:
-        #    # print("Different Degree Dictionaries")
-        #    return False
-
-        #splitDeg1 = self.vertexSplitDegreeDict
-        #splitDeg2 = other.vertexSplitDegreeDict
-        #if splitDeg1 != splitDeg2:
-        #    # print("Different Split Degree Dictionaries)
-        #    return False
-
         if self.vertexEverythingDict != other.vertexEverythingDict:
             # print("Different counts of vertices with a given number of legs, edges, and genus")
             # print(self.getVerticesByEverything())
@@ -433,14 +413,6 @@ class CombCurve(object):
             # print(self.vertexEverythingDict)
             # print(other.vertexEverythingDict)
             return False
-
-        #gen1 = self.vertexGenusDict
-        #gen2 = other.vertexGenusDict
-        #if gen1 != gen2:
-        #    # print("Different Genus Dictionaries")
-        #    # print(gen1)
-        #    # print(gen2)
-        #    return False
 
         loop1 = self.vertexSelfLoopDict
         loop2 = other.vertexSelfLoopDict
@@ -457,8 +429,8 @@ class CombCurve(object):
             orderedVertices[i].name = "v" + str(i)
         for e in self.edges:
             e.name = "edge: " + e.vert1.name + ", " + e.vert2.name
-        for l in self.legs:
-            l.name = "leg: " + l.root.name
+        for nextLeg in self.legs:
+            nextLeg.name = "leg: " + nextLeg.root.name
 
     def showNumbers(self):
         print("Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber)
@@ -473,4 +445,4 @@ class CombCurve(object):
 
     # Prints the names of legs
     def showLegs(self):
-        print([l.name for l in self.legs])
+        print([nextLeg.name for nextLeg in self.legs])
