@@ -403,6 +403,15 @@ class CombCurve(object):
         # print("With corresponding output list: ", [v.name for v in outputList])
 
         for i in range(len(inputList)):
+            for j in range(len(inputList)):
+                # Number of edges connecting inputList[i] and inputList[j]
+                numInputEdges = sum(1 for e in self.edges if e.vertices == {inputList[i], inputList[j]})
+                numOutputEdges = sum(1 for e in other.edges if e.vertices == {outputList[i], outputList[j]})
+                if numInputEdges != numOutputEdges:
+                    # print("Function does not preserve number of connecting edges")
+                    return False
+
+        for i in range(len(inputList)):
             if inputList[i].genus != outputList[i].genus:
                 # print("Function does not preserve genus")
                 return False
@@ -412,14 +421,7 @@ class CombCurve(object):
                 # print("Function does not preserve number of legs")
                 return False
 
-        for i in range(len(inputList)):
-            for j in range(len(inputList)):
-                # Number of edges connecting inputList[i] and inputList[j]
-                numInputEdges = sum(1 for e in self.edges if e.vertices == {inputList[i], inputList[j]})
-                numOutputEdges = sum(1 for e in other.edges if e.vertices == {outputList[i], outputList[j]})
-                if numInputEdges != numOutputEdges:
-                    # print("Function does not preserve number of connecting edges")
-                    return False
+
 
         # print("This was an isomorphism!")
         return True
