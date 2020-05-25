@@ -278,28 +278,6 @@ class CombCurve(object):
             self._vertexSelfLoopsCacheValid = True
         return self._vertexSelfLoopsCache
 
-    def getVerticesByDegree(self):
-        vertexDict = {}
-        for v in self.vertices:
-            d = self.degree(v)
-            if d in vertexDict:
-                vertexDict[d].append(v)
-            else:
-                vertexDict[d] = [v]
-        return vertexDict
-
-    def getVerticesBySplitDegree(self):
-        vertexDict = {}
-        for v in self.vertices:
-            numEdgesAttached = self.numEdgesAttached(v)
-            numLegsAttached = self.numLegsAttached(v)
-            key = (numEdgesAttached, numLegsAttached)
-            if key in vertexDict:
-                vertexDict[key].append(v)
-            else:
-                vertexDict[key] = [v]
-        return vertexDict
-
     def getPermutations(self, lst):
         # If lst is empty then there are no permutations
         if len(lst) == 0:
