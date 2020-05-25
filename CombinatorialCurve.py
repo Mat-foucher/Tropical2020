@@ -192,6 +192,29 @@ class CombCurve(object):
     def numLegsAttached(self, v):
         return sum(1 for attachedLeg in self.legs if attachedLeg.root == v)
 
+    # Returns a copy of this curve where all vertices, edges, and legs are also copied shallowly
+    def getFullyShallowCopy(self):
+        vertexCopyDict = {}
+        for v in self.vertices:
+            vertexCopyDict[v] = copy.copy(v)
+
+        edgeCopies = set()
+        legCopies = set()
+        for nextEdge in self.edges:
+            nextEdgeCopy = edge(nextEdge.name, nextEdge.length,
+                                vertexCopyDict[nextEdge.vert1], vertexCopyDict[nextEdge.vert2])
+            edgeCopies.add(nextEdgeCopy)
+
+        for nextLeg in self.legs:
+            nextLegCopy = leg(nextLeg.name, vertexCopyDict[nextLeg.root])
+            legCopies.add(nextLegCopy)
+
+        curveCopy = CombCurve(self.name)
+        curveCopy.edges = edgeCopies
+        curveCopy.legs = legCopies
+
+        return curveCopy
+
     # e should be an edge and the length should be a double
     # genus should be a non-negative integer
     def subdivide(self, e, length, genus=0):
