@@ -74,7 +74,7 @@ class TropicalModuliSpace(object):
             return self._curves
         return [t[0] for t in isotypes]
 
-    def generateSpace(self):
+    def generateSpace(self, suppressComments=True):
 
         seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
         v = vertex("v", self._g)
@@ -85,9 +85,11 @@ class TropicalModuliSpace(object):
         newCurves = [seedCurve]
 
         while newCurves:
-            print("Found ", len(newCurves), " new curves. Reducing now.")
+            if not suppressComments:
+                print("Found ", len(newCurves), " new curves. Reducing now.")
             curveBuffer = self.reduceByIsomorphism(newCurves)
-            print("Reduced to ", len(curveBuffer), " new curves.")
+            if not suppressComments:
+                print("Reduced to ", len(curveBuffer), " new curves.")
             self._curves = self._curves | set(curveBuffer)
             newCurves = []
             # print("\n\n\n\n\n\n###################### Moving to next level ######################\n\n\n\n\n\n")
@@ -200,8 +202,8 @@ class TropicalModuliSpace(object):
         curve.edges = curve.edges | {e}
 
     def getGenusReductionSpecialization(self, curve, vert):
-        c = CombCurve("(Spec. of " + curve.name + " from genus reducing at " + vert.name)
-        c.edges = {copy.copy(e) for e in curve.edges}
-        c.legs = {copy.copy(nextLeg) for nextLeg in curve.legs}
-        self.specializeByReducingGenus(c, vert)
+        c, copyInfo = curve.getFullyShallowCopy(True)
+        c.name = "(Spec. of " + curve.name + " from genus reducing at " + vert.name
+
+        self.specializeByReducingGenus(c, copyInfo[vert])
         return c
