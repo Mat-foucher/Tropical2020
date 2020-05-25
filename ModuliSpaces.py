@@ -159,33 +159,18 @@ class TropicalModuliSpace(object):
         curve.edges = curve.edges | {e}
 
     def getSplittingSpecialization(self, curve, vert, g1, g2, S, T):
-        c = CombCurve("(Spec. of " + curve.name + " from splitting at " + vert.name)
-
-        edgeCopyDict = {}
-        for e in curve.edges:
-            edgeCopyDict[e] = copy.copy(e)
-
-        legCopyDict = {}
-        for nextLeg in curve.legs:
-            legCopyDict[nextLeg] = copy.copy(nextLeg)
-
-        c.edges = {e for e in edgeCopyDict.values()}
-        c.legs = {nextLeg for nextLeg in legCopyDict.values()}
+        # copy the curve shallowly and keep track of how copying was performed
+        c, copyInfo = curve.getFullyShallowCopy(True)
+        c.name = "(Spec. of " + curve.name + " from splitting at " + vert.name
 
         safeS = set()
         safeT = set()
         for p in S:
             e, n = p
-            if isinstance(e, edge):
-                safeS.add((edgeCopyDict[e], n))
-            else:
-                safeS.add((legCopyDict[e], n))
+            safeS.add((copyInfo[e], n))
         for p in T:
             e, n = p
-            if isinstance(e, edge):
-                safeT.add((edgeCopyDict[e], n))
-            else:
-                safeT.add((legCopyDict[e], n))
+            safeT.add((copyInfo[e], n))
 
         # c.edges = {copy.copy(e) for e in curve.edges}
         # c.legs = {copy.copy(l) for l in curve.legs}
