@@ -1,13 +1,14 @@
 from CombinatorialCurve import *
 import copy
 
+
 class TropicalModuliSpace(object):
     def __init__(self, g_, n_):
         self._g = g_
         self._n = n_
         self._curves = set()
 
-    #TODO: Figure out whether python passes by reference or value so we can avoid the silly pop/add lines
+    # TODO: Figure out whether python passes by reference or value so we can avoid the silly pop/add lines
     def getPartitions(self, s):
 
         if len(s) == 1:
@@ -28,8 +29,9 @@ class TropicalModuliSpace(object):
 
         return partition
 
-    def printCurve(self, curve):
-        '''
+    @staticmethod
+    def printCurve(curve):
+        """
         print("\nPrinting a new curve")
         print("Vertices:")
         for v in curve.vertices:
@@ -38,7 +40,7 @@ class TropicalModuliSpace(object):
             print("Edge ", e.name, " with vertices ", e.vert1.name, " and ", e.vert2.name)
         for l in curve.legs:
             print("Leg ", l.name, " with root ", l.root.name)
-        '''
+        """
 
         print("\n\nVertices:")
         for v in curve.vertices:
@@ -47,13 +49,13 @@ class TropicalModuliSpace(object):
         for e in curve.edges:
             print(e.name)
         print("Legs:")
-        for l in curve.legs:
-            print(l.name)
+        for nextLeg in curve.legs:
+            print(nextLeg.name)
 
-    def reduceByIsomorphism(self, curves = None):
+    def reduceByIsomorphism(self, curves=None):
         isotypes = []
 
-        modifySelf = (curves == None)
+        modifySelf = (curves is None)
         if modifySelf:
             curves = self._curves
 
@@ -72,7 +74,6 @@ class TropicalModuliSpace(object):
             return self._curves
         return [t[0] for t in isotypes]
 
-
     def generateSpace(self):
 
         seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
@@ -83,13 +84,13 @@ class TropicalModuliSpace(object):
 
         newCurves = [seedCurve]
 
-        while newCurves != []:
+        while newCurves:
             print("Found ", len(newCurves), " new curves. Reducing now.")
             curveBuffer = self.reduceByIsomorphism(newCurves)
             print("Reduced to ", len(curveBuffer), " new curves.")
             self._curves = self._curves | set(curveBuffer)
             newCurves = []
-            # print("\n\n\n\n\n\n########################### Moving to next level ###########################\n\n\n\n\n\n")
+            # print("\n\n\n\n\n\n###################### Moving to next level ######################\n\n\n\n\n\n")
             while curveBuffer:
                 currentCurve = curveBuffer[0]
 
@@ -111,11 +112,11 @@ class TropicalModuliSpace(object):
                             S, T = p
                             if not ((g == 0 and len(S) < 2) or (g == vert.genus and len(T) < 2)):
                                 # print("\nSplitting vertex: " + vert.name)
-                                vertexSplitCurve = self.getSplittingSpecialization(currentCurve, vert, g, vert.genus - g, S, T)
+                                vertexSplitCurve = self.getSplittingSpecialization(currentCurve, vert, g,
+                                                                                   vert.genus - g, S, T)
                                 newCurves.append(vertexSplitCurve)
                                 # self.printCurve(vertexSplitCurve)
                 curveBuffer.remove(currentCurve)
-
 
                 # print("Current buffer length: ", len(curveBuffer))
                 # print("Number of new curves this loop: ", len(newCurves))
@@ -123,9 +124,12 @@ class TropicalModuliSpace(object):
         return self._curves
 
     # Returns the specialization of 'curve' at 'vert' as determined by g1, g2, S, and T
-    # Specifically, 'vert' is split into two vertices, v1 and v2, of genuses g1 and g2 respectively, where g1+g2 == vert.genus
-    # S and T partition the endpoints of edges on vert, and we move the endpoints of edges in S to v1 and those in T to v2
-    def specializeBySplittingAtVertex(self, curve, vert, g1, g2, S, T):
+    # Specifically, 'vert' is split into two vertices, v1 and v2, of genuses g1 and g2 respectively,
+    # where g1+g2 == vert.genus
+    # S and T partition the endpoints of edges on vert, and we move the endpoints of edges in S to v1 and those
+    # in T to v2
+    @staticmethod
+    def specializeBySplittingAtVertex(curve, vert, g1, g2, S, T):
         assert g1 + g2 == vert.genus
         v1 = vertex("(First split of " + vert.name + ")", g1)
         v2 = vertex("(Second split of " + vert.name + ")", g2)
@@ -162,11 +166,11 @@ class TropicalModuliSpace(object):
             edgeCopyDict[e] = copy.copy(e)
 
         legCopyDict = {}
-        for l in curve.legs:
-            legCopyDict[l] = copy.copy(l)
+        for nextLeg in curve.legs:
+            legCopyDict[nextLeg] = copy.copy(nextLeg)
 
         c.edges = {e for e in edgeCopyDict.values()}
-        c.legs = {l for l in legCopyDict.values()}
+        c.legs = {nextLeg for nextLeg in legCopyDict.values()}
 
         safeS = set()
         safeT = set()
@@ -183,12 +187,13 @@ class TropicalModuliSpace(object):
             else:
                 safeT.add((legCopyDict[e], n))
 
-        #c.edges = {copy.copy(e) for e in curve.edges}
-        #c.legs = {copy.copy(l) for l in curve.legs}
+        # c.edges = {copy.copy(e) for e in curve.edges}
+        # c.legs = {copy.copy(l) for l in curve.legs}
         self.specializeBySplittingAtVertex(c, vert, g1, g2, safeS, safeT)
         return c
 
-    def specializeByReducingGenus(self, curve, vert):
+    @staticmethod
+    def specializeByReducingGenus(curve, vert):
         assert vert.genus > 0
 
         endpoints = curve.getEndpointsOfEdges(vert)
@@ -212,6 +217,6 @@ class TropicalModuliSpace(object):
     def getGenusReductionSpecialization(self, curve, vert):
         c = CombCurve("(Spec. of " + curve.name + " from genus reducing at " + vert.name)
         c.edges = {copy.copy(e) for e in curve.edges}
-        c.legs = {copy.copy(l) for l in curve.legs}
+        c.legs = {copy.copy(nextLeg) for nextLeg in curve.legs}
         self.specializeByReducingGenus(c, vert)
         return c
