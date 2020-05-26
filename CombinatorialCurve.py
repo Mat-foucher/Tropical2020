@@ -79,12 +79,12 @@ class CombCurve(object):
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
     def __init__(self, name_):
         self.name = name_
-        self._edges = {}
-        self._legs = {}
+        self._edges = set()
+        self._legs = set()
 
         # Variables for caching vertices
         self._vertexCacheValid = False
-        self._vertexCache = {}
+        self._vertexCache = set()
 
         # Variables for caching genus
         self._genusCacheValid = False
@@ -276,6 +276,8 @@ class CombCurve(object):
 
         return len(numbers) == self.vertexNumber
 
+
+
     @property
     def core(self):
 
@@ -284,15 +286,27 @@ class CombCurve(object):
 
             core = copy.copy(self)
 
+            genus = core.genus
+
             core.legs = {}
 
             assert core.isConnected
 
-            for x in self.edges:
-                core.edges = core.edges - {x}
-                if core.genus < self.genus or core.isConnected == False:
-                    core.edges = core.edges | {x}
+            keepChecking = True
 
+            while keepChecking:
+
+                keepChecking = False
+                for i in core.vertices:
+                    
+                    if i.genus == 0 and core.degree(i) < 2:
+                        
+                        
+                        for x in core.edges:
+                            if i == x.vert1 or i == x.vert2:
+                                keepChecking = True
+                                core.edges = core.edges - {x}
+                        
             self._coreCache = core
             self._coreCacheValid = True
 
