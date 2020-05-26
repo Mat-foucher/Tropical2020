@@ -1,5 +1,6 @@
 from CombinatorialCurve import *
 import copy
+import time
 
 
 class TropicalModuliSpace(object):
@@ -7,6 +8,8 @@ class TropicalModuliSpace(object):
         self._g = g_
         self._n = n_
         self._curves = set()
+        # Curves organized by number of edges
+        self._curvesDict = {}
 
     @property
     def curves(self):
@@ -15,6 +18,10 @@ class TropicalModuliSpace(object):
     @curves.setter
     def curves(self, curves_):
         self._curves = curves_
+
+    @property
+    def curvesDict(self):
+        return self._curvesDict
 
     # TODO: Figure out whether python passes by reference or value so we can avoid the silly pop/add lines
     def getPartitions(self, s):
@@ -31,8 +38,9 @@ class TropicalModuliSpace(object):
         partition = []
         for blockPair in p:
             S, T = blockPair
-            if len(S) < len(T):
-                partition.append((S | {elem}, T))
+            #if len(S) < len(T):
+            #    partition.append((S | {elem}, T))
+            partition.append((S | {elem}, T))
             partition.append((S, T | {elem}))
 
         return partition
@@ -61,36 +69,111 @@ class TropicalModuliSpace(object):
             print(nextLeg.name)
 
     def reduceByIsomorphism(self, curves=None):
-        isotypes = []
 
         modifySelf = (curves is None)
         if modifySelf:
-            curves = self._curves
 
-        for curve in curves:
-            newIsotype = True
-            for t in isotypes:
-                if t[0].isIsomorphicTo(curve):
-                    t.append(curve)
-                    newIsotype = False
-                    break
-            if newIsotype:
-                isotypes.append([curve])
-
-        if modifySelf:
-            self._curves = [t[0] for t in isotypes]
-            return self._curves
-        return [t[0] for t in isotypes]
+            for n in self.curvesDict:
+                self.curvesDict[n] = self.reduceByIsomorphism(self.curvesDict[n])
+            self.curves = set()
+            for n in self.curvesDict:
+                self.curves = self.curves | set(self.curvesDict[n])
+            return self.curves
+        else:
+            isotypes = []
+            for curve in curves:
+                newIsotype = True
+                for t in isotypes:
+                    if t[0].isIsomorphicTo(curve):
+                        t.append(curve)
+                        newIsotype = False
+                        break
+                if newIsotype:
+                    isotypes.append([curve])
+            return {t[0] for t in isotypes}
 
     def containsUpToIsomorphism(self, curve):
-        for c in self.curves:
-            if c.isIsomorphicTo(curve):
-                return True
+
+        if curve.edgeNumber not in self.curvesDict:
+            return False
+        else:
+            for c in self.curvesDict[curve.edgeNumber]:
+                if c.isIsomorphicTo(curve):
+                    return True
+
         return False
 
     def addCurve(self, curve):
-        if not self.containsUpToIsomorphism(curve):
+        # if not self.containsUpToIsomorphism(curve):
+        #     self.curves = self.curves | {curve}
+
+        numEdges = curve.edgeNumber
+        if numEdges in self.curvesDict:
+            curveIsNew = True
+            for c in self.curvesDict[numEdges]:
+                if curve.isIsomorphicTo(c):
+                    curveIsNew = False
+                    break
+            if curveIsNew:
+                self.curvesDict[numEdges] = self.curvesDict[numEdges] + [curve]
+                self.curves = self.curves | {curve}
+        else:
+            self.curvesDict[numEdges] = [curve]
             self.curves = self.curves | {curve}
+
+    def addSpecializationsDFS(self, curve):
+        newCurves = []
+
+        # Get the one-step specializations of the given curve
+        for vert in curve.vertices:
+
+            # If the genus of vert is positive, then we can decrement its genus and add a self loop
+            if vert.genus > 0:
+                genusReducedCurve = self.getGenusReductionSpecialization(curve, vert)
+                newCurves.append(genusReducedCurve)
+
+            # We can also split a vertex in two and pass around parts of its genus and endpoints to the new pieces
+            endpointPartitions = self.getPartitions(curve.getEndpointsOfEdges(vert))
+
+            # Anticipate some isomorphic results
+            endpointPartitions = [(S, T) for (S, T) in endpointPartitions if len(S) <= len(T)]
+
+            for g in range(vert.genus + 1):
+                for p in endpointPartitions:
+                    S, T = p
+                    if not ((g == 0 and len(S) < 2) or (g == vert.genus and len(T) < 2)):
+                        vertexSplitCurve = self.getSplittingSpecialization(curve, vert, g, vert.genus - g, S, T)
+                        newCurves.append(vertexSplitCurve)
+
+        # Reduce before we go down a level
+        newCurvesBuffer = self.reduceByIsomorphism(newCurves)
+        newCurves = []
+        for c in newCurvesBuffer:
+            if not self.containsUpToIsomorphism(c):
+                newCurves.append(c)
+                self.addCurve(c)
+
+        #print("Found ", len(newCurves), " new curves")
+        #print("Currently have ", len(self.curves), " curves!")
+
+        # Specialize the specializations DFS
+        for c in newCurves:
+            self.addSpecializationsDFS(c)
+
+    def generateSpaceDFS(self):
+
+        # start_time = time.time()
+
+        seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
+        v = vertex("v", self._g)
+        seedCurve.legs = {leg("leg " + str(i), v) for i in range(self._n)}
+
+        self.addCurve(seedCurve)
+        self.addSpecializationsDFS(seedCurve)
+
+        # generation_complete_time = time.time()
+
+        # print("Generation time: ", generation_complete_time - start_time)
 
     def generateSpace(self, suppressComments=True):
 
@@ -105,7 +188,7 @@ class TropicalModuliSpace(object):
         while newCurves:
             if not suppressComments:
                 print("Found ", len(newCurves), " new curves. Reducing now.")
-            curveBuffer = self.reduceByIsomorphism(newCurves)
+            curveBuffer = list(self.reduceByIsomorphism(newCurves))
             if not suppressComments:
                 print("Reduced to ", len(curveBuffer), " new curves.")
             self._curves = self._curves | set(curveBuffer)
