@@ -26,6 +26,8 @@ f = StrictPiecewiseLinearFunction(C, dict)
 
 s = f.getSpecialSupportPartition()
 
+assert not f.mesaTest()
+
 #print(s)
 assert s == [{e1, e3, e4}]
 #for x in s:
@@ -183,6 +185,7 @@ C.edges = {e1, e2, e3, e4, e5, e6, e7, e8}
 f = StrictPiecewiseLinearFunction(C, {v1: 0.0, v2: 1.0, v3: 0.0, v4: 1.0, v5: 0.0, v6: 0.0, v7: 1.0, v8: 1.0, v9: 0.0})
 
 
+
 #supportEdges, supportVertices = f.getSpecialSupport()
 #for e in supportEdges:
 #    print(e.name)
@@ -197,6 +200,41 @@ s = f.getSpecialSupportPartition()
 
 # Python doesn't allow sets of mutable sets, so we convert these to sets of immutable sets before comparing
 assert {frozenset(block) for block in s} == {frozenset({e1, e2}), frozenset({e3, e4}), frozenset({e6, e7, e8})}
+
+
+# Example 4.4
+Ex44 = CombCurve("Example 4.4")
+v1 = vertex("v1", 0)
+v2 = vertex("v2", 1)
+v3 = vertex("v3", 0)
+v4 = vertex("v4", 0)
+v5 = vertex("v5", 0)
+v6 = vertex("v6", 0)
+e1 = edge("e1", 2.0, v1, v2)
+e2 = edge("e2", 1.0, v2, v3)
+e3 = edge("e3", 1.0, v3, v4)
+e4 = edge("e4", 1.0, v4, v5)
+e5 = edge("e5", 1.0, v4, v6)
+l1 = leg("l1", v1)
+l2 = leg("l2", v2)
+l3 = leg("l3", v5)
+l4 = leg("l4", v5)
+l5 = leg("l5", v6)
+l6 = leg("l6", v6)
+
+Ex44.edges = {e1, e2, e3, e4, e5}
+#Ex44.legs = {l1, l2, l3, l4, l5, l6}
+
+g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0 , v4: 1.0, v5: 0.0, v6: 0.0})
+
+assert g.mesaTest()
+
+
+
+
+
+
+
 
 
 print("If you see this, then all previous assertations were true!")
