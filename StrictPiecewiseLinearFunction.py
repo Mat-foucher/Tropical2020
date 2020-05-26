@@ -68,6 +68,37 @@ class StrictPiecewiseLinearFunction(object):
 
         return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
 
+    def floodfillVertices(self, vert):
+
+        edgesToCheck = {e for e in self.domain.edges if vert in e.vertices}
+        edgesVisited = set()
+
+        core = self.domain.core
+
+        foundANonsupportVertex = False
+        foundACoreVertex = False
+
+        while len(edgesToCheck) > 0:
+            nextEdge = edgesToCheck.pop()
+            edgesVisited = edgesVisited | {nextEdge}
+
+            # Check something here
+            
+            if nextEdge.vert1 in core or nextEdge.vert2 in core:
+                foundACoreVertex = True
+            if nextEdge.vert1 not in supportVertices or nextEdge.vert2 not in supportVertices:
+                foundANonsupportVertex = True
+            if foundACoreVertex and foundANonsupportVertex:
+                return True
+            
+
+            edgesToCheck = edgesToCheck | (
+                        {e for e in self.domain.edges if nextEdge.vert1 in e.vertices} - edgesVisited)
+            edgesToCheck = edgesToCheck | (
+                        {e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesVisited)
+
+        return False
+
     def getSpecialSupport(self):
         
         supportEdges = set()
@@ -116,8 +147,39 @@ class StrictPiecewiseLinearFunction(object):
     @property
     def mesaTest(self):
 
+        # Part 1
         for i in self.domain.legs:
             if self.functionValues[i] != 0:
                 return False 
         
+        specialSupports = self.getSpecialSupportPartition()
+
+        # Part 2
+        for j in specialSupports:
+            support = CombCurve("support")
+            support.edges = j
+
+            supportCore = support.core
+
+            if support.isConnected == False:
+                print("Disconnected Support")
+                return False
+
+            if supportCore.genus != 1:
+                support.showEdges
+                print("Not Genus 1")
+                return False
+
+        # Part 3
+        # This part has to be checked over each individual support.
+                    
         
+        # Part 4
+        for i in self.domain.vertices:
+            if self.floodfillVertices(i) == False:
+                print("Not Every Vertex on path")
+                return False
+                break
+
+
+        return True

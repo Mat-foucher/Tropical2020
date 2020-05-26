@@ -26,7 +26,7 @@ f = StrictPiecewiseLinearFunction(C, dict)
 
 s = f.getSpecialSupportPartition()
 
-assert not f.mesaTest()
+assert not f.mesaTest
 
 #print(s)
 assert s == [{e1, e3, e4}]
@@ -216,7 +216,7 @@ e3 = edge("e3", 1.0, v3, v4)
 e4 = edge("e4", 1.0, v4, v5)
 e5 = edge("e5", 1.0, v4, v6)
 l1 = leg("l1", v1)
-l2 = leg("l2", v2)
+l2 = leg("l2", v1)
 l3 = leg("l3", v5)
 l4 = leg("l4", v5)
 l5 = leg("l5", v6)
@@ -227,7 +227,7 @@ Ex44.edges = {e1, e2, e3, e4, e5}
 
 g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0 , v4: 1.0, v5: 0.0, v6: 0.0})
 
-assert g.mesaTest()
+assert g.mesaTest
 
 
 
