@@ -68,30 +68,31 @@ class StrictPiecewiseLinearFunction(object):
 
         return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
 
-def floodfillVertices(self, vert, S, T, allowedVertices=None):       
-    if allowedVertices is None:            
-        allowedVertices = self.domain.vertices        
-    
-    edgesToCheck = {e for e in self.domain.edges if (vert in e.vertices and vert in allowedVertices)}
-    edgesVisited = set()
+    def floodfillVertices(self, vert, S, T, allowedVertices=None):
 
-    foundAnSVertex = False        
-    foundATVertex = False        
-    while len(edgesToCheck) > 0:
-        nextEdge = edgesToCheck.pop()
-        edgesVisited = edgesVisited | {nextEdge}
-        # Check something here
-        if nextEdge.vert1 in T or nextEdge.vert2 in T:
-            foundATVertex = True
-        if nextEdge.vert1 in S or nextEdge.vert2 in S:
-            foundAnSVertex = True
-        if foundATVertex and foundAnSVertex:
-            return True            
-    
-        edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert1 in e.vertices and nextEdge.vert1 in allowedVertices)} - edgesVisited) 
-        edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert2 in e.vertices and nextEdge.vert2 in allowedVertices)} - edgesVisited)
+        if allowedVertices is None:            
+            allowedVertices = self.domain.vertices        
+        
+        edgesToCheck = {e for e in self.domain.edges if (vert in e.vertices and vert in allowedVertices)}
+        edgesVisited = set()
 
-    return False
+        foundAnSVertex = False        
+        foundATVertex = False        
+        while len(edgesToCheck) > 0:
+            nextEdge = edgesToCheck.pop()
+            edgesVisited = edgesVisited | {nextEdge}
+            # Check something here
+            if nextEdge.vert1 in T or nextEdge.vert2 in T:
+                foundATVertex = True
+            if nextEdge.vert1 in S or nextEdge.vert2 in S:
+                foundAnSVertex = True
+            if foundATVertex and foundAnSVertex:
+                return True            
+        
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert1 in e.vertices and nextEdge.vert1 in allowedVertices)} - edgesVisited) 
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert2 in e.vertices and nextEdge.vert2 in allowedVertices)} - edgesVisited)
+
+        return False
 
 
     def getSpecialSupport(self):
@@ -187,11 +188,17 @@ def floodfillVertices(self, vert, S, T, allowedVertices=None):
             T = self.domain.vertices - allSupportVertices 
 
             for v in thisComponentSupportVertices: 
-                if not self.floodfillVertices(v, S, T):
+                if not self.floodfillVertices(v, S, T): 
                     return False
 
             # Part 5 
-            
+            edgesToCheck = support.edges - supportCore.edges
 
+            for x in edgesToCheck:
+                vert1TowardsCore = self.floodfillVertices(x.vert1, supportCore.vertices, supportCore.vertices, self.domain.vertices - {x.vert2})
+                if vert1TowardsCore:
+                    rise = self.functionValues[x.vert1] - self.functionValues[x.vert2]
+                    if rise != x.length and rise != 0:
+                        return False
 
         return True
