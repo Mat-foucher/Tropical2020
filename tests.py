@@ -6,7 +6,6 @@ import time
 
 
 
-
 C = CombCurve("Example 3.5")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)

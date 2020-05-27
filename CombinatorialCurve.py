@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 
 
 # A vertex has a name and non-negative genus
@@ -101,6 +102,11 @@ class CombCurve(object):
         self._vertexEverythingCacheValid = False
         self._vertexEverythingCache = {}
 
+        # Variables for caching the core
+        self._coreCacheValid = False
+        self._coreCache = None
+
+
     @property
     def edges(self):
         return self._edges
@@ -114,6 +120,8 @@ class CombCurve(object):
         self._genusCacheValid = False
         self._vertexSelfLoopsCacheValid = False
         self._vertexEverythingCacheValid = False
+        self._coreCacheValid = False
+
 
     @property
     def edgesWithVertices(self):
@@ -473,3 +481,65 @@ class CombCurve(object):
     # Prints the names of legs
     def showLegs(self):
         print([nextLeg.name for nextLeg in self.legs])
+
+    # This function will check if the tropical curve is connected (in the style of Def 3.10)
+    @property
+    def isConnected(self):
+
+        A = np.zeros((self.vertexNumber, self.vertexNumber))
+        _vertices = list(self.vertices)
+
+        for x in self.edges:
+            v1 = x.vert1
+            v2 = x.vert2
+
+            i = _vertices.index(v1)
+            j = _vertices.index(v2)
+
+            # print(i, j)
+            # So that the connections made by the edges are symmetric ((v1,v2) = (v2,v1))
+            A[i][j] = 1
+            A[j][i] = 1
+
+        # So that the while loop works
+        go = True
+        numbers = []
+        newNumbers = [0]
+
+        while go:
+            numbers.extend(newNumbers)
+            brandNewNumbers = []
+            for i in newNumbers:
+                for k in range(self.vertexNumber):
+                    if A[i][k] == 1:
+                        if k not in numbers:
+                            brandNewNumbers.append(k)
+
+            newNumbers = []
+            newNumbers.extend(brandNewNumbers)
+            brandNewNumbers = []
+            go = len(newNumbers) > 0
+
+        return len(numbers) == self.vertexNumber
+
+    @property
+    def core(self):
+
+        if self._coreCacheValid == False:
+            assert self.genus > 0
+
+            core = copy.copy(self)
+
+            core.legs = {}
+
+            assert core.isConnected
+
+            for x in self.edges:
+                core.edges = core.edges - {x}
+                if core.genus < self.genus or core.isConnected == False:
+                    core.edges = core.edges | {x}
+
+            self._coreCache = core
+            self._coreCacheValid = True
+
+        return self._coreCache
