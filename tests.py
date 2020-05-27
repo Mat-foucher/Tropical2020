@@ -272,4 +272,10 @@ def testTimeAndSize(g, n):
 
 testTimeAndSize(2, 2)
 
+print("Loading curves from file.")
+m12.loadModuliSpaceFromFile("SavedModuliSpaces/M-1-2.txt")
+print("Curves loaded. Printing now.")
+for curve in m12.curves:
+    curve.printSelf()
+
 print("If you see this, then all previous assertations were true!")

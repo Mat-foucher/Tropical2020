@@ -2,6 +2,7 @@ from CombinatorialCurve import *
 import copy
 import time
 
+import re
 
 class TropicalModuliSpace(object):
     def __init__(self, g_, n_):
@@ -283,3 +284,85 @@ class TropicalModuliSpace(object):
 
         self.specializeByReducingGenus(c, copyInfo[vert])
         return c
+
+
+
+
+
+    def loadModuliSpaceFromFile(self, filename, curveEntryDelimiter = "=", encoding = 'utf-8'):
+        self.curves = set()
+        with open(filename, mode='r', encoding=encoding) as f:
+            content = f.read()
+            curveStrings = content.split("\n" + curveEntryDelimiter + "\n")
+            for curveString in curveStrings:
+                curveInfo = curveString.split("\n")
+                vertexInfo = curveInfo[0]
+                vertexInfoFinder = re.compile("\((v\d*) with genus (\d*)\)")
+
+                edgeInfo = curveInfo[1]
+                edgeInfoFinder = re.compile("edge\((v\d*), (v\d*)\)")
+
+                legInfo = curveInfo[2]
+                legInfoFinder = re.compile("leg\((v\d*)\)")
+
+                vertices = {}
+                for m in vertexInfoFinder.finditer(vertexInfo):
+                    if m:
+                        vName = m.group(1)
+                        vGenus = m.group(2)
+                        v = vertex(vName, int(vGenus))
+                        vertices[vName] = v
+
+                edges = set()
+                for m in edgeInfoFinder.finditer(edgeInfo):
+                    if m:
+                        eName = m.group(0)
+                        eVert1Name = m.group(1)
+                        eVert2Name = m.group(2)
+                        e = edge(eName, 1.0, vertices[eVert1Name], vertices[eVert2Name])
+                        edges.add(e)
+
+                legs = set()
+                for m in legInfoFinder.finditer(legInfo):
+                    if m:
+                        lName = m.group(0)
+                        lRootName = m.group(1)
+                        l = leg(lName, vertices[lRootName])
+                        legs.add(l)
+
+                c = CombCurve("")
+                c.edges = edges
+                c.legs = legs
+
+                self.curves.add(c)
+
+
+
+
+
+
+
+
+
+    def saveModuliSpaceToFile(self, filename = "", curveEntryDelimiter = "=", encoding = 'utf-8'):
+        if filename == "":
+            filename = "SavedModuliSpaces/M-" + str(self._g) + "-" + str(self._n) + ".txt"
+
+        with open(filename, mode='w', encoding=encoding) as f:
+            curveNames = []
+            for c in sorted(self.curves, key=lambda x: x.edgeNumber):
+                c.simplifyNames()
+                vertexNames = [("(" + v.name + " with genus " + str(v.genus) + ")") for v in c.vertices]
+                edgeNames = [e.name for e in c.edges]
+                legNames = [nextLeg.name for nextLeg in c.legs]
+                vertexLine = "Vertices: {" + ",".join(vertexNames) + "}"
+                edgeLine = "Edges: {" + ",".join(edgeNames) + "}"
+                legLine = "Legs: {" + ",".join(legNames) + "}"
+                curveNames.append("\n".join([vertexLine, edgeLine, legLine]))
+            if curveNames:
+                currentCurve = curveNames.pop()
+                f.write(currentCurve)
+                while curveNames:
+                    currentCurve = curveNames.pop()
+                    f.write("\n" + curveEntryDelimiter + "\n")
+                    f.write(currentCurve)
