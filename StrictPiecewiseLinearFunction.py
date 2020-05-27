@@ -68,36 +68,31 @@ class StrictPiecewiseLinearFunction(object):
 
         return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
 
-    def floodfillVertices(self, vert):
+def floodfillVertices(self, vert, S, T, allowedVertices=None):       
+    if allowedVertices is None:            
+        allowedVertices = self.domain.vertices        
+    
+    edgesToCheck = {e for e in self.domain.edges if (vert in e.vertices and vert in allowedVertices)}
+    edgesVisited = set()
 
-        edgesToCheck = {e for e in self.domain.edges if vert in e.vertices}
-        edgesVisited = set()
+    foundAnSVertex = False        
+    foundATVertex = False        
+    while len(edgesToCheck) > 0:
+        nextEdge = edgesToCheck.pop()
+        edgesVisited = edgesVisited | {nextEdge}
+        # Check something here
+        if nextEdge.vert1 in T or nextEdge.vert2 in T:
+            foundATVertex = True
+        if nextEdge.vert1 in S or nextEdge.vert2 in S:
+            foundAnSVertex = True
+        if foundATVertex and foundAnSVertex:
+            return True            
+    
+        edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert1 in e.vertices and nextEdge.vert1 in allowedVertices)} - edgesVisited) 
+        edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert2 in e.vertices and nextEdge.vert2 in allowedVertices)} - edgesVisited)
 
-        core = self.domain.core
+    return False
 
-        foundANonsupportVertex = False
-        foundACoreVertex = False
-
-        while len(edgesToCheck) > 0:
-            nextEdge = edgesToCheck.pop()
-            edgesVisited = edgesVisited | {nextEdge}
-
-            # Check something here
-            
-            if nextEdge.vert1 in core.vertices or nextEdge.vert2 in core.vertices:
-                foundACoreVertex = True
-            if nextEdge.vert1 not in core.vertices or nextEdge.vert2 not in core.vertices:
-                foundANonsupportVertex = True
-            if foundACoreVertex and foundANonsupportVertex:
-                return True
-            
-
-            edgesToCheck = edgesToCheck | (
-                        {e for e in self.domain.edges if nextEdge.vert1 in e.vertices} - edgesVisited)
-            edgesToCheck = edgesToCheck | (
-                        {e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesVisited)
-
-        return False
 
     def getSpecialSupport(self):
         
@@ -115,7 +110,7 @@ class StrictPiecewiseLinearFunction(object):
 
         return (supportEdges, supportVertices)
 
-
+    
     def getSpecialSupportPartition(self):
 
         supportEdges, supportVertices = self.getSpecialSupport()
@@ -160,46 +155,43 @@ class StrictPiecewiseLinearFunction(object):
             support = CombCurve("support")
             support.edges = j
 
-            # Add the vertices to the support:
-            for x in self.domain.vertices:
-                for k in support.edges:
-                    if x.name == k.vert1.name or x.name == k.vert2.name:
-                        support.vertices.add(x)
-                
             supportCore = support.core
 
             if support.isConnected == False:
-                print("Disconnected Support")
+                # print("Disconnected Support")
                 return False
 
             if supportCore.genus != 1:
                 # support.showEdges
-                print("Not Genus 1")
+                # print("Not Genus 1")
                 return False
 
             const = 0.0
             previous = 0.0
 
+            # Part 3
             # Check that the function is constant over the associated support:
             for i in self.domain.vertices:
                 for x in support.edges:
                     if const != previous:
-                            return False
-                    if i.name == x.vert1.name or x.vert2.name:
+                        return False
+                    if i == x.vert1 or x.vert2:
                         const = self.functionValues[i]
-                        previous = const
+                        previous = const              
 
+            # Part 4
+            allSupportVertices = {v for v in self.domain.vertices if self.functionValues[v] > 0}
+            thisComponentSupportVertices = allSupportVertices.intersection(support.vertices)
 
-        # Part 3
-        # This part has to be checked over each individual support. See Part #2 code.
-                    
-        
-        # Part 4
-        for i in self.domain.vertices:
-            if self.floodfillVertices(i) == False:
-                print("Not Every Vertex on path")
-                return False
-                break
+            S = supportCore.vertices
+            T = self.domain.vertices - allSupportVertices 
+
+            for v in thisComponentSupportVertices: 
+                if not self.floodfillVertices(v, S, T):
+                    return False
+
+            # Part 5 
+            
 
 
         return True

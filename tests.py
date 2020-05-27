@@ -28,11 +28,7 @@ s = f.getSpecialSupportPartition()
 
 assert not f.mesaTest
 
-#print(s)
 assert s == [{e1, e3, e4}]
-#for x in s:
-#    for e in x:
-#        print(e.name)
 
 assert f.functionValues[v1] == 1.0
 for v in C.vertices:
