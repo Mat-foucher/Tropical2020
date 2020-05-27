@@ -1,7 +1,7 @@
 from CombinatorialCurve import *
 from StrictPiecewiseLinearFunction import *
 from ModuliSpaces import *
-
+import time
 
 
 
@@ -128,9 +128,8 @@ f = StrictPiecewiseLinearFunction(C, dict)
 
 
 
-
+"""
 # Test out some specialization code
-'''
 m = TropicalModuliSpace(1, 3)
 C = CombCurve("Specialization Test Curve")
 v = vertex("v", 2)
@@ -193,18 +192,8 @@ for e in C.edges:
     print("Vertices of edge ", e.name, ": (", e.vert1.name, ", ", e.vert2.name, ")")
 for l in C.legs:
     print ("Root of leg ", l.name, ": ", l.root.name)
-'''
+"""
 
-m = TropicalModuliSpace(1, 4)
-s = m.generateSpace()
-print("number of curves before reducing: ", len(m._curves))
-m.reduceByIsomorphism()
-print("Number of curves after reducing: ", len(m._curves))
-print("\n\n\n\n\n\n\n\n\n")
-
-for c in sorted(list(m._curves), key = lambda x: x.edgeNumber):
-    c.simplifyNames()
-    m.printCurve(c)
 
 
 
@@ -226,18 +215,55 @@ t1 = leg("t1", w1)
 C.legs = {s1}
 D.legs = {t1}
 
-assert C.isBruteForceIsomorphicTo(C)
 assert C.isIsomorphicTo(C)
+assert C.isIsomorphicTo(C.getFullyShallowCopy())
 
-assert not C.isBruteForceIsomorphicTo(D)
 assert not C.isIsomorphicTo(D)
 
 C.legs = {s2}
 
 assert C.isIsomorphicTo(D)
 
+# Generate some small, known, moduli spaces
+
+m11 = TropicalModuliSpace(1, 1)
+m11.generateSpaceDFS()
+assert len(m11.curves) == 2
+
+m12 = TropicalModuliSpace(1, 2)
+m12.generateSpaceDFS()
+assert len(m12.curves) == 5
+
+m13 = TropicalModuliSpace(1, 3)
+m13.generateSpaceDFS()
+assert len(m13.curves) == 11
+
+m14 = TropicalModuliSpace(1, 4)
+m14.generateSpaceDFS()
+assert len(m14.curves) == 30
+
+m15 = TropicalModuliSpace(1, 5)
+m15.generateSpaceDFS()
+assert len(m15.curves) == 76
+
+m22 = TropicalModuliSpace(2, 2)
+m22.generateSpaceDFS()
+assert len(m22.curves) == 60
 
 
+def testTimeAndSize(g, n):
+    m = TropicalModuliSpace(g, n)
 
+    start_time = time.time()
+    m.generateSpaceDFS()
+    end_time = time.time()
+
+    print("\n")
+    print("Finished M(", g, ", ", n, ") in ", end_time - start_time, " seconds.")
+    print("M(", g, ", ", n, ") has ", len(m.curves), " elements.")
+    print("\n")
+
+
+testTimeAndSize(2, 2)
 
 print("If you see this, then all previous assertations were true!")
