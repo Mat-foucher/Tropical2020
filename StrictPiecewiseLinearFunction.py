@@ -84,9 +84,9 @@ class StrictPiecewiseLinearFunction(object):
 
             # Check something here
             
-            if nextEdge.vert1 in core or nextEdge.vert2 in core:
+            if nextEdge.vert1 in core.vertices or nextEdge.vert2 in core.vertices:
                 foundACoreVertex = True
-            if nextEdge.vert1 not in supportVertices or nextEdge.vert2 not in supportVertices:
+            if nextEdge.vert1 not in core.vertices or nextEdge.vert2 not in core.vertices:
                 foundANonsupportVertex = True
             if foundACoreVertex and foundANonsupportVertex:
                 return True
@@ -156,9 +156,16 @@ class StrictPiecewiseLinearFunction(object):
 
         # Part 2
         for j in specialSupports:
+            
             support = CombCurve("support")
             support.edges = j
 
+            # Add the vertices to the support:
+            for x in self.domain.vertices:
+                for k in support.edges:
+                    if x.name == k.vert1.name or x.name == k.vert2.name:
+                        support.vertices.add(x)
+                
             supportCore = support.core
 
             if support.isConnected == False:
@@ -166,12 +173,25 @@ class StrictPiecewiseLinearFunction(object):
                 return False
 
             if supportCore.genus != 1:
-                support.showEdges
+                # support.showEdges
                 print("Not Genus 1")
                 return False
 
+            const = 0.0
+            previous = 0.0
+
+            # Check that the function is constant over the associated support:
+            for i in self.domain.vertices:
+                for x in support.edges:
+                    if const != previous:
+                            return False
+                    if i.name == x.vert1.name or x.vert2.name:
+                        const = self.functionValues[i]
+                        previous = const
+
+
         # Part 3
-        # This part has to be checked over each individual support.
+        # This part has to be checked over each individual support. See Part #2 code.
                     
         
         # Part 4

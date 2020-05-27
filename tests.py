@@ -223,7 +223,7 @@ l5 = leg("l5", v6)
 l6 = leg("l6", v6)
 
 Ex44.edges = {e1, e2, e3, e4, e5}
-#Ex44.legs = {l1, l2, l3, l4, l5, l6}
+# Ex44.legs = {l1, l2, l3, l4, l5, l6}
 
 g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0 , v4: 1.0, v5: 0.0, v6: 0.0})
 
