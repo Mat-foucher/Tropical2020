@@ -288,6 +288,8 @@ class TropicalModuliSpace(object):
 
 
 
+    def loadModuliSpaceFromFile(self, filename, curveEntryDelimiter = "="):
+        pass
 
 
 
@@ -307,4 +309,10 @@ class TropicalModuliSpace(object):
                 edgeLine = "Edges: {" + ",".join(edgeNames) + "}"
                 legLine = "Legs: {" + ",".join(legNames) + "}"
                 curveNames.append("\n".join([vertexLine, edgeLine, legLine]))
-            f.write(("\n" + curveEntryDelimiter + "\n").join(curveNames))
+            if curveNames:
+                currentCurve = curveNames.pop()
+                f.write(currentCurve)
+                while curveNames:
+                    currentCurve = curveNames.pop()
+                    f.write("\n" + curveEntryDelimiter + "\n")
+                    f.write(currentCurve)
