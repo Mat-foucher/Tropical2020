@@ -23,7 +23,6 @@ class TropicalModuliSpace(object):
     def curvesDict(self):
         return self._curvesDict
 
-    # TODO: Figure out whether python passes by reference or value so we can avoid the silly pop/add lines
     def getPartitions(self, s):
 
         if len(s) == 1:
@@ -38,35 +37,10 @@ class TropicalModuliSpace(object):
         partition = []
         for blockPair in p:
             S, T = blockPair
-            #if len(S) < len(T):
-            #    partition.append((S | {elem}, T))
             partition.append((S | {elem}, T))
             partition.append((S, T | {elem}))
 
         return partition
-
-    @staticmethod
-    def printCurve(curve):
-        """
-        print("\nPrinting a new curve")
-        print("Vertices:")
-        for v in curve.vertices:
-            print(v.name, " with genus ", v.genus)
-        for e in curve.edges:
-            print("Edge ", e.name, " with vertices ", e.vert1.name, " and ", e.vert2.name)
-        for l in curve.legs:
-            print("Leg ", l.name, " with root ", l.root.name)
-        """
-
-        print("\n\nVertices:")
-        for v in curve.vertices:
-            print(v.name, " with genus ", v.genus)
-        print("Edges:")
-        for e in curve.edges:
-            print(e.name)
-        print("Legs:")
-        for nextLeg in curve.legs:
-            print(nextLeg.name)
 
     def reduceByIsomorphism(self, curves=None):
 
@@ -117,6 +91,7 @@ class TropicalModuliSpace(object):
             if curveIsNew:
                 self.curvesDict[numEdges] = self.curvesDict[numEdges] + [curve]
                 self.curves = self.curves | {curve}
+                #print("Currently at ", len(self.curves), " curves.")
         else:
             self.curvesDict[numEdges] = [curve]
             self.curves = self.curves | {curve}

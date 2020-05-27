@@ -450,6 +450,18 @@ class CombCurve(object):
     def showNumbers(self):
         print("Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber)
 
+    @staticmethod
+    def printCurve(curve):
+        print("\n\nVertices:")
+        for v in curve.vertices:
+            print(v.name, " with genus ", v.genus)
+        print("Edges:")
+        for e in curve.edges:
+            print(e.name)
+        print("Legs:")
+        for nextLeg in curve.legs:
+            print(nextLeg.name)
+
     # Prints the names of vertices
     def showVertices(self):
         print([v.name for v in self.vertices])
