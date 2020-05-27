@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+from GraphIsoHelper import *
 
 
 # A vertex has a name and non-negative genus
@@ -324,127 +325,19 @@ class CombCurve(object):
         return self._vertexSelfLoopsCache
 
     def getPermutations(self, lst):
-        # If lst is empty then there are no permutations
-        if len(lst) == 0:
-            return []
-
-        # If there is only one element in lst then, only one permutation is possible
-        if len(lst) == 1:
-            return [lst]
-
-        # Find the permutations for lst if there are more than 1 characters
-
-        perms = []  # empty list that will store current permutation
-
-        # Iterate the input(lst) and calculate the permutation
-        for i in range(len(lst)):
-            m = lst[i]
-
-            # Extract lst[i] or m from the list.  remLst is
-            # remaining list
-            remLst = lst[:i] + lst[i + 1:]
-
-            # Generating all permutations where m is first
-            # element
-            for p in self.getPermutations(remLst):
-                perms.append([m] + p)
-        return perms
+        return GraphIsoHelper.getPermutations(lst)
 
     def checkIfBijectionIsIsomorphism(self, other, domainOrderingDict, codomainOrderingDict):
-
-        keyList = list(domainOrderingDict.keys())
-
-        inputList = []
-        outputList = []
-        for key in keyList:
-            inputList = inputList + domainOrderingDict[key]
-            outputList = outputList + codomainOrderingDict[key]
-
-        # print("Checking input list: ", [v.name for v in inputList])
-        # print("With corresponding output list: ", [v.name for v in outputList])
-
-        for i in range(len(inputList)):
-            for j in range(len(inputList)):
-                # Number of edges connecting inputList[i] and inputList[j]
-                numInputEdges = sum(1 for e in self.edges if e.vertices == {inputList[i], inputList[j]})
-                numOutputEdges = sum(1 for e in other.edges if e.vertices == {outputList[i], outputList[j]})
-                if numInputEdges != numOutputEdges:
-                    # print("Function does not preserve number of connecting edges")
-                    return False
-
-        for i in range(len(inputList)):
-            if inputList[i].genus != outputList[i].genus:
-                # print("Function does not preserve genus")
-                return False
-            numInputLegs = sum(1 for nextLeg in self.legs if nextLeg.root == inputList[i])
-            numOutputLegs = sum(1 for nextLeg in other.legs if nextLeg.root == outputList[i])
-            if numInputLegs != numOutputLegs:
-                # print("Function does not preserve number of legs")
-                return False
-
-        # print("This was an isomorphism!")
-        return True
+        return GraphIsoHelper.checkIfBijectionIsIsomorphism(self, other, domainOrderingDict, codomainOrderingDict)
 
     def getBijections(self, permDict):
-
-        if len(permDict) == 0:
-            return [{}]
-
-        nextKey = list(permDict.keys())[0]
-        permsOfThatKey = permDict.pop(nextKey)
-        remaining = self.getBijections(permDict)
-
-        perms = []
-
-        for perm in permsOfThatKey:
-            for subPerm in remaining:
-                # Taking the union of dictionaries in python is next to impossible to do nicely :(
-                newDict = {nextKey: perm}
-                for k in subPerm:
-                    newDict[k] = subPerm[k]
-                perms.append(newDict)
-        return perms
+        return GraphIsoHelper.getBijections(permDict)
 
     def isBruteForceIsomorphicTo(self, other):
-        selfEverythingVertexDict = self.getVerticesByEverything()
-        otherEverythingVertexDict = other.getVerticesByEverything()
-
-        permDict = {}
-        for d in selfEverythingVertexDict:
-            permDict[d] = self.getPermutations(selfEverythingVertexDict[d])
-        domainOrderingDicts = self.getBijections(permDict)
-
-        for domainOrderingDict in domainOrderingDicts:
-            if self.checkIfBijectionIsIsomorphism(other, domainOrderingDict, otherEverythingVertexDict):
-                return True
-
-        return False
+        return GraphIsoHelper.isBruteForceIsomorphicTo(self, other)
 
     def isIsomorphicTo(self, other):
-        if self.edgeNumber != other.edgeNumber:
-            # print("Different Number of Edges")
-            return False
-
-        if self.vertexNumber != other.vertexNumber:
-            # print("Different Number of Vertices")
-            return False
-
-        if self.vertexEverythingDict != other.vertexEverythingDict:
-            # print("Different counts of vertices with a given number of legs, edges, and genus")
-            # print(self.getVerticesByEverything())
-            # print(other.getVerticesByEverything())
-            # print(self.vertexEverythingDict)
-            # print(other.vertexEverythingDict)
-            return False
-
-        loop1 = self.vertexSelfLoopDict
-        loop2 = other.vertexSelfLoopDict
-        if loop1 != loop2:
-            # print("Different Instances of Self Loops")
-            return False
-
-        # print("Easy tests were inconclusive - switching to brute force")
-        return self.isBruteForceIsomorphicTo(other)
+        return GraphIsoHelper.isIsomorphicTo(self, other)
 
     def simplifyNames(self):
         orderedVertices = list(self.vertices)
