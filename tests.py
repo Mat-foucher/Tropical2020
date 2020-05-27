@@ -4,9 +4,8 @@ from ModuliSpaces import *
 import time
 
 
-
-
 C = CombCurve("Example 3.5")
+
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
 v3 = vertex("v3", 1)
@@ -19,9 +18,17 @@ l = leg("l", v1)
 C.edges = {e1, e2, e3, e4}
 C.legs = {l}
 
+core = C.core
+
+assert core.isConnected
+assert core.genus == C.genus
+
+
 dict = {v1: 1.0, v2: 0.0, v3: 0.0, l: 0.0}
 
 f = StrictPiecewiseLinearFunction(C, dict)
+
+
 
 assert f.functionValues[v1] == 1.0
 for v in C.vertices:
