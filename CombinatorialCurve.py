@@ -451,9 +451,9 @@ class CombCurve(object):
         for i in range(len(orderedVertices)):
             orderedVertices[i].name = "v" + str(i)
         for e in self.edges:
-            e.name = "edge: " + e.vert1.name + ", " + e.vert2.name
+            e.name = "edge(" + e.vert1.name + ", " + e.vert2.name + ")"
         for nextLeg in self.legs:
-            nextLeg.name = "leg: " + nextLeg.root.name
+            nextLeg.name = "leg(" + nextLeg.root.name + ")"
 
     def showNumbers(self):
         print("Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber)
