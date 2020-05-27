@@ -1,0 +1,3 @@
+Vertices: {(v0 with genus 0)}
+Edges: {}
+Legs: {leg(v0),leg(v0),leg(v0)}
