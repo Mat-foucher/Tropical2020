@@ -200,5 +200,5 @@ class StrictPiecewiseLinearFunction(object):
                     rise = self.functionValues[x.vert1] - self.functionValues[x.vert2]
                     if rise != x.length and rise != 0:
                         return False
-
+                    
         return True
