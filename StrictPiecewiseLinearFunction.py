@@ -1,4 +1,4 @@
-from Tropical2020.CombinatorialCurve import *
+from CombinatorialCurve import *
 
 class StrictPiecewiseLinearFunction(object):
     # domain_ should be a CombCurve representing the domain of the function

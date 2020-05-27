@@ -527,33 +527,49 @@ class CombCurve(object):
     @property
     def core(self):
 
-        if self._coreCacheValid == False:
-            assert self.genus > 0
+        # Calculate the core if our current copy is invalid
+        if not self._coreCacheValid:
 
-            core = copy.copy(self)
+            # Only allow the core to be requested from curves where the core is defined.
+            if not self.genus > 0:
+                raise ValueError("The core is only defined for curves of positive genus.")
+            if not self.isConnected:
+                raise ValueError("The core is only defined for connected curves.")
 
-            genus = core.genus
+            # In order to generate the core, we start with a copy of self and repeatedly prune off certain leaves
+            core = self.getFullyShallowCopy()
 
-            core.legs = {}
+            # The core is guaranteed to have no legs
+            core.legs = set()
 
-            assert core.isConnected
-
+            # Flag to indicate whether new leaves were pruned
             keepChecking = True
 
             while keepChecking:
 
+                # If nothing happens this loop, then stop.
                 keepChecking = False
-                for i in core.vertices:
-                    
-                    if i.genus == 0 and core.degree(i) < 2:
-                        
-                        
+
+                # Search for leaves to prune
+                for nextVertex in core.vertices:
+                    # A vertex is the endpoint of a leaf to prune if it is connected to exactly one edge and has
+                    # genus zero
+                    if nextVertex.genus == 0 and core.degree(nextVertex) < 2:
+                        # Find the unique edge that has this endpoint
                         for x in core.edges:
-                            if i == x.vert1 or i == x.vert2:
-                                keepChecking = True
+                            if nextVertex in x.vertices:
+                                # Prune the leaf
                                 core.edges = core.edges - {x}
-                        
+
+                                # Pruning this leaf may have revealed more, so we need to loop again.
+                                keepChecking = True
+
+                                # The degree of the vertex is less than 2, so this is the only possible edge to find
+                                break
+
+            # Save the new, valid, core and set the valid flag to true
             self._coreCache = core
             self._coreCacheValid = True
 
+        # Return the saved copy of the core (possibly just calculated)
         return self._coreCache
