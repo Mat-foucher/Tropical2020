@@ -470,6 +470,9 @@ class CombCurve(object):
         for nextLeg in curve.legs:
             print(nextLeg.name)
 
+    def printSelf(self):
+        CombCurve.printCurve(self)
+
     # Prints the names of vertices
     def showVertices(self):
         print([v.name for v in self.vertices])
