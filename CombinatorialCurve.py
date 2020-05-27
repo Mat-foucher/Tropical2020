@@ -527,29 +527,27 @@ class CombCurve(object):
     @property
     def core(self):
 
-        if self._coreCacheValid == False:
-            assert self.genus > 0
+        if not self._coreCacheValid:
 
-            core = copy.copy(self)
+            if not self.genus > 0:
+                raise ValueError("The core is only defined for curves of positive genus.")
+            if not self.isConnected:
+                raise ValueError("The core is only defined for connected curves.")
 
-            genus = core.genus
+            core = self.getFullyShallowCopy()
 
-            core.legs = {}
-
-            assert core.isConnected
+            core.legs = set()
 
             keepChecking = True
 
             while keepChecking:
 
                 keepChecking = False
-                for i in core.vertices:
-                    
-                    if i.genus == 0 and core.degree(i) < 2:
-                        
-                        
+
+                for nextVertex in core.vertices:
+                    if nextVertex.genus == 0 and core.degree(nextVertex) < 2:
                         for x in core.edges:
-                            if i == x.vert1 or i == x.vert2:
+                            if nextVertex in x.vertices:
                                 keepChecking = True
                                 core.edges = core.edges - {x}
                         
