@@ -283,3 +283,28 @@ class TropicalModuliSpace(object):
 
         self.specializeByReducingGenus(c, copyInfo[vert])
         return c
+
+
+
+
+
+
+
+
+
+    def saveModuliSpaceToFile(self, filename = "", curveEntryDelimiter = "="):
+        if filename == "":
+            filename = "SavedModuliSpaces/M-" + str(self._g) + "-" + str(self._n) + ".txt"
+
+        with open(filename, mode='w', encoding='utf-8') as f:
+            curveNames = []
+            for c in sorted(self.curves, key=lambda x: x.edgeNumber):
+                c.simplifyNames()
+                vertexNames = [("(" + v.name + " with genus " + str(v.genus) + ")") for v in c.vertices]
+                edgeNames = [e.name for e in c.edges]
+                legNames = [nextLeg.name for nextLeg in c.legs]
+                vertexLine = "Vertices: {" + ",".join(vertexNames) + "}"
+                edgeLine = "Edges: {" + ",".join(edgeNames) + "}"
+                legLine = "Legs: {" + ",".join(legNames) + "}"
+                curveNames.append("\n".join([vertexLine, edgeLine, legLine]))
+            f.write(("\n" + curveEntryDelimiter + "\n").join(curveNames))
