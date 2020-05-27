@@ -1,0 +1,11 @@
+Vertices: {(v0 with genus 0)}
+Edges: {}
+Legs: {leg(v0),leg(v0),leg(v0),leg(v0),leg(v0)}
+=
+Vertices: {(v0 with genus 0),(v1 with genus 0)}
+Edges: {edge(v1, v0)}
+Legs: {leg(v0),leg(v0),leg(v1),leg(v0),leg(v1)}
+=
+Vertices: {(v0 with genus 0),(v1 with genus 0),(v2 with genus 0)}
+Edges: {edge(v2, v1),edge(v1, v0)}
+Legs: {leg(v2),leg(v0),leg(v2),leg(v1),leg(v0)}
