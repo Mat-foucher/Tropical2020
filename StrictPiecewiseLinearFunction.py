@@ -82,15 +82,15 @@ class StrictPiecewiseLinearFunction(object):
             nextEdge = edgesToCheck.pop()
             edgesVisited = edgesVisited | {nextEdge}
             # Check something here
-            if nextEdge.vert1 in T or nextEdge.vert2 in T:
+            if (nextEdge.vert1 in T and nextEdge.vert1 in allowedVertices) or (nextEdge.vert2 in T and nextEdge.vert2 in allowedVertices):
                 foundATVertex = True
-            if nextEdge.vert1 in S or nextEdge.vert2 in S:
+            if (nextEdge.vert1 in S and nextEdge.vert1 in allowedVertices) or (nextEdge.vert2 in S and nextEdge.vert2 in allowedVertices):
                 foundAnSVertex = True
             if foundATVertex and foundAnSVertex:
                 return True            
         
-            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert1 in e.vertices and nextEdge.vert1 in allowedVertices)} - edgesVisited) 
-            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert2 in e.vertices and nextEdge.vert2 in allowedVertices)} - edgesVisited)
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert1 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited) 
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert2 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
 
         return False
 
@@ -159,7 +159,7 @@ class StrictPiecewiseLinearFunction(object):
             supportCore = support.core
 
             if support.isConnected == False:
-                # print("Disconnected Support")
+                print("Disconnected Support")
                 return False
 
             if supportCore.genus != 1:
@@ -175,6 +175,7 @@ class StrictPiecewiseLinearFunction(object):
             for i in self.domain.vertices:
                 for x in support.edges:
                     if const != previous:
+                        print("Not Constant on core")
                         return False
                     if i == x.vert1 or x.vert2:
                         const = self.functionValues[i]
@@ -189,16 +190,22 @@ class StrictPiecewiseLinearFunction(object):
 
             for v in thisComponentSupportVertices: 
                 if not self.floodfillVertices(v, S, T): 
+                    # print(v.name, "Failed 4")
                     return False
 
             # Part 5 
             edgesToCheck = support.edges - supportCore.edges
 
             for x in edgesToCheck:
-                vert1TowardsCore = self.floodfillVertices(x.vert1, supportCore.vertices, supportCore.vertices, self.domain.vertices - {x.vert2})
+                P = supportCore.vertices.intersection(allSupportVertices)
+                vert1TowardsCore = self.floodfillVertices(x.vert1, P, P, self.domain.vertices - {x.vert2})
                 if vert1TowardsCore:
                     rise = self.functionValues[x.vert1] - self.functionValues[x.vert2]
-                    if rise != x.length and rise != 0:
-                        return False
+                else:
+                    rise = self.functionValues[x.vert2] - self.functionValues[x.vert1]
+
+                if rise != x.length and rise != 0:
+                    return False
+                
                     
         return True
