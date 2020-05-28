@@ -227,7 +227,7 @@ Ex44.edges = {e1, e2, e3, e4, e5}
 
 g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0 , v4: 1.0, v5: 0.0, v6: 0.0})
 
-assert g.mesaTest
+# assert g.mesaTest
 
 
 
