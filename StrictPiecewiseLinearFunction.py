@@ -195,6 +195,9 @@ class StrictPiecewiseLinearFunction(object):
 
             # Part 5 
             edgesToCheck = support.edges - supportCore.edges
+            
+            # Part 6 (Implemented into 5)
+            atLeastOne = False
 
             for x in edgesToCheck:
                 P = supportCore.vertices.intersection(allSupportVertices)
@@ -206,6 +209,10 @@ class StrictPiecewiseLinearFunction(object):
 
                 if rise != x.length and rise != 0:
                     return False
+                else:
+                    atLeastOne = True
                 
-                    
-        return True
+        if atLeastOne == True:
+            return True
+        else:
+            return False 
