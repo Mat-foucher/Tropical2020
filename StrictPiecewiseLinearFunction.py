@@ -68,6 +68,33 @@ class StrictPiecewiseLinearFunction(object):
 
         return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
 
+    def floodfillVertices(self, vert, S, T, allowedVertices=None):
+
+        if allowedVertices is None:            
+            allowedVertices = self.domain.vertices        
+        
+        edgesToCheck = {e for e in self.domain.edges if (vert in e.vertices and vert in allowedVertices)}
+        edgesVisited = set()
+
+        foundAnSVertex = False        
+        foundATVertex = False        
+        while len(edgesToCheck) > 0:
+            nextEdge = edgesToCheck.pop()
+            edgesVisited = edgesVisited | {nextEdge}
+            # Check something here
+            if nextEdge.vert1 in T or nextEdge.vert2 in T:
+                foundATVertex = True
+            if nextEdge.vert1 in S or nextEdge.vert2 in S:
+                foundAnSVertex = True
+            if foundATVertex and foundAnSVertex:
+                return True            
+        
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert1 in e.vertices and nextEdge.vert1 in allowedVertices)} - edgesVisited) 
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert2 in e.vertices and nextEdge.vert2 in allowedVertices)} - edgesVisited)
+
+        return False
+
+
     def getSpecialSupport(self):
         
         supportEdges = set()
@@ -84,7 +111,7 @@ class StrictPiecewiseLinearFunction(object):
 
         return (supportEdges, supportVertices)
 
-
+    
     def getSpecialSupportPartition(self):
 
         supportEdges, supportVertices = self.getSpecialSupport()
@@ -141,33 +168,64 @@ class StrictPiecewiseLinearFunction(object):
         
     
     def mesaTest(self):
-        
+
+        # Part 1
         for i in self.domain.legs:
             if self.functionValues[i] != 0:
                 return False 
         
-        potentialMesa = copy.copy(self)
+        specialSupports = self.getSpecialSupportPartition()
 
-        connectedSupportComponents = potentialMesa.getSpecialSupportPartition()
+        # Part 2
+        for j in specialSupports:
+            
+            support = CombCurve("support")
+            support.addEdges(j)
 
-        # Make a new curve whomst vertices are the support vertices.
-        
-        # Testing the connectedness of the cores of the supports
-        for x in connectedSupportComponents:
-            curve = CombCurve("Curve")
+            supportCore = support.core
 
-            curve.edges = x
-
-            curveCore = curve.core
-
-            if not curveCore.isConnected or curveCore.genus != 1:
+            if support.isConnected == False:
+                # print("Disconnected Support")
                 return False
 
-            for i in x:
-                assert potentialMesa.floodfillVertices(i.vert1, x, curveCore) and potentialMesa.floodfillVertices(i.vert2, x, curveCore)
-            
-            
+            if supportCore.genus != 1:
+                # support.showEdges
+                # print("Not Genus 1")
+                return False
+
+            const = 0.0
+            previous = 0.0
+
+            # Part 3
+            # Check that the function is constant over the associated support:
+            for i in self.domain.vertices:
+                for x in support.edges:
+                    if const != previous:
+                        return False
+                    if i == x.vert1 or x.vert2:
+                        const = self.functionValues[i]
+                        previous = const              
+
+            # Part 4
+            allSupportVertices = {v for v in self.domain.vertices if self.functionValues[v] > 0}
+            thisComponentSupportVertices = allSupportVertices.intersection(support.vertices)
+
+            S = supportCore.vertices
+            T = self.domain.vertices - allSupportVertices 
+
+            for v in thisComponentSupportVertices: 
+                if not self.floodfillVertices(v, S, T): 
+                    return False
+
+            # Part 5 
+            edgesToCheck = support.edges - supportCore.edges
+
+            for x in edgesToCheck:
+                vert1TowardsCore = self.floodfillVertices(x.vert1, supportCore.vertices, supportCore.vertices, self.domain.vertices - {x.vert2})
+                if vert1TowardsCore:
+                    rise = self.functionValues[x.vert1] - self.functionValues[x.vert2]
+                    if rise != x.length and rise != 0:
+                        return False
+
         return True
 
-
-        
