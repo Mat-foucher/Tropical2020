@@ -26,6 +26,8 @@ class TropicalModuliSpace(object):
 
     def getPartitions(self, s):
 
+        if len(s) == 0:
+            return []
         if len(s) == 1:
             elem = s.pop()
             s.add(elem)
@@ -142,7 +144,8 @@ class TropicalModuliSpace(object):
 
         seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
         v = vertex("v", self._g)
-        seedCurve.legs = {leg("leg " + str(i), v) for i in range(self._n)}
+        seedCurve.addVertex(v)
+        seedCurve.addLegs({leg("leg " + str(i), v) for i in range(self._n)})
 
         self.addCurve(seedCurve)
         self.addSpecializationsDFS(seedCurve)
@@ -235,7 +238,8 @@ class TropicalModuliSpace(object):
 
         e = edge("(Edge splitting " + vert.name + ")", 1.0, v1, v2)
 
-        curve.edges = curve.edges | {e}
+        curve.addEdge(e)
+        curve.removeVertex(vert)
 
     def getSplittingSpecialization(self, curve, vert, g1, g2, S, T):
         # copy the curve shallowly and keep track of how copying was performed
@@ -253,7 +257,7 @@ class TropicalModuliSpace(object):
 
         # c.edges = {copy.copy(e) for e in curve.edges}
         # c.legs = {copy.copy(l) for l in curve.legs}
-        self.specializeBySplittingAtVertex(c, vert, g1, g2, safeS, safeT)
+        self.specializeBySplittingAtVertex(c, copyInfo[vert], g1, g2, safeS, safeT)
         return c
 
     @staticmethod
@@ -276,11 +280,12 @@ class TropicalModuliSpace(object):
 
         e = edge("(Genus reduction loop for " + vert.name + ")", 1.0, v, v)
 
-        curve.edges = curve.edges | {e}
+        curve.addEdge(e)
+        curve.removeVertex(vert)
 
     def getGenusReductionSpecialization(self, curve, vert):
         c, copyInfo = curve.getFullyShallowCopy(True)
-        c.name = "(Spec. of " + curve.name + " from genus reducing at " + vert.name
+        c.name = "(Spec. of " + curve.name + " from genus reducing at " + vert.name + ")"
 
         self.specializeByReducingGenus(c, copyInfo[vert])
         return c
