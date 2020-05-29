@@ -84,6 +84,7 @@ class CombCurve(object):
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
     def __init__(self, name_):
         self.name = name_
+        self._vertices = set()
         self._edges = set()
         self._legs = set()
 
@@ -107,26 +108,77 @@ class CombCurve(object):
         self._coreCacheValid = False
         self._coreCache = None
 
-
-    @property
-    def edges(self):
-        return self._edges
-
-    # Control how edges are set
-    # edges_ should be a set of edges
-    @edges.setter
-    def edges(self, edges_):
-        self._edges = edges_
+    def invalidateCaches(self):
         self._vertexCacheValid = False
         self._genusCacheValid = False
         self._vertexSelfLoopsCacheValid = False
         self._vertexEverythingCacheValid = False
         self._coreCacheValid = False
 
+    # The set of vertices is a read only property computed upon access, unless a valid cache is available
+    # It is the collection of vertices that are endpoints of edges or roots of legs
+    @property
+    def vertices(self):
+        return self._vertices
+
+    def addVertex(self, v):
+        if v is not None:
+            self._vertices.add(v)
+            self.invalidateCaches()
+
+    def addVertices(self, vertices):
+        for v in copy.copy(vertices):
+            self.addVertex(v)
+
+    def removeVertex(self, v):
+        if v in self._vertices:
+            self._vertices.remove(v)
+            for e in {e for e in self.edges if v in e.vertices}:
+                self.removeEdge(e)
+            for nextLeg in {nextLeg for nextLeg in self.legs if v in nextLeg.vertices}:
+                self.remove(nextLeg)
+            self.invalidateCaches()
+
+    def removeVertices(self, vertices):
+        for v in copy.copy(vertices):
+            self.removeVertex(v)
+
+    @property
+    def edges(self):
+        return self._edges
 
     @property
     def edgesWithVertices(self):
         return {e for e in self.edges if not (e.vert1 is None or e.vert2 is None)}
+
+    # Control how edges are set
+    # edges_ should be a set of edges
+    @edges.setter
+    def edges(self, edges_):
+        self._edges = edges_
+        self.invalidateCaches()
+
+    def addEdge(self, e):
+        self._edges.add(e)
+        self.addVertices(e.vertices)
+        self.invalidateCaches()
+
+    def addEdges(self, edges):
+        for e in copy.copy(edges):
+            self.addEdge(e)
+
+    def removeEdge(self, e, removeDanglingVertices=True):
+        if e in self._edges:
+            self._edges.remove(e)
+            if removeDanglingVertices:
+                for v in e.vertices:
+                    if self.degree(v) == 0:
+                        self.removeVertex(v)
+            self.invalidateCaches()
+
+    def removeEdges(self, edges):
+        for e in copy.copy(edges):
+            self.removeEdge(e)
 
     @property
     def legs(self):
@@ -141,26 +193,29 @@ class CombCurve(object):
     @legs.setter
     def legs(self, legs_):
         self._legs = legs_
-        self._vertexCacheValid = False
-        self._genusCacheValid = False
-        self._vertexEverythingCacheValid = False
+        self.invalidateCaches()
 
-    # The set of vertices is a read only property computed upon access, unless a valid cache is available
-    # It is the collection of vertices that are endpoints of edges or roots of legs
-    @property
-    def vertices(self):
-        if not self._vertexCacheValid:
-            # Flatmap self.edges with the function e => e.vertices
-            unflattened_vertex_list = [e.vertices for e in self.edges] + [nextLeg.vertices for nextLeg in self.legs]
-            flattened_vertex_list = []
-            for sublist in unflattened_vertex_list:
-                for v in sublist:
-                    flattened_vertex_list.append(v)
+    def addLeg(self, newLeg):
+        self._legs.add(newLeg)
+        self.addVertices(newLeg.vertices)
+        self.invalidateCaches()
 
-            self._vertexCache = set(flattened_vertex_list) - {None}
-            self._vertexCacheValid = True
+    def addLegs(self, newLegs):
+        for newLeg in copy.copy(newLegs):
+            self.addLeg(newLeg)
 
-        return self._vertexCache
+    def removeLeg(self, badLeg, removeDanglingVertices=True):
+        if badLeg in self._legs:
+            self._legs.remove(badLeg)
+            if removeDanglingVertices:
+                for v in badLeg.vertices:
+                    if self.degree(v) == 0:
+                        self.removeVertex(v)
+            self.invalidateCaches()
+
+    def removeLegs(self, badLegs):
+        for badLeg in copy.copy(badLegs):
+            self.removeLeg(badLeg)
 
     # The number of vertices is a read only property computed upon access
     # It is the number of vertices
@@ -230,8 +285,8 @@ class CombCurve(object):
                 copyInfo[nextLeg] = nextLegCopy
 
         curveCopy = CombCurve(self.name)
-        curveCopy.edges = edgeCopies
-        curveCopy.legs = legCopies
+        curveCopy.addEdges(edgeCopies)
+        curveCopy.addLegs(legCopies)
 
         if returnCopyInfo:
             return curveCopy, copyInfo
@@ -251,17 +306,19 @@ class CombCurve(object):
         e1 = edge("(subdivision 1 of " + e.name + ")", length, e.vert1, v)
         e2 = edge("(subdivision 2 of " + e.name + ")", e.length - length, v, e.vert2)
 
-        self.edges = self.edges - {e}
-        self.edges = self.edges | {e1}
-        self.edges = self.edges | {e2}
+        self.removeEdge(e)
+        self.addEdges({e1, e2})
 
     # e should be an edge and the length should be a double
     # genus should be a non-negative integer
     # returns a new CombCurve with edge e subdivided
-    def getSubdivision(self, e, length, genus=0):
-        subdivision = copy.copy(self)
-        subdivision.subdivide(e, length, genus)
-        return subdivision
+    def getSubdivision(self, e, length, returnCopyInfo=False, genus=0):
+        subdivision, copyInfoDict = self.getFullyShallowCopy(True)
+        subdivision.subdivide(copyInfoDict[e], length, genus)
+        if returnCopyInfo:
+            return subdivision, copyInfoDict
+        else:
+            return subdivision
 
     # v should be a vector
     # Returns the set of all elements of the form (e, n), where e is an edge, n is 1 or 2,
@@ -433,10 +490,9 @@ class CombCurve(object):
                 raise ValueError("The core is only defined for connected curves.")
 
             # In order to generate the core, we start with a copy of self and repeatedly prune off certain leaves
-            core = copy.copy(self)
-
-            # The core is guaranteed to have no legs
-            core.legs = set()
+            core = CombCurve("(Core of " + self.name + ")")
+            core.addEdges(self.edges)
+            core.addVertices(self.vertices)
 
             # Flag to indicate whether new leaves were pruned
             keepChecking = True
@@ -447,21 +503,13 @@ class CombCurve(object):
                 keepChecking = False
 
                 # Search for leaves to prune
-                for nextVertex in core.vertices:
+                for nextVertex in copy.copy(core.vertices):
                     # A vertex is the endpoint of a leaf to prune if it is connected to exactly one edge and has
                     # genus zero
                     if nextVertex.genus == 0 and core.degree(nextVertex) < 2:
-                        # Find the unique edge that has this endpoint
-                        for x in core.edges:
-                            if nextVertex in x.vertices:
-                                # Prune the leaf
-                                core.edges = core.edges - {x}
-
-                                # Pruning this leaf may have revealed more, so we need to loop again.
-                                keepChecking = True
-
-                                # The degree of the vertex is less than 2, so this is the only possible edge to find
-                                break
+                        # Prune the leaf
+                        core.removeVertex(nextVertex)
+                        keepChecking = True
 
             # Save the new, valid, core and set the valid flag to true
             self._coreCache = core

@@ -148,13 +148,39 @@ class StrictPiecewiseLinearFunction(object):
 
         return connectedComponents
 
+    def floodfillVertices(self, vert, supportEdges, core):        
+        edgesToCheck = {e for e in self.domain.edges if vert in e.vertices}
+        edgesVisited = set()
+        foundANonsupportVertex = False        
+        foundACoreVertex = False
 
-    @property
+        while len(edgesToCheck) > 0:            
+            nextEdge = edgesToCheck.pop()            
+            edgesVisited = edgesVisited | {nextEdge}                        
+            # Check something here            
+                       
+            if nextEdge.vert1 in core.vertices or nextEdge.vert2 in core.vertices:                
+                foundACoreVertex = True       
+
+            for i in supportEdges: 
+                if nextEdge.vert1 not in i.vertices or nextEdge.vert2 not in i.vertices:                
+                    foundANonsupportVertex = True     
+
+            if foundACoreVertex and foundANonsupportVertex:
+                return True            
+                                    
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if nextEdge.vert1 in e.vertices} - edgesVisited)
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesVisited)
+
+        return False
+            
+        
+    
     def mesaTest(self):
 
         # Part 1
         for i in self.domain.legs:
-            if self.functionValues[i] != 0:
+            if self.functionValues[i] != 0.0:
                 return False 
         
         specialSupports = self.getSpecialSupportPartition()
@@ -163,15 +189,9 @@ class StrictPiecewiseLinearFunction(object):
         for j in specialSupports:
             
             support = CombCurve("support")
-            support.edges = j
-
-            print("Support:")
-            support.printSelf()
+            support.addEdges(j)
 
             supportCore = support.core
-
-            print("Support Core:")
-            supportCore.printSelf()
 
             assert support.isConnected
                 
@@ -201,9 +221,9 @@ class StrictPiecewiseLinearFunction(object):
             T = self.domain.vertices - allSupportVertices 
 
             for v in thisComponentSupportVertices: 
-                print(v.name, v.genus)
+                
                 if not self.floodfillVertices(v, S, T): 
-                    print(v.name, v.genus, "Failed 4")
+                    print(v.name, v.genus, "Failed Part 4")
                     return False
 
             # Part 5 
@@ -219,14 +239,6 @@ class StrictPiecewiseLinearFunction(object):
                     rise = self.functionValues[x.vert1] - self.functionValues[x.vert2]
                 else:
                     rise = self.functionValues[x.vert2] - self.functionValues[x.vert1]
+        print("A Mesa I Am")
+        return True
 
-                if rise != 0 and x.length !=0:
-                    atLeastOne = True
-                
-                if rise != x.length and rise != 0:
-                    return False
-    
-        if atLeastOne == True:
-            return True
-        else:
-            return False 
