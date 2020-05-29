@@ -154,7 +154,7 @@ class StrictPiecewiseLinearFunction(object):
         for j in specialSupports:
             
             support = CombCurve("support")
-            support.edges = j
+            support.addEdges(j)
 
             supportCore = support.core
 
