@@ -27,7 +27,7 @@ class TropicalModuliSpace(object):
     def getPartitions(self, s):
 
         if len(s) == 0:
-            return []
+            return [(set(), set())]
         if len(s) == 1:
             elem = s.pop()
             s.add(elem)
@@ -106,7 +106,10 @@ class TropicalModuliSpace(object):
         for vert in curve.vertices:
 
             # If the genus of vert is positive, then we can decrement its genus and add a self loop
-            if vert.genus > 0:
+            if vert.genus > 1:
+                genusReducedCurve = self.getGenusReductionSpecialization(curve, vert)
+                newCurves.append(genusReducedCurve)
+            elif vert.genus == 1 and curve.degree(vert) > 0:
                 genusReducedCurve = self.getGenusReductionSpecialization(curve, vert)
                 newCurves.append(genusReducedCurve)
 
@@ -141,6 +144,9 @@ class TropicalModuliSpace(object):
     def generateSpaceDFS(self):
 
         # start_time = time.time()
+
+        if self._g == 0 and self._n < 3:
+            return
 
         seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
         v = vertex("v", self._g)
@@ -183,11 +189,14 @@ class TropicalModuliSpace(object):
 
                     endpointPartitions = self.getPartitions(currentCurve.getEndpointsOfEdges(vert))
 
-                    if vert.genus > 0:
+                    if vert.genus > 1:
                         # print("\nGenus reducing vertex: " + vert.name)
                         genusReducedCurve = self.getGenusReductionSpecialization(currentCurve, vert)
                         newCurves.append(genusReducedCurve)
                         # self.printCurve(genusReducedCurve)
+                    elif vert.genus == 1 and currentCurve.degree(vert) > 0:
+                        genusReducedCurve = self.getGenusReductionSpecialization(currentCurve, vert)
+                        newCurves.append(genusReducedCurve)
 
                     for g in range(vert.genus + 1):
                         for p in endpointPartitions:
