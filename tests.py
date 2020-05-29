@@ -15,8 +15,8 @@ e3 = edge("e3", 1.0, v1, v3)
 e4 = edge("e4", 1.0, v1, v1)
 l = leg("l", v1)
 
-C.edges = {e1, e2, e3, e4}
-C.legs = {l}
+C.addEdges({e1, e2, e3, e4})
+C.addLeg(l)
 
 core = C.core
 
@@ -53,12 +53,12 @@ assert C.degree(v3) == 2
 assert C.genus == 3
 assert C.bettiNumber == 2
 
-subdiv = C.getSubdivision(e4, 0.5)
-assert subdiv.degree(v1) == 5
-assert subdiv.degree(v2) == 2
-assert subdiv.degree(v3) == 2
-assert subdiv.genus == 3
+subdiv, copyInfo = C.getSubdivision(e4, 0.5, returnCopyInfo=True)
+assert subdiv.degree(copyInfo[v1]) == 5
+assert subdiv.degree(copyInfo[v2]) == 2
+assert subdiv.degree(copyInfo[v3]) == 2
 assert subdiv.bettiNumber == 2
+assert subdiv.genus == 3
 assert subdiv.vertexNumber == C.vertexNumber + 1
 assert subdiv.edgeNumber == C.edgeNumber + 1
 
@@ -86,7 +86,7 @@ e4 = edge("e4", 1.0, v2, v3)
 e5 = edge("e5", 1.0, v1, v1)
 e6 = edge("e6", 1.0, v2, v2)
 e7 = edge("e7", 1.0, v3, v3)
-C.edges = {e1, e2, e3, e4, e5, e6, e7}
+C.addEdges({e1, e2, e3, e4, e5, e6, e7})
 assert C.bettiNumber == 5
 assert C.genus == 5
 
@@ -105,7 +105,7 @@ v2 = vertex("v2", 1)
 v3 = vertex("v3", 1)
 v4 = vertex("v4", 1)
 v5 = vertex("v5", 1)
-C.edges = {edge("e1", 1.0, v1, v2), edge("e2", 1.0, v2, v3), edge("e3", 1.0, v3, v4), edge("e4", 1.0, v4, v5)}
+C.addEdges({edge("e1", 1.0, v1, v2), edge("e2", 1.0, v2, v3), edge("e3", 1.0, v3, v4), edge("e4", 1.0, v4, v5)})
 assert C.bettiNumber == 0
 assert C.genus == 5
 for v in C.vertices:
@@ -122,7 +122,7 @@ v1 = vertex("v1", 1)
 e1 = edge("e1", 1.0, v1, v1)
 e2 = edge("e2", 1.0, v1, None)
 e3 = edge("e3", 1.0, None, None)
-C.edges = {e1, e2, e3}
+C.addEdges({e1, e2, e3})
 
 assert C.bettiNumber == 1
 assert C.genus == 2
@@ -146,8 +146,8 @@ e3 = edge("e3", 1.0, v1, v3)
 e4 = edge("e4", 1.0, v1, v1)
 l = leg("l", v1)
 
-C.edges = {e1, e3, e4}
-C.legs = {l}
+C.addEdges({e1, e3, e4})
+C.addLeg(l)
 
 core_ = C.core
 
@@ -180,7 +180,7 @@ e6 = edge("e6", 1.0, v6, v7)
 e7 = edge("e7", 1.0, v7, v8)
 e8 = edge("e8", 1.0, v8, v9)
 
-C.edges = {e1, e2, e3, e4, e5, e6, e7, e8}
+C.addEdges({e1, e2, e3, e4, e5, e6, e7, e8})
 
 f = StrictPiecewiseLinearFunction(C, {v1: 0.0, v2: 1.0, v3: 0.0, v4: 1.0, v5: 0.0, v6: 0.0, v7: 1.0, v8: 1.0, v9: 0.0})
 
@@ -222,7 +222,7 @@ l4 = leg("l4", v5)
 l5 = leg("l5", v6)
 l6 = leg("l6", v6)
 
-Ex44.edges = {e1, e2, e3, e4, e5}
+Ex44.addEdges({e1, e2, e3, e4, e5})
 # Ex44.legs = {l1, l2, l3, l4, l5, l6}
 
 g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0 , v4: 1.0, v5: 0.0, v6: 0.0})
@@ -322,15 +322,16 @@ s2 = leg("s2", v2)
 w1 = vertex("w1", 1)
 t1 = leg("t1", w1)
 
-C.legs = {s1}
-D.legs = {t1}
+C.addLeg(s1)
+D.addLeg(t1)
 
 assert C.isIsomorphicTo(C)
 assert C.isIsomorphicTo(C.getFullyShallowCopy())
 
 assert not C.isIsomorphicTo(D)
 
-C.legs = {s2}
+C.removeLeg(s1)
+C.addLeg(s2)
 
 assert C.isIsomorphicTo(D)
 
@@ -374,7 +375,7 @@ def testTimeAndSize(g, n):
     print("\n")
 
 
-testTimeAndSize(2, 2)
+testTimeAndSize(2, 4)
 
 print("Loading curves from file.")
 m12.loadModuliSpaceFromFile("SavedModuliSpaces/M-1-2.txt")

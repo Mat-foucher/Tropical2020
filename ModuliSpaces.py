@@ -26,6 +26,8 @@ class TropicalModuliSpace(object):
 
     def getPartitions(self, s):
 
+        if len(s) == 0:
+            return [(set(), set())]
         if len(s) == 1:
             elem = s.pop()
             s.add(elem)
@@ -104,7 +106,10 @@ class TropicalModuliSpace(object):
         for vert in curve.vertices:
 
             # If the genus of vert is positive, then we can decrement its genus and add a self loop
-            if vert.genus > 0:
+            if vert.genus > 1:
+                genusReducedCurve = self.getGenusReductionSpecialization(curve, vert)
+                newCurves.append(genusReducedCurve)
+            elif vert.genus == 1 and curve.degree(vert) > 0:
                 genusReducedCurve = self.getGenusReductionSpecialization(curve, vert)
                 newCurves.append(genusReducedCurve)
 
@@ -140,9 +145,13 @@ class TropicalModuliSpace(object):
 
         # start_time = time.time()
 
+        if self._g == 0 and self._n < 3:
+            return
+
         seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
         v = vertex("v", self._g)
-        seedCurve.legs = {leg("leg " + str(i), v) for i in range(self._n)}
+        seedCurve.addVertex(v)
+        seedCurve.addLegs({leg("leg " + str(i), v) for i in range(self._n)})
 
         self.addCurve(seedCurve)
         self.addSpecializationsDFS(seedCurve)
@@ -180,11 +189,14 @@ class TropicalModuliSpace(object):
 
                     endpointPartitions = self.getPartitions(currentCurve.getEndpointsOfEdges(vert))
 
-                    if vert.genus > 0:
+                    if vert.genus > 1:
                         # print("\nGenus reducing vertex: " + vert.name)
                         genusReducedCurve = self.getGenusReductionSpecialization(currentCurve, vert)
                         newCurves.append(genusReducedCurve)
                         # self.printCurve(genusReducedCurve)
+                    elif vert.genus == 1 and currentCurve.degree(vert) > 0:
+                        genusReducedCurve = self.getGenusReductionSpecialization(currentCurve, vert)
+                        newCurves.append(genusReducedCurve)
 
                     for g in range(vert.genus + 1):
                         for p in endpointPartitions:
@@ -235,7 +247,8 @@ class TropicalModuliSpace(object):
 
         e = edge("(Edge splitting " + vert.name + ")", 1.0, v1, v2)
 
-        curve.edges = curve.edges | {e}
+        curve.addEdge(e)
+        curve.removeVertex(vert)
 
     def getSplittingSpecialization(self, curve, vert, g1, g2, S, T):
         # copy the curve shallowly and keep track of how copying was performed
@@ -253,7 +266,7 @@ class TropicalModuliSpace(object):
 
         # c.edges = {copy.copy(e) for e in curve.edges}
         # c.legs = {copy.copy(l) for l in curve.legs}
-        self.specializeBySplittingAtVertex(c, vert, g1, g2, safeS, safeT)
+        self.specializeBySplittingAtVertex(c, copyInfo[vert], g1, g2, safeS, safeT)
         return c
 
     @staticmethod
@@ -276,11 +289,12 @@ class TropicalModuliSpace(object):
 
         e = edge("(Genus reduction loop for " + vert.name + ")", 1.0, v, v)
 
-        curve.edges = curve.edges | {e}
+        curve.addEdge(e)
+        curve.removeVertex(vert)
 
     def getGenusReductionSpecialization(self, curve, vert):
         c, copyInfo = curve.getFullyShallowCopy(True)
-        c.name = "(Spec. of " + curve.name + " from genus reducing at " + vert.name
+        c.name = "(Spec. of " + curve.name + " from genus reducing at " + vert.name + ")"
 
         self.specializeByReducingGenus(c, copyInfo[vert])
         return c
