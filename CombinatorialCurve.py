@@ -433,7 +433,7 @@ class CombCurve(object):
                 raise ValueError("The core is only defined for connected curves.")
 
             # In order to generate the core, we start with a copy of self and repeatedly prune off certain leaves
-            core = self.getFullyShallowCopy()
+            core = copy.copy(self)
 
             # The core is guaranteed to have no legs
             core.legs = set()
