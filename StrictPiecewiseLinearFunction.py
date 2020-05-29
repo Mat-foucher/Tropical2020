@@ -33,7 +33,7 @@ class StrictPiecewiseLinearFunction(object):
         for e in self.domain.edgesWithVertices:
             if e.length > 0.0:
                 # Ensure the function has integer slope
-                assert ((self.functionValues[e.vert1] - self.functionValues[e.vert2]) / e.length).is_integer()
+                ((self.functionValues[e.vert1] - self.functionValues[e.vert2]) / e.length).is_integer()
 
     def __add__(self, other):
         assert other.domain == self.domain
@@ -74,6 +74,14 @@ class StrictPiecewiseLinearFunction(object):
             allowedVertices = self.domain.vertices        
         
         edgesToCheck = {e for e in self.domain.edges if (vert in e.vertices and vert in allowedVertices)}
+        print("S verts: ")
+        for e in S:
+            print(e.name)
+
+        print("T verts: ")
+        for f in T:
+            print(f.name)
+
         edgesVisited = set()
 
         foundAnSVertex = False        
@@ -92,6 +100,7 @@ class StrictPiecewiseLinearFunction(object):
             edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert1 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited) 
             edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert2 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
 
+        print("S:", foundAnSVertex, "T:", foundATVertex)
         return False
 
 
@@ -156,30 +165,33 @@ class StrictPiecewiseLinearFunction(object):
             support = CombCurve("support")
             support.edges = j
 
+            print("Support:")
+            support.printSelf()
+
             supportCore = support.core
 
-            if support.isConnected == False:
-                print("Disconnected Support")
-                return False
+            print("Support Core:")
+            supportCore.printSelf()
 
-            if supportCore.genus != 1:
+            assert support.isConnected
+                
+            if support.genus != 1:
                 # support.showEdges
-                # print("Not Genus 1")
+                print("Not Genus 1")
                 return False
 
             const = 0.0
             previous = 0.0
 
             # Part 3
-            # Check that the function is constant over the associated support:
-            for i in self.domain.vertices:
-                for x in support.edges:
-                    if const != previous:
-                        print("Not Constant on core")
-                        return False
-                    if i == x.vert1 or x.vert2:
-                        const = self.functionValues[i]
-                        previous = const              
+            # Check that the function is constant over the core of associated support:
+            
+            for x in supportCore.vertices:
+                if const != previous:
+                    print("Not Constant on core")
+                    return False
+                const = self.functionValues[x]
+                previous = const        
 
             # Part 4
             allSupportVertices = {v for v in self.domain.vertices if self.functionValues[v] > 0}
@@ -189,8 +201,9 @@ class StrictPiecewiseLinearFunction(object):
             T = self.domain.vertices - allSupportVertices 
 
             for v in thisComponentSupportVertices: 
+                print(v.name, v.genus)
                 if not self.floodfillVertices(v, S, T): 
-                    # print(v.name, "Failed 4")
+                    print(v.name, v.genus, "Failed 4")
                     return False
 
             # Part 5 
@@ -207,11 +220,12 @@ class StrictPiecewiseLinearFunction(object):
                 else:
                     rise = self.functionValues[x.vert2] - self.functionValues[x.vert1]
 
-                if rise != x.length and rise != 0:
-                    return False
-                else:
+                if rise != 0 and x.length !=0:
                     atLeastOne = True
                 
+                if rise != x.length and rise != 0:
+                    return False
+    
         if atLeastOne == True:
             return True
         else:

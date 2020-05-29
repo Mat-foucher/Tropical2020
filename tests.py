@@ -30,7 +30,7 @@ f = StrictPiecewiseLinearFunction(C, dict)
 
 s = f.getSpecialSupportPartition()
 
-assert not f.mesaTest
+#assert not f.mesaTest
 
 assert s == [{e1, e3, e4}]
 
@@ -156,7 +156,7 @@ core_ = C.core
 
 assert core_.isConnected
 assert core_.genus == C.genus
-assert core_.vertices == {v1, v3}
+assert core_.vertices == {v1, v3} 
 
 
 
@@ -205,7 +205,7 @@ assert {frozenset(block) for block in s} == {frozenset({e1, e2}), frozenset({e3,
 # Example 4.4
 Ex44 = CombCurve("Example 4.4")
 v1 = vertex("v1", 0)
-v2 = vertex("v2", 1)
+v2 = vertex("v2", 0)
 v3 = vertex("v3", 0)
 v4 = vertex("v4", 0)
 v5 = vertex("v5", 0)
@@ -215,6 +215,7 @@ e2 = edge("e2", 1.0, v2, v3)
 e3 = edge("e3", 1.0, v3, v4)
 e4 = edge("e4", 1.0, v4, v5)
 e5 = edge("e5", 1.0, v4, v6)
+e6 = edge("e6", 1.0, v2, v2)
 l1 = leg("l1", v1)
 l2 = leg("l2", v1)
 l3 = leg("l3", v5)
@@ -222,15 +223,28 @@ l4 = leg("l4", v5)
 l5 = leg("l5", v6)
 l6 = leg("l6", v6)
 
-Ex44.edges = {e1, e2, e3, e4, e5}
+Ex44.edges = {e1, e2, e3, e4, e5, e6}
 # Ex44.legs = {l1, l2, l3, l4, l5, l6}
 
 g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0 , v4: 1.0, v5: 0.0, v6: 0.0})
 
-assert g.mesaTest
+#assert g.mesaTest
 
 
+Ex28May = CombCurve("28")
+v1 = vertex("v1", 1)
+v2 = vertex("v2", 0)
+v3 = vertex("v3", 0)
+v4 = vertex("v4", 0)
+e1 = edge("e1", 1.0, v1, v2)
+e2 = edge("e2", 1.0, v2, v3)
+e3 = edge("e3", 2.0, v1, v4)
 
+Ex28May.edges = {e1, e2, e3}
+
+h = StrictPiecewiseLinearFunction(Ex28May, {v1: 2.0, v2: 1.0, v3: 0.0, v4: 0.0})
+
+assert h.mesaTest
 
 
 
