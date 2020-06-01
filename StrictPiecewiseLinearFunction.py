@@ -76,6 +76,7 @@ class StrictPiecewiseLinearFunction(object):
             allowedVertices = self.domain.vertices
 
         edgesToCheck = {e for e in self.domain.edges if (vert in e.vertices and vert in allowedVertices)}
+        """
         print("S verts: ")
         for e in S:
             print(e.name)
@@ -83,6 +84,7 @@ class StrictPiecewiseLinearFunction(object):
         print("T verts: ")
         for f in T:
             print(f.name)
+        """
 
         edgesVisited = set()
 
@@ -106,7 +108,7 @@ class StrictPiecewiseLinearFunction(object):
             edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (
                         nextEdge.vert2 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
 
-        print("S:", foundAnSVertex, "T:", foundATVertex)
+        # print("S:", foundAnSVertex, "T:", foundATVertex)
         return False
 
     def getSpecialSupport(self):
@@ -152,34 +154,7 @@ class StrictPiecewiseLinearFunction(object):
 
         return connectedComponents
 
-    def floodfillVertices(self, vert, supportEdges, core):
-        edgesToCheck = {e for e in self.domain.edges if vert in e.vertices}
-        edgesVisited = set()
-        foundANonsupportVertex = False
-        foundACoreVertex = False
-
-        while len(edgesToCheck) > 0:
-            nextEdge = edgesToCheck.pop()
-            edgesVisited = edgesVisited | {nextEdge}
-            # Check something here            
-
-            if nextEdge.vert1 in core.vertices or nextEdge.vert2 in core.vertices:
-                foundACoreVertex = True
-
-            for i in supportEdges:
-                if nextEdge.vert1 not in i.vertices or nextEdge.vert2 not in i.vertices:
-                    foundANonsupportVertex = True
-
-            if foundACoreVertex and foundANonsupportVertex:
-                return True
-
-            edgesToCheck = edgesToCheck | (
-                        {e for e in self.domain.edges if nextEdge.vert1 in e.vertices} - edgesVisited)
-            edgesToCheck = edgesToCheck | (
-                        {e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesVisited)
-
-        return False
-
+    @property
     def mesaTest(self):
 
         # A mesa must have slope and value zero on all legs
@@ -276,5 +251,5 @@ class StrictPiecewiseLinearFunction(object):
             if not specialEdgeFound:
                 return False
 
-        print("A Mesa I Am")
+        # print("A Mesa I Am")
         return True
