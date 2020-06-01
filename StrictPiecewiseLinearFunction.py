@@ -233,17 +233,26 @@ class StrictPiecewiseLinearFunction(object):
 
             # Check that the function has slope 0 or 1 on every edge out of the core (oriented towards the core)
             edgesToCheck = support.edges - supportCore.edges
-            
-            # Part 6 (Implemented into 5)
-            atLeastOne = False
 
-            for x in edgesToCheck:
+            for nextEdge in edgesToCheck:
+                # Search for the vertices of the core that actually belong to the support
                 P = supportCore.vertices.intersection(allSupportVertices)
-                vert1TowardsCore = self.floodfillVertices(x.vert1, P, P, self.domain.vertices - {x.vert2})
+
+                # Check if a vertex from P can be reached from vert1 of nextEdge if we do not allow ourselves to
+                # travel over vert2 of nextEdge. If this can be done, then vert1 is the side of nextEdge that is
+                # closest to the core. Otherwise, it's vert2.
+                vert1TowardsCore = self.floodfillVertices(nextEdge.vert1, P, P, self.domain.vertices - {nextEdge.vert2})
+
+                # Calculate the rise of the function with respect to orientation towards the core.
                 if vert1TowardsCore:
-                    rise = self.functionValues[x.vert1] - self.functionValues[x.vert2]
+                    rise = self.functionValues[nextEdge.vert1] - self.functionValues[nextEdge.vert2]
                 else:
-                    rise = self.functionValues[x.vert2] - self.functionValues[x.vert1]
+                    rise = self.functionValues[nextEdge.vert2] - self.functionValues[nextEdge.vert1]
+
+                # The rise is 0.0 or nextEdge.length iff the slope of the function is 0 or 1 towards the cure.
+                # Both of these must hold
+                if not (rise == 0.0 or rise == nextEdge.length):
+                    return False
         print("A Mesa I Am")
         return True
 
