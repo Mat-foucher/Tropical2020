@@ -517,3 +517,15 @@ class CombCurve(object):
 
         # Return the saved copy of the core (possibly just calculated)
         return self._coreCache
+
+    @property
+    def spanningTree(self):
+        pass
+
+    @property
+    def loops(self):
+        loopDeterminers = self.edges - self.spanningTree.edges
+        _loops = []
+        for nextEdge in loopDeterminers:
+            # self.getPath(starting from nextEdge.vert1, looking for nextEdge.vert2, allowed vertices spanningTree.vertices)
+
