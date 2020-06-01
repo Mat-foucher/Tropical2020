@@ -178,10 +178,14 @@ class StrictPiecewiseLinearFunction(object):
     
     def mesaTest(self):
 
-        # Part 1
+        # A mesa must have slope and value zero on all legs
         for i in self.domain.legs:
+            # Check that the slope is zero:
             if self.functionValues[i] != 0.0:
-                return False 
+                return False
+            # Check that the value is zero:
+            if self.functionValues[i.root] != 0.0:
+                return False
         
         specialSupports = self.getSpecialSupportPartition()
 
