@@ -173,9 +173,7 @@ class StrictPiecewiseLinearFunction(object):
             edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesVisited)
 
         return False
-            
-        
-    
+
     def mesaTest(self):
 
         # A mesa must have slope and value zero on all legs
@@ -186,38 +184,41 @@ class StrictPiecewiseLinearFunction(object):
             # Check that the value is zero:
             if self.functionValues[i.root] != 0.0:
                 return False
-        
+
+        # specialSupports contains a list of sets. Each set in the list contains the edges of one of the connected
+        # components of the support. These edges may contain vertices out of the support.
         specialSupports = self.getSpecialSupportPartition()
 
-        # Part 2
+        # The rest of the checks must hold for each connected component of the support.
         for j in specialSupports:
-            
+
+            # Support component realized as a Combinatorial Curve
             support = CombCurve("support")
             support.addEdges(j)
 
+            # Core of the support realized as a Combinatorial Curve
             supportCore = support.core
 
             assert support.isConnected
-                
+
+            # Each component of the support must have genus 1
             if support.genus != 1:
                 # support.showEdges
                 print("Not Genus 1")
                 return False
 
-            const = 0.0
-            previous = 0.0
-
-            # Part 3
             # Check that the function is constant over the core of associated support:
-            
-            for x in supportCore.vertices:
-                if const != previous:
-                    print("Not Constant on core")
-                    return False
-                const = self.functionValues[x]
-                previous = const        
 
-            # Part 4
+            # Get a random function value from the support-core vertices
+            coreFuncVal = self.functionValues[list(supportCore.vertices)[0]]
+
+            # Make sure every vertex of the support core has this same value
+            for vert in supportCore.vertices:
+                if self.functionValues[vert] != coreFuncVal:
+                    return False
+
+            # Every vertex of the support must lie on a path from the core of the support component to a vertex outside
+            # of the support
             allSupportVertices = {v for v in self.domain.vertices if self.functionValues[v] > 0}
             thisComponentSupportVertices = allSupportVertices.intersection(support.vertices)
 
@@ -230,7 +231,7 @@ class StrictPiecewiseLinearFunction(object):
                     print(v.name, v.genus, "Failed Part 4")
                     return False
 
-            # Part 5 
+            # Check that the function has slope 0 or 1 on every edge out of the core (oriented towards the core)
             edgesToCheck = support.edges - supportCore.edges
             
             # Part 6 (Implemented into 5)
