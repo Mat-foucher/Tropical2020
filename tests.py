@@ -352,6 +352,10 @@ assert C.isIsomorphicTo(D)
 
 # Generate some small, known, moduli spaces
 
+m10 = TropicalModuliSpace(1,0)
+m10.generateSpaceDFS()
+assert len(m10.curves) == 1
+
 m11 = TropicalModuliSpace(1, 1)
 m11.generateSpaceDFS()
 assert len(m11.curves) == 2

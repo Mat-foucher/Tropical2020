@@ -148,34 +148,6 @@ class StrictPiecewiseLinearFunction(object):
 
         return connectedComponents
 
-    def floodfillVertices(self, vert, supportEdges, core):        
-        edgesToCheck = {e for e in self.domain.edges if vert in e.vertices}
-        edgesVisited = set()
-        foundANonsupportVertex = False        
-        foundACoreVertex = False
-
-        while len(edgesToCheck) > 0:            
-            nextEdge = edgesToCheck.pop()            
-            edgesVisited = edgesVisited | {nextEdge}                        
-            # Check something here            
-                       
-            if nextEdge.vert1 in core.vertices or nextEdge.vert2 in core.vertices:                
-                foundACoreVertex = True       
-
-            for i in supportEdges: 
-                if nextEdge.vert1 not in i.vertices or nextEdge.vert2 not in i.vertices:                
-                    foundANonsupportVertex = True     
-
-            if foundACoreVertex and foundANonsupportVertex:
-                return True            
-                                    
-            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if nextEdge.vert1 in e.vertices} - edgesVisited)
-            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesVisited)
-
-        return False
-            
-        
-    
     def mesaTest(self):
 
         # Part 1
@@ -239,6 +211,6 @@ class StrictPiecewiseLinearFunction(object):
                     rise = self.functionValues[x.vert1] - self.functionValues[x.vert2]
                 else:
                     rise = self.functionValues[x.vert2] - self.functionValues[x.vert1]
-        print("A Mesa I Am")
+                    
         return True
 
