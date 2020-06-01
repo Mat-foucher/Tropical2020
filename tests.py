@@ -31,7 +31,7 @@ f = StrictPiecewiseLinearFunction(C, dict)
 s = f.getSpecialSupportPartition()
 
 # For now we can say, that f is a mesa until we discuss.
-assert f.mesaTest
+assert not f.mesaTest
 
 assert s == [{e1, e3, e4}]
 
@@ -206,7 +206,7 @@ assert {frozenset(block) for block in s} == {frozenset({e1, e2}), frozenset({e3,
 # Example 4.4
 Ex44 = CombCurve("Example 4.4")
 v1 = vertex("v1", 0)
-v2 = vertex("v2", 0)
+v2 = vertex("v2", 1)
 v3 = vertex("v3", 0)
 v4 = vertex("v4", 0)
 v5 = vertex("v5", 0)
@@ -225,9 +225,10 @@ l5 = leg("l5", v6)
 l6 = leg("l6", v6)
 
 Ex44.addEdges({e1, e2, e3, e4, e5})
-# Ex44.legs = {l1, l2, l3, l4, l5, l6}
+Ex44.addLegs({l1, l2, l3, l4, l5, l6})
 
-g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0 , v4: 1.0, v5: 0.0, v6: 0.0})
+g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0, v4: 1.0, v5: 0.0, v6: 0.0,
+                                         l1: 0.0, l2: 0.0, l3: 0.0, l4: 0.0, l5: 0.0, l6: 0.0})
 
 assert g.mesaTest
 
@@ -376,7 +377,7 @@ m22 = TropicalModuliSpace(2, 2)
 m22.generateSpaceDFS()
 assert len(m22.curves) == 60
 
-
+"""
 def testTimeAndSize(g, n):
     m = TropicalModuliSpace(g, n)
 
@@ -397,5 +398,6 @@ m12.loadModuliSpaceFromFile("SavedModuliSpaces/M-1-2.txt")
 print("Curves loaded. Printing now.")
 for curve in m12.curves:
     curve.printSelf()
+"""
 
 print("If you see this, then all previous assertations were true!")
