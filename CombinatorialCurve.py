@@ -130,13 +130,13 @@ class CombCurve(object):
         for v in copy.copy(vertices):
             self.addVertex(v)
 
-    def removeVertex(self, v):
+    def removeVertex(self, v, removeDanglingVertices=False):
         if v in self._vertices:
             self._vertices.remove(v)
             for e in {e for e in self.edges if v in e.vertices}:
-                self.removeEdge(e)
+                self.removeEdge(e, removeDanglingVertices)
             for nextLeg in {nextLeg for nextLeg in self.legs if v in nextLeg.vertices}:
-                self.remove(nextLeg)
+                self.removeLeg(nextLeg)
             self.invalidateCaches()
 
     def removeVertices(self, vertices):
