@@ -74,14 +74,7 @@ class StrictPiecewiseLinearFunction(object):
             allowedVertices = self.domain.vertices        
         
         edgesToCheck = {e for e in self.domain.edges if (vert in e.vertices and vert in allowedVertices)}
-        print("S verts: ")
-        for e in S:
-            print(e.name)
-
-        print("T verts: ")
-        for f in T:
-            print(f.name)
-
+        
         edgesVisited = set()
 
         foundAnSVertex = False        
@@ -94,13 +87,13 @@ class StrictPiecewiseLinearFunction(object):
                 foundATVertex = True
             if (nextEdge.vert1 in S and nextEdge.vert1 in allowedVertices) or (nextEdge.vert2 in S and nextEdge.vert2 in allowedVertices):
                 foundAnSVertex = True
-            if foundATVertex and foundAnSVertex:
+            if foundATVertex and foundAnSVertex: 
                 return True            
         
             edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert1 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited) 
             edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert2 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
 
-        print("S:", foundAnSVertex, "T:", foundATVertex)
+        #print("S:", foundAnSVertex, "T:", foundATVertex)
         return False
 
 

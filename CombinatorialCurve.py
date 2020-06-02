@@ -517,3 +517,25 @@ class CombCurve(object):
 
         # Return the saved copy of the core (possibly just calculated)
         return self._coreCache
+
+    def getSpanningTree(self, vert):
+        
+        tree = CombCurve(self.name + " Spanning Tree")
+
+        edgesToCheck = {e for e in self.edges if e.vert1 == vert or e.vert2 == vert}
+
+        while len(edgesToCheck) > 0:
+            nextEdge = edgesToCheck.pop()
+
+            edgesVisited = set()
+
+            while len(edgesToCheck) > 0:
+                nextEdge = edgesToCheck.pop()
+                edgesVisited = edgesVisited | {nextEdge}
+
+                edgesToCheck = edgesToCheck | ({e for e in self.edges if (nextEdge.vert1 == e.vert1 or nextEdge.vert2 == e.vert2)} - edgesVisited)
+                
+                tree.edges = tree.edges | edgesVisited
+            
+            return tree
+            
