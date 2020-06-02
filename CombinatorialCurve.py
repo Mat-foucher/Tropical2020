@@ -607,6 +607,7 @@ class CombCurve(object):
     def spanningTree(self):
         return Tree()
 
+    # Will return a list of edges in a loop.
     def getLoop(self, e):
         if e not in self.spanningTree.edges:
             raise ValueError("Edge " + e.name + " must not belong to the spanning tree to determine a unique loop.")
@@ -627,6 +628,7 @@ class CombCurve(object):
 
 
     @property
+    # Returns a list of lists of edges.
     def loops(self):
         loopDeterminers = self.edges - self.spanningTree.edges
         _loops = []
@@ -635,23 +637,38 @@ class CombCurve(object):
         return _loops
 
     def getSpanningTree(self, vert):
+        
+        if not self.isConnected:
+            raise ValueError("A spanning tree is only defined for a connected graph")
 
-        tree = CombCurve(self.name + " Spanning Tree")
+        tree = self.Tree()          
+        tree.setValue(vert)
 
-        edgesToCheck = {e for e in self.edges if e.vert1 == vert or e.vert2 == vert}
+        verticesToCheck = {vert}
 
-        while len(edgesToCheck) > 0:
-            nextEdge = edgesToCheck.pop()
+        while len(verticesToCheck) > 0:
 
-            edgesVisited = set()
+            nextVertex = verticesToCheck.pop()
 
-            while len(edgesToCheck) > 0:
-                nextEdge = edgesToCheck.pop()
-                edgesVisited = edgesVisited | {nextEdge}
+            connectedEdges = {e for e in self.edges if (nextVertex == e.vert1 or nextVertex == e.vert2)} 
 
-                edgesToCheck = edgesToCheck | ({e for e in self.edges if (nextEdge.vert1 == e.vert1 or nextEdge.vert2 == e.vert2)} - edgesVisited)
+            adjacentVertices = set()          
 
-                tree.edges = tree.edges | edgesVisited
+            for e in connectedEdges:
+                adjacentVertices = adjacentVertices | e.vertices 
 
-            return tree
+            newAdjacentVertices = adjacentVertices - set(tree.getVertices()) 
+
+            verticesToCheck = verticesToCheck | adjacentVertices
+
+            nextTree = tree.findVertex(nextVertex)    
+
+            for v in newAdjacentVertices:
+                connectingEdge = {e for e in self.edges if e.vertices == {nextVertex, v}}.pop()
+                nextTree.addChild(connectingEdge, v)
+            
+
+            verticesToCheck = verticeToCheck | newAdjacentVertices
+
+        return tree
 
