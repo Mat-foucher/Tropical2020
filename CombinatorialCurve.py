@@ -568,10 +568,10 @@ class CombCurve(object):
                 return self.parent.getEdges()
 
         def getVertices(self):
-            vertices = []
+            vertices = Set()
             for e in self.getEdges():
-                vertices.append(e.vert1)
-                vertices.append(e.vert2)
+                vertices.add(e.vert1)
+                vertices.add(e.vert2)
             return vertices
 
         def searchForVertexInChildren(self, vert):
