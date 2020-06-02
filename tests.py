@@ -4,6 +4,32 @@ from ModuliSpaces import *
 import time
 
 
+class CurveTests:
+    @staticmethod
+    def testCore(curve):
+        assert curve.core.isConnected
+        assert curve.core.genus == curve.genus
+
+    @staticmethod
+    def testConnectedness(curve, connected=True):
+        assert curve.isConnected == connected
+
+class SPLFTests:
+    @staticmethod
+    def testMesa(func, isMesa=True):
+        assert func.mesaTest == isMesa
+
+    @staticmethod
+    def testSpecialSupport(func, supportBlocks):
+        assert func.getSpecialSupportPartition() == supportBlocks
+
+    @staticmethod
+    def testSelfArithmetic(func):
+        for vert in func.domain.vertices:
+            assert (func + func).functionValues[vert] == func.functionValues[vert] + func.functionValues[vert]
+            assert (func - func).functionValues[vert] == func.functionValues[vert] - func.functionValues[vert]
+            assert (func * func).functionValues[vert] == func.functionValues[vert] * func.functionValues[vert]
+
 C = CombCurve("Example 3.5")
 
 v1 = vertex("v1", 0)
@@ -18,28 +44,15 @@ l = leg("l", v1)
 C.addEdges({e1, e2, e3, e4})
 C.addLeg(l)
 
-core = C.core
-
-assert core.isConnected
-assert core.genus == C.genus
-
+CurveTests.testCore(C)
 
 dict = {v1: 1.0, v2: 0.0, v3: 0.0, l: 0.0}
 
 f = StrictPiecewiseLinearFunction(C, dict)
 
-s = f.getSpecialSupportPartition()
-
-# For now we can say, that f is a mesa until we discuss.
-assert not f.mesaTest
-
-assert s == [{e1, e3, e4}]
-
-assert f.functionValues[v1] == 1.0
-for v in C.vertices:
-    assert (f + f).functionValues[v] == f.functionValues[v] + f.functionValues[v]
-    assert (f - f).functionValues[v] == f.functionValues[v] - f.functionValues[v]
-    assert (f * f).functionValues[v] == f.functionValues[v] * f.functionValues[v]
+SPLFTests.testMesa(f, isMesa=False)
+SPLFTests.testSpecialSupport(f, [{e1, e3, e4}])
+SPLFTests.testSelfArithmetic(f)
 
 assert C.vertices == {v1, v2, v3}
 
