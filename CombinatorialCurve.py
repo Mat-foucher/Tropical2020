@@ -532,6 +532,9 @@ class CombCurve(object):
         def setValue(self, vert):
             self.value = vert
 
+        def setParent(self, p):
+            self.parent = p
+
         def addChild(self, vert, connectingEdge):
             if (
                     # Don't allow a self loop to be added
@@ -541,7 +544,7 @@ class CombCurve(object):
                     # Don't introduce any loops
                     (vert not in self.getVertices())
             ):
-                childTree = Tree()
+                childTree = CombCurve.Tree()
                 childTree.setValue(vert)
                 childTree.setParent(self)
                 childTree.parentConnection = connectingEdge
@@ -563,16 +566,17 @@ class CombCurve(object):
                 return self.parent.getEdges()
 
         def getVerticesFromChildren(self):
-            vertices = Set(self.value)
+            vertices = {self.value}
             for child in self.children:
-                vertices = vertices | child.getVerticesFromChildren
+                childTree, connectingEdge = child
+                vertices = vertices | childTree.getVerticesFromChildren()
             return vertices
 
         def getVertices(self):
             if self.parent is None:
-                return self.getEdgesOfChildren()
+                return self.getVerticesFromChildren()
             else:
-                return self.parent.getEdges()
+                return self.parent.getVertices()
 
         def findVertexInChildren(self, vert):
             if self.value == vert:
@@ -605,7 +609,7 @@ class CombCurve(object):
 
     @property
     def spanningTree(self):
-        return Tree()
+        return getSpanningTree(list(self.vertices)[0])
 
     def getLoop(self, e):
         if e not in self.spanningTree.edges:
@@ -625,7 +629,6 @@ class CombCurve(object):
 
         return anc1.reverse() + [e] + anc2
 
-
     @property
     def loops(self):
         loopDeterminers = self.edges - self.spanningTree.edges
@@ -636,22 +639,27 @@ class CombCurve(object):
 
     def getSpanningTree(self, vert):
 
-        tree = CombCurve(self.name + " Spanning Tree")
+        if not self.isConnected:
+            raise ValueError("A spanning tree is only defined for a connected graph")
 
-        edgesToCheck = {e for e in self.edges if e.vert1 == vert or e.vert2 == vert}
+        tree = self.Tree()
+        tree.setValue(vert)
 
-        while len(edgesToCheck) > 0:
-            nextEdge = edgesToCheck.pop()
+        verticesToCheck = {vert}
+        while verticesToCheck:
+            nextVertex = verticesToCheck.pop()
 
-            edgesVisited = set()
+            connectedEdges = {e for e in self.edges if e.vert1 == nextVertex or e.vert2 == nextVertex}
+            adjacentVertices = set()
+            for e in connectedEdges:
+                adjacentVertices = adjacentVertices | e.vertices
+            newAdjacentVertices = adjacentVertices - tree.getVertices()
 
-            while len(edgesToCheck) > 0:
-                nextEdge = edgesToCheck.pop()
-                edgesVisited = edgesVisited | {nextEdge}
+            nextTree = tree.findVertex(nextVertex)
+            for v in newAdjacentVertices:
+                connectingEdge = {e for e in self.edges if e.vertices == {nextVertex, v}}.pop()
+                nextTree.addChild(v, connectingEdge)
 
-                edgesToCheck = edgesToCheck | ({e for e in self.edges if (nextEdge.vert1 == e.vert1 or nextEdge.vert2 == e.vert2)} - edgesVisited)
+            verticesToCheck = verticesToCheck | newAdjacentVertices
 
-                tree.edges = tree.edges | edgesVisited
-
-            return tree
-
+        return tree

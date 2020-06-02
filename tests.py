@@ -18,6 +18,9 @@ l = leg("l", v1)
 C.addEdges({e1, e2, e3, e4})
 C.addLeg(l)
 
+
+tree = C.getSpanningTree(v1)
+
 core = C.core
 
 assert core.isConnected
