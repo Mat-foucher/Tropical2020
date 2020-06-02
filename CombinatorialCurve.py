@@ -532,6 +532,9 @@ class CombCurve(object):
         def setValue(self, vert):
             self.value = vert
 
+        def setParent(self, p):
+            self.parent = p
+
         def addChild(self, vert, connectingEdge):
             if (
                     # Don't allow a self loop to be added
@@ -541,7 +544,7 @@ class CombCurve(object):
                     # Don't introduce any loops
                     (vert not in self.getVertices())
             ):
-                childTree = Tree()
+                childTree = CombCurve.Tree()
                 childTree.setValue(vert)
                 childTree.setParent(self)
                 childTree.parentConnection = connectingEdge
@@ -563,16 +566,17 @@ class CombCurve(object):
                 return self.parent.getEdges()
 
         def getVerticesFromChildren(self):
-            vertices = Set(self.value)
+            vertices = {self.value}
             for child in self.children:
-                vertices = vertices | child.getVerticesFromChildren
+                childTree, connectingEdge = child
+                vertices = vertices | childTree.getVerticesFromChildren()
             return vertices
 
         def getVertices(self):
             if self.parent is None:
-                return self.getEdgesOfChildren()
+                return self.getVerticesFromChildren()
             else:
-                return self.parent.getEdges()
+                return self.parent.getVertices()
 
         def findVertexInChildren(self, vert):
             if self.value == vert:
@@ -605,7 +609,7 @@ class CombCurve(object):
 
     @property
     def spanningTree(self):
-        return Tree()
+        return getSpanningTree(list(self.vertices)[0])
 
     # Will return a list of edges in a loop.
     def getLoop(self, e):
@@ -625,7 +629,6 @@ class CombCurve(object):
         anc2 = anc2[leastAncestorIndex:]
 
         return anc1.reverse() + [e] + anc2
-
 
     @property
     # Returns a list of lists of edges.
@@ -657,18 +660,14 @@ class CombCurve(object):
             for e in connectedEdges:
                 adjacentVertices = adjacentVertices | e.vertices 
 
-            newAdjacentVertices = adjacentVertices - set(tree.getVertices()) 
-
-            verticesToCheck = verticesToCheck | adjacentVertices
+            newAdjacentVertices = adjacentVertices - set(tree.getVertices())
 
             nextTree = tree.findVertex(nextVertex)    
 
             for v in newAdjacentVertices:
                 connectingEdge = {e for e in self.edges if e.vertices == {nextVertex, v}}.pop()
-                nextTree.addChild(connectingEdge, v)
-            
+                nextTree.addChild(v, connectingEdge)
 
-            verticesToCheck = verticeToCheck | newAdjacentVertices
+            verticesToCheck = verticesToCheck | newAdjacentVertices
 
         return tree
-
