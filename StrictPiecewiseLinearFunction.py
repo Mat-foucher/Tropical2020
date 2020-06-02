@@ -1,5 +1,6 @@
 from CombinatorialCurve import *
 
+
 class StrictPiecewiseLinearFunction(object):
     # domain_ should be a CombCurve representing the domain of the function
     # functionValues_ should be a dictionary with vertex/leg keys and non-negative double values
@@ -11,9 +12,10 @@ class StrictPiecewiseLinearFunction(object):
     # Make the domain read only
     @property
     def domain(self):
-        return self._domain 
+        return self._domain
 
-    # Make the function read only
+        # Make the function read only
+
     @property
     def functionValues(self):
         return self._functionValues
@@ -33,7 +35,7 @@ class StrictPiecewiseLinearFunction(object):
         for e in self.domain.edgesWithVertices:
             if e.length > 0.0:
                 # Ensure the function has integer slope
-                assert ((self.functionValues[e.vert1] - self.functionValues[e.vert2]) / e.length).is_integer()
+                ((self.functionValues[e.vert1] - self.functionValues[e.vert2]) / e.length).is_integer()
 
     def __add__(self, other):
         assert other.domain == self.domain
@@ -45,7 +47,7 @@ class StrictPiecewiseLinearFunction(object):
             newFunctionValues[leg] = self.functionValues[leg] + other.functionValues[leg]
 
         return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
-    
+
     def __sub__(self, other):
         assert other.domain == self.domain
 
@@ -70,33 +72,47 @@ class StrictPiecewiseLinearFunction(object):
 
     def floodfillVertices(self, vert, S, T, allowedVertices=None):
 
-        if allowedVertices is None:            
-            allowedVertices = self.domain.vertices        
-        
+        if allowedVertices is None:
+            allowedVertices = self.domain.vertices
+
         edgesToCheck = {e for e in self.domain.edges if (vert in e.vertices and vert in allowedVertices)}
+        """
+        print("S verts: ")
+        for e in S:
+            print(e.name)
+
+        print("T verts: ")
+        for f in T:
+            print(f.name)
+        """
+
         edgesVisited = set()
 
-        foundAnSVertex = False        
-        foundATVertex = False        
+        foundAnSVertex = False
+        foundATVertex = False
         while len(edgesToCheck) > 0:
             nextEdge = edgesToCheck.pop()
             edgesVisited = edgesVisited | {nextEdge}
             # Check something here
-            if nextEdge.vert1 in T or nextEdge.vert2 in T:
+            if (nextEdge.vert1 in T and nextEdge.vert1 in allowedVertices) or (
+                    nextEdge.vert2 in T and nextEdge.vert2 in allowedVertices):
                 foundATVertex = True
-            if nextEdge.vert1 in S or nextEdge.vert2 in S:
+            if (nextEdge.vert1 in S and nextEdge.vert1 in allowedVertices) or (
+                    nextEdge.vert2 in S and nextEdge.vert2 in allowedVertices):
                 foundAnSVertex = True
             if foundATVertex and foundAnSVertex:
-                return True            
-        
-            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert1 in e.vertices and nextEdge.vert1 in allowedVertices)} - edgesVisited) 
-            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (nextEdge.vert2 in e.vertices and nextEdge.vert2 in allowedVertices)} - edgesVisited)
+                return True
 
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (
+                        nextEdge.vert1 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
+            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (
+                        nextEdge.vert2 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
+
+        # print("S:", foundAnSVertex, "T:", foundATVertex)
         return False
 
-
     def getSpecialSupport(self):
-        
+
         supportEdges = set()
         supportVertices = set()
 
@@ -104,14 +120,13 @@ class StrictPiecewiseLinearFunction(object):
             if x.vert1 != None and x.vert2 != None:
                 if self.functionValues[x.vert1] > 0 or self.functionValues[x.vert2] > 0:
                     supportEdges = supportEdges | {x}
-        
+
         for i in self.domain.vertices:
             if self.functionValues[i] > 0:
                 supportVertices = supportVertices | {i}
 
         return (supportEdges, supportVertices)
 
-    
     def getSpecialSupportPartition(self):
 
         supportEdges, supportVertices = self.getSpecialSupport()
@@ -130,102 +145,111 @@ class StrictPiecewiseLinearFunction(object):
                             verticesToCheck = verticesToCheck + [e.vert1]
                         if e.vert2 in supportVertices:
                             verticesToCheck = verticesToCheck + [e.vert2]
-                
+
                 verticesToCheck.remove(currentVertex)
                 if currentVertex in supportVerticesNeedingComponent:
                     supportVerticesNeedingComponent.remove(currentVertex)
-            
+
             connectedComponents.append(supportComponentEdges)
 
         return connectedComponents
 
-    def floodfillVertices(self, vert, supportEdges, core):        
-        edgesToCheck = {e for e in self.domain.edges if vert in e.vertices}
-        edgesVisited = set()
-        foundANonsupportVertex = False        
-        foundACoreVertex = False
-
-        while len(edgesToCheck) > 0:            
-            nextEdge = edgesToCheck.pop()            
-            edgesVisited = edgesVisited | {nextEdge}                        
-            # Check something here            
-                       
-            if nextEdge.vert1 in core.vertices or nextEdge.vert2 in core.vertices:                
-                foundACoreVertex = True       
-
-            for i in supportEdges: 
-                if nextEdge.vert1 not in i.vertices or nextEdge.vert2 not in i.vertices:                
-                    foundANonsupportVertex = True     
-
-            if foundACoreVertex and foundANonsupportVertex:
-                return True            
-                                    
-            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if nextEdge.vert1 in e.vertices} - edgesVisited)
-            edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesVisited)
-
-        return False
-            
-        
-    
+    @property
     def mesaTest(self):
 
-        # Part 1
+        # A mesa must have slope and value zero on all legs
         for i in self.domain.legs:
-            if self.functionValues[i] != 0:
-                return False 
-        
+            # Check that the slope is zero:
+            if self.functionValues[i] != 0.0:
+                return False
+            # Check that the value is zero:
+            if self.functionValues[i.root] != 0.0:
+                return False
+
+        # specialSupports contains a list of sets. Each set in the list contains the edges of one of the connected
+        # components of the support. These edges may contain vertices out of the support.
         specialSupports = self.getSpecialSupportPartition()
 
-        # Part 2
+        # The rest of the checks must hold for each connected component of the support.
         for j in specialSupports:
-            
+
+            # Support component realized as a Combinatorial Curve
             support = CombCurve("support")
             support.addEdges(j)
 
+            # Core of the support realized as a Combinatorial Curve
             supportCore = support.core
 
-            if support.isConnected == False:
-                # print("Disconnected Support")
-                return False
+            assert support.isConnected
 
-            if supportCore.genus != 1:
+            # Each component of the support must have genus 1
+            if support.genus != 1:
                 # support.showEdges
-                # print("Not Genus 1")
+                print("Not Genus 1")
                 return False
 
-            const = 0.0
-            previous = 0.0
+            # Check that the function is constant over the core of associated support:
 
-            # Part 3
-            # Check that the function is constant over the associated support:
-            for i in self.domain.vertices:
-                for x in support.edges:
-                    if const != previous:
-                        return False
-                    if i == x.vert1 or x.vert2:
-                        const = self.functionValues[i]
-                        previous = const              
+            # Get a random function value from the support-core vertices
+            coreFuncVal = self.functionValues[list(supportCore.vertices)[0]]
 
-            # Part 4
+            # Make sure every vertex of the support core has this same value
+            for vert in supportCore.vertices:
+                if self.functionValues[vert] != coreFuncVal:
+                    return False
+
+            # Every vertex of the support must lie on a path from the core of the support component to a vertex outside
+            # of the support
             allSupportVertices = {v for v in self.domain.vertices if self.functionValues[v] > 0}
             thisComponentSupportVertices = allSupportVertices.intersection(support.vertices)
 
             S = supportCore.vertices
-            T = self.domain.vertices - allSupportVertices 
+            T = self.domain.vertices - allSupportVertices
 
-            for v in thisComponentSupportVertices: 
-                if not self.floodfillVertices(v, S, T): 
+            for v in thisComponentSupportVertices:
+
+                if not self.floodfillVertices(v, S, T):
+                    print(v.name, v.genus, "Failed Part 4")
                     return False
 
-            # Part 5 
+            # Check that the function has slope 0 or 1 on every edge out of the core (oriented towards the core)
             edgesToCheck = support.edges - supportCore.edges
 
-            for x in edgesToCheck:
-                vert1TowardsCore = self.floodfillVertices(x.vert1, supportCore.vertices, supportCore.vertices, self.domain.vertices - {x.vert2})
+            for nextEdge in edgesToCheck:
+                # Search for the vertices of the core that actually belong to the support
+                P = supportCore.vertices.intersection(allSupportVertices)
+
+                # Check if a vertex from P can be reached from vert1 of nextEdge if we do not allow ourselves to
+                # travel over vert2 of nextEdge. If this can be done, then vert1 is the side of nextEdge that is
+                # closest to the core. Otherwise, it's vert2.
+                vert1TowardsCore = self.floodfillVertices(nextEdge.vert1, P, P, self.domain.vertices - {nextEdge.vert2})
+
+                # Calculate the rise of the function with respect to orientation towards the core.
                 if vert1TowardsCore:
-                    rise = self.functionValues[x.vert1] - self.functionValues[x.vert2]
-                    if rise != x.length and rise != 0:
-                        return False
+                    rise = self.functionValues[nextEdge.vert1] - self.functionValues[nextEdge.vert2]
+                else:
+                    rise = self.functionValues[nextEdge.vert2] - self.functionValues[nextEdge.vert1]
 
+                # The rise is 0.0 or nextEdge.length iff the slope of the function is 0 or 1 towards the cure.
+                # Both of these must hold
+                if not (rise == 0.0 or rise == nextEdge.length):
+                    return False
+
+            # Next, search for an edge adjacent to the core that has nonzero slope.
+            specialEdgeFound = False
+            for nextEdge in support.edges:
+                # nextEdge is adjacent to the core if it has one endpoint in, and one endpoint out of, the core.
+                adjacentToCore = (((nextEdge.vert1 in supportCore.vertices) and
+                                   (nextEdge.vert2 not in supportCore.vertices)) or
+                                  ((nextEdge.vert2 in supportCore.vertices) and
+                                   (nextEdge.vert1 not in supportCore.vertices)))
+
+                if adjacentToCore and self.functionValues[nextEdge.vert1] != self.functionValues[nextEdge.vert2]:
+                    specialEdgeFound = True
+                    break
+
+            if not specialEdgeFound:
+                return False
+
+        # print("A Mesa I Am")
         return True
-

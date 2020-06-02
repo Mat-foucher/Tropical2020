@@ -30,6 +30,7 @@ f = StrictPiecewiseLinearFunction(C, dict)
 
 s = f.getSpecialSupportPartition()
 
+# For now we can say, that f is a mesa until we discuss.
 assert not f.mesaTest
 
 assert s == [{e1, e3, e4}]
@@ -156,7 +157,7 @@ core_ = C.core
 
 assert core_.isConnected
 assert core_.genus == C.genus
-assert core_.vertices == {v1, v3}
+assert core_.vertices == {v1, v3} 
 
 
 
@@ -215,6 +216,7 @@ e2 = edge("e2", 1.0, v2, v3)
 e3 = edge("e3", 1.0, v3, v4)
 e4 = edge("e4", 1.0, v4, v5)
 e5 = edge("e5", 1.0, v4, v6)
+e6 = edge("e6", 1.0, v2, v2)
 l1 = leg("l1", v1)
 l2 = leg("l2", v1)
 l3 = leg("l3", v5)
@@ -223,14 +225,28 @@ l5 = leg("l5", v6)
 l6 = leg("l6", v6)
 
 Ex44.addEdges({e1, e2, e3, e4, e5})
-# Ex44.legs = {l1, l2, l3, l4, l5, l6}
+Ex44.addLegs({l1, l2, l3, l4, l5, l6})
 
-g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0 , v4: 1.0, v5: 0.0, v6: 0.0})
+g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0, v4: 1.0, v5: 0.0, v6: 0.0,
+                                         l1: 0.0, l2: 0.0, l3: 0.0, l4: 0.0, l5: 0.0, l6: 0.0})
 
-# assert g.mesaTest
+assert g.mesaTest
 
 
+Ex28May = CombCurve("28")
+v1 = vertex("v1", 1)
+v2 = vertex("v2", 0)
+v3 = vertex("v3", 0)
+v4 = vertex("v4", 0)
+e1 = edge("e1", 1.0, v1, v2)
+e2 = edge("e2", 1.0, v2, v3)
+e3 = edge("e3", 2.0, v1, v4)
 
+Ex28May.addEdges({e1, e2, e3})
+
+h = StrictPiecewiseLinearFunction(Ex28May, {v1: 2.0, v2: 1.0, v3: 0.0, v4: 0.0})
+
+assert h.mesaTest
 
 
 
@@ -361,7 +377,7 @@ m22 = TropicalModuliSpace(2, 2)
 m22.generateSpaceDFS()
 assert len(m22.curves) == 60
 
-
+"""
 def testTimeAndSize(g, n):
     m = TropicalModuliSpace(g, n)
 
@@ -382,5 +398,6 @@ m12.loadModuliSpaceFromFile("SavedModuliSpaces/M-1-2.txt")
 print("Curves loaded. Printing now.")
 for curve in m12.curves:
     curve.printSelf()
+"""
 
 print("If you see this, then all previous assertations were true!")
