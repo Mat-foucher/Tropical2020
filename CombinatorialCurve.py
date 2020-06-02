@@ -522,6 +522,8 @@ class CombCurve(object):
         def __init__(self):
             # Tree Parent
             self.parent = None
+            # Edge connecting self to parent
+            self.parentConnection = None
             # Node holds a vertex value
             self.value = None
             # List of (Tree, Edge) children
@@ -542,6 +544,7 @@ class CombCurve(object):
                 childTree = Tree()
                 childTree.setValue(vert)
                 childTree.setParent(self)
+                childTree.parentConnection = connectingEdge
                 self.children.append((childTree, connectingEdge))
 
         def getEdges(self):
@@ -580,24 +583,37 @@ class CombCurve(object):
             else:
                 return self.parent.findVertex(vert)
 
+        def getAncestorEdges(self, vert):
+            currentTree = self.findVertex(vert)
+            ancestorEdges = []
+
+            while currentTree.parent is not None:
+                ancestorEdges.append(self.parentConnection)
+                currentTree = currentTree.parent
+
+            return ancestorEdges
+
 
 
     @property
     def spanningTree(self):
-        pass
+        return Tree()
 
     def getLoop(self, e):
         if e not in self.spanningTree.edges:
             raise ValueError("Edge " + e.name + " must not belong to the spanning tree to determine a unique loop.")
 
-        anc1 = self.spanningTree.getAncestors(e.vert1)
-        anc2 = self.spanningTree.getAncestors(e.vert2)
+        anc1 = self.spanningTree.getAncestorEdges(e.vert1)
+        anc2 = self.spanningTree.getAncestorEdges(e.vert2)
 
         leastAncestorIndex = 0
         for i in range(min(len(anc1), len(anc2))):
             if anc1[i] != anc2[i]:
                 break
             leastAncestorIndex = i
+
+        anc1 = anc1[leastAncestorIndex:]
+        anc2 = anc2[leastAncestorIndex:]
 
         return anc1.reverse() + [e] + anc2
 
