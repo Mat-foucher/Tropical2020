@@ -517,3 +517,157 @@ class CombCurve(object):
 
         # Return the saved copy of the core (possibly just calculated)
         return self._coreCache
+
+    class Tree:
+        def __init__(self):
+            # Tree Parent
+            self.parent = None
+            # Edge connecting self to parent
+            self.parentConnection = None
+            # Node holds a vertex value
+            self.value = None
+            # List of (Tree, Edge) children
+            self.children = []
+
+        def setValue(self, vert):
+            self.value = vert
+
+        def setParent(self, p):
+            self.parent = p
+
+        def addChild(self, vert, connectingEdge):
+            if (
+                    # Don't allow a self loop to be added
+                    (vert != self.value) and
+                    # Make sure connectingEdge is actually a connecting edge
+                    (connectingEdge.vertices == {self.value, vert}) and
+                    # Don't introduce any loops
+                    (vert not in self.getVertices())
+            ):
+                childTree = CombCurve.Tree()
+                childTree.setValue(vert)
+                childTree.setParent(self)
+                childTree.parentConnection = connectingEdge
+                self.children.append((childTree, connectingEdge))
+
+        def getEdgesOfChildren(self):
+            edges = []
+            for child in self.children:
+                childTree, connectingEdge = child
+                edges.append(connectingEdge)
+                edges += childTree.getEdgesOfChildren()
+            return edges
+
+        def getEdges(self):
+            # If we're actually the root of the whole tree, then descend recursively
+            if self.parent is None:
+                return self.getEdgesOfChildren()
+            else:
+                return self.parent.getEdges()
+
+        def getVerticesFromChildren(self):
+            vertices = {self.value}
+            for child in self.children:
+                childTree, connectingEdge = child
+                vertices = vertices | childTree.getVerticesFromChildren()
+            return vertices
+
+        def getVertices(self):
+            if self.parent is None:
+                return self.getVerticesFromChildren()
+            else:
+                return self.parent.getVertices()
+
+        def findVertexInChildren(self, vert):
+            if self.value == vert:
+                return self
+            else:
+                for child in self.children:
+                    childTree, connectingEdge = child
+                    possibleFind = childTree.findVertexInChildren(vert)
+                    if possibleFind is not None:
+                        return possibleFind
+                return None
+
+        def findVertex(self, vert):
+            if self.parent is None:
+                return self.findVertexInChildren(vert)
+            else:
+                return self.parent.findVertex(vert)
+
+        def getAncestorEdges(self, vert):
+            currentTree = self.findVertex(vert)
+            ancestorEdges = []
+
+            while currentTree.parent is not None:
+                ancestorEdges.append(self.parentConnection)
+                currentTree = currentTree.parent
+
+            return ancestorEdges
+
+
+
+    @property
+    def spanningTree(self):
+        return getSpanningTree(list(self.vertices)[0])
+
+    # Will return a list of edges in a loop.
+    def getLoop(self, e):
+        if e not in self.spanningTree.edges:
+            raise ValueError("Edge " + e.name + " must not belong to the spanning tree to determine a unique loop.")
+
+        anc1 = self.spanningTree.getAncestorEdges(e.vert1)
+        anc2 = self.spanningTree.getAncestorEdges(e.vert2)
+
+        leastAncestorIndex = 0
+        for i in range(min(len(anc1), len(anc2))):
+            if anc1[i] != anc2[i]:
+                break
+            leastAncestorIndex = i
+
+        anc1 = anc1[leastAncestorIndex:]
+        anc2 = anc2[leastAncestorIndex:]
+
+        return anc1.reverse() + [e] + anc2
+
+    @property
+    # Returns a list of lists of edges.
+    def loops(self):
+        loopDeterminers = self.edges - self.spanningTree.edges
+        _loops = []
+        for nextEdge in loopDeterminers:
+            _loops.append(self.getLoop(nextEdge))
+        return _loops
+
+    def getSpanningTree(self, vert):
+        
+        if not self.isConnected:
+            raise ValueError("A spanning tree is only defined for a connected graph")
+
+        tree = self.Tree()          
+        tree.setValue(vert)
+
+        verticesToCheck = {vert}
+
+        while len(verticesToCheck) > 0:
+
+            nextVertex = verticesToCheck.pop()
+
+            connectedEdges = {e for e in self.edges if (nextVertex == e.vert1 or nextVertex == e.vert2)} 
+
+            adjacentVertices = set()          
+
+            for e in connectedEdges:
+                adjacentVertices = adjacentVertices | e.vertices 
+
+            newAdjacentVertices = adjacentVertices - set(tree.getVertices())
+
+            nextTree = tree.findVertex(nextVertex)    
+
+            for v in newAdjacentVertices:
+                connectingEdge = {e for e in self.edges if e.vertices == {nextVertex, v}}.pop()
+                nextTree.addChild(v, connectingEdge)
+
+            verticesToCheck = verticesToCheck | newAdjacentVertices
+
+        return tree
