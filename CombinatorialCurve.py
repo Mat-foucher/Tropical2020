@@ -563,6 +563,23 @@ class CombCurve(object):
                 vertices.append(e.vert2)
             return vertices
 
+        def searchForVertexInChildren(self, vert):
+            if self.value == vert:
+                return self
+            else:
+                for child in self.children:
+                    childTree, connectingEdge = child
+                    possibleFind = childTree.searchForVertexInChildren(vert)
+                    if possibleFind is not None:
+                        return possibleFind
+                return None
+
+        def findVertex(self, vert):
+            if self.parent is None:
+                return self.searchForVertexInChildren(vert)
+            else:
+                return self.parent.findVertex(vert)
+
 
 
     @property
