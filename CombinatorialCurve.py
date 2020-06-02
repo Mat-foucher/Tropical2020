@@ -558,36 +558,36 @@ class CombCurve(object):
         def getEdges(self):
             # If we're actually the root of the whole tree, then descend recursively
             if self.parent is None:
-                edges = []
-                for child in self.children:
-                    childTree, connectingEdge = child
-                    edges.append(connectingEdge)
-                    edges += childTree.getEdgesOfChildren()
-                return edges
+                return self.getEdgesOfChildren()
             else:
                 return self.parent.getEdges()
 
-        def getVertices(self):
-            vertices = Set()
-            for e in self.getEdges():
-                vertices.add(e.vert1)
-                vertices.add(e.vert2)
+        def getVerticesFromChildren(self):
+            vertices = Set(self.value)
+            for child in self.children:
+                vertices = vertices | child.getVerticesFromChildren
             return vertices
 
-        def searchForVertexInChildren(self, vert):
+        def getVertices(self):
+            if self.parent is None:
+                return self.getEdgesOfChildren()
+            else:
+                return self.parent.getEdges()
+
+        def findVertexInChildren(self, vert):
             if self.value == vert:
                 return self
             else:
                 for child in self.children:
                     childTree, connectingEdge = child
-                    possibleFind = childTree.searchForVertexInChildren(vert)
+                    possibleFind = childTree.findVertexInChildren(vert)
                     if possibleFind is not None:
                         return possibleFind
                 return None
 
         def findVertex(self, vert):
             if self.parent is None:
-                return self.searchForVertexInChildren(vert)
+                return self.findVertexInChildren(vert)
             else:
                 return self.parent.findVertex(vert)
 
