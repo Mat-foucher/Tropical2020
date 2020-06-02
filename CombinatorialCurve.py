@@ -547,14 +547,22 @@ class CombCurve(object):
                 childTree.parentConnection = connectingEdge
                 self.children.append((childTree, connectingEdge))
 
+        def getEdgesOfChildren(self):
+            edges = []
+            for child in self.children:
+                childTree, connectingEdge = child
+                edges.append(connectingEdge)
+                edges += childTree.getEdgesOfChildren()
+            return edges
+
         def getEdges(self):
-            # If we're actually the root of the whole tree, then
+            # If we're actually the root of the whole tree, then descend recursively
             if self.parent is None:
                 edges = []
                 for child in self.children:
                     childTree, connectingEdge = child
                     edges.append(connectingEdge)
-                    edges += childTree.getEdges()
+                    edges += childTree.getEdgesOfChildren()
                 return edges
             else:
                 return self.parent.getEdges()
