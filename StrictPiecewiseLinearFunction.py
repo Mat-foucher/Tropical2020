@@ -151,6 +151,7 @@ class StrictPiecewiseLinearFunction(object):
 
         return integral
 
+    # We probably will not need this.
     def getEdgeSlopesFrom(self, v1, v2):
 
         edgesAndSlopes = {'edge' : 'slope'}
