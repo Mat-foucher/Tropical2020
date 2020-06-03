@@ -112,14 +112,53 @@ class StrictPiecewiseLinearFunction(object):
         # print("S:", foundAnSVertex, "T:", foundATVertex)
         return False
 
+    # Returns twice the integral of self over the supplied path
+    def doubleIntegrateOverPath(self, path):
+        if len(path) == 0:
+            return 0
+        if len(path) == 1:
+            return self.functionValues[path[0]]
+
+        integral = 0
+
+        # Integrate over everything except for the very last edge of the path
+        for edgeIndex in range(len(path)-1):
+            currentEdge = path[edgeIndex]
+            nextEdge = path[edgeIndex + 1]
+
+            if (currentEdge.vertices.intersection(nextEdge.vertices)) == 0:
+                raise ValueError("The supplied list of edges is not a path.")
+            connectingVertex = currentEdge.vertices.intersection(nextEdge.vertices).pop()
+
+            # Passing over currentEdge from vert1 to vert 2 <=> normal orientation
+            if connectingVertex == currentEdge.vert2:
+                integral += self.functionValues[currentEdge] * currentEdge.length
+            else:
+                integral += -1 * self.functionValues[currentEdge] * currentEdge.length
+
+        # Integrate over the very last edge
+        secondToLastEdge = path[len(path) - 2]
+        lastEdge = path[len(path) - 1]
+        if (secondToLastEdge.vertices.intersection(lastEdge.vertices)) == 0:
+            raise ValueError("The supplied list of edges is not a path.")
+        connectingVertex = secondToLastEdge.vertices.intersection(lastEdge.vertices).pop()
+
+        # Passing over currentEdge from vert1 to vert 2 <=> normal orientation
+        if connectingVertex == lastEdge.vert2:
+            integral += self.functionValues[lastEdge] * lastEdge.length
+        else:
+            integral += -1 * self.functionValues[lastEdge] * lastEdge.length
+
+        return integral
+
     def getEdgeSlopesFrom(self, v1, v2):
 
         edgesAndSlopes = {'edge' : 'slope'}
 
         firstVertexSet = self.domain.vertices - v2
         secondVertexSet = self.domain.vertices - v1
-        
-        if ! self.domain.isConnected:
+
+        if not self.domain.isConnected:
             raise ValueError("Curve is disconnected, please compute edge slopes for connected components only.")
 
         edgesToCheckForSlope = {e for e in self.domain.edges if e.vert1 == v1}
