@@ -144,27 +144,12 @@ class TropicalModuliSpace(object):
                         newCurves.append(vertexSplitCurve)
 
         # Reduce before we go down a level
-        newCurvesBuffer, bufferReductionInfo = self.reduceByIsomorphism(newCurves, returnReductionInformation=True)
+        newCurvesBuffer = self.reduceByIsomorphism(newCurves)
         newCurves = []
         for c in newCurvesBuffer:
-            searchInfo = self.containsUpToIsomorphism(c, returnMatch=True)
-            cAlreadyPresent = searchInfo[0]
-            match = searchInfo[1]
-            if not cAlreadyPresent:
+            if not self.containsUpToIsomorphism(c):
                 newCurves.append(c)
-                self.contractionDict[c] = [(curve, len(bufferReductionInfo[c]))]
                 self.addCurve(c)
-            else:
-                oldContractionValue = self.contractionDict[match]
-                newContractionValue = []
-                for contractionPair in oldContractionValue:
-                    contractionCurve = contractionPair[0]
-                    contractionNum = contractionPair[1]
-                    if contractionCurve == curve:
-                        newContractionValue.append((curve, contractionNum + len(bufferReductionInfo[c])))
-                    else:
-                        newContractionValue.append(contractionPair)
-                self.contractionDict[match] = newContractionValue
 
         #print("Found ", len(newCurves), " new curves")
         #print("Currently have ", len(self.curves), " curves!")
@@ -191,6 +176,18 @@ class TropicalModuliSpace(object):
         # generation_complete_time = time.time()
 
         # print("Generation time: ", generation_complete_time - start_time)
+
+    def generateContractionDictionary(self):
+        for curve in self.curves:
+            contractionPairs = []
+            for nextEdge in curve.edges:
+                contractionCurve = curve.getContraction(nextEdge)
+                p = self.containsUpToIsomorphism(contractionCurve, returnMatch=True)
+                containsAMatch = p[0]
+                match = p[1]
+                assert containsAMatch
+                contractionPairs.append((match, nextEdge))
+            self.contractionDict[curve] = contractionPairs
 
     # Returns the specialization of 'curve' at 'vert' as determined by g1, g2, S, and T
     # Specifically, 'vert' is split into two vertices, v1 and v2, of genuses g1 and g2 respectively,
