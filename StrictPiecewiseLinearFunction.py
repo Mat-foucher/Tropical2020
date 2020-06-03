@@ -151,6 +151,13 @@ class StrictPiecewiseLinearFunction(object):
 
         return integral
 
+    @property
+    def assertIsWellDefined(self):
+        for l in self.domain.loops:
+            change = self.doubleIntegrateOverPath(l)
+
+            assert change == 0.0
+
     # We probably will not need this.
     def getEdgeSlopesFrom(self, v1, v2):
 
@@ -230,6 +237,8 @@ class StrictPiecewiseLinearFunction(object):
             connectedComponents.append(supportComponentEdges)
 
         return connectedComponents
+
+    
 
     @property
     def mesaTest(self):

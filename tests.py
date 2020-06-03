@@ -34,13 +34,16 @@ f = StrictPiecewiseLinearFunction(C, dict)
 
 s = f.getSpecialSupportPartition()
 
-# For now we can say, that f is a mesa until we discuss.
+assert f.assertIsWellDefined
+
+# For now we can say that f is NOT a mesa until we discuss.
 assert not f.mesaTest
 
 assert s == [{e1, e3, e4}]
 
 assert f.functionValues[v1] == 1.0
 for v in C.vertices:
+    #print(v.name)
     assert (f + f).functionValues[v] == f.functionValues[v] + f.functionValues[v]
     assert (f - f).functionValues[v] == f.functionValues[v] - f.functionValues[v]
     assert (f * f).functionValues[v] == f.functionValues[v] * f.functionValues[v]
