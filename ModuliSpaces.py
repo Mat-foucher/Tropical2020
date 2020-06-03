@@ -11,6 +11,9 @@ class TropicalModuliSpace(object):
         self._curves = set()
         # Curves organized by number of edges
         self._curvesDict = {}
+        # Dictionary tracking what each curve can contract to
+        # contractionDict[curve]: List[(contraction, number of ways the contraction can occur)]
+        self.contractionDict = {}
 
     @property
     def curves(self):
@@ -45,11 +48,10 @@ class TropicalModuliSpace(object):
 
         return partition
 
-    def reduceByIsomorphism(self, curves=None):
+    def reduceByIsomorphism(self, curves=None, returnReductionInformation=False):
 
         modifySelf = (curves is None)
         if modifySelf:
-
             for n in self.curvesDict:
                 self.curvesDict[n] = self.reduceByIsomorphism(self.curvesDict[n])
             self.curves = set()
@@ -67,18 +69,32 @@ class TropicalModuliSpace(object):
                         break
                 if newIsotype:
                     isotypes.append([curve])
-            return {t[0] for t in isotypes}
+            if returnReductionInformation:
+                reductionDict = []
+                for t in isotypes:
+                    reductionDict[t[0]] = t
+                return {t[0] for t in isotypes}, reductionDict
+            else:
+                return {t[0] for t in isotypes}
 
-    def containsUpToIsomorphism(self, curve):
+    def containsUpToIsomorphism(self, curve, returnMatch=False):
 
         if curve.edgeNumber not in self.curvesDict:
-            return False
+            if returnMatch:
+                return False, None
+            else:
+                return False
         else:
             for c in self.curvesDict[curve.edgeNumber]:
-                if c.isIsomorphicTo(curve):
+                if c.isIsomorphicTo(curve) and returnMatch:
+                    return True, c
+                else:
                     return True
 
-        return False
+        if returnMatch:
+            return False, None
+        else:
+            return False
 
     def addCurve(self, curve):
         # if not self.containsUpToIsomorphism(curve):
@@ -127,12 +143,25 @@ class TropicalModuliSpace(object):
                         newCurves.append(vertexSplitCurve)
 
         # Reduce before we go down a level
-        newCurvesBuffer = self.reduceByIsomorphism(newCurves)
+        newCurvesBuffer, bufferReductionInfo = self.reduceByIsomorphism(newCurves, returnReductionInformation=True)
         newCurves = []
         for c in newCurvesBuffer:
-            if not self.containsUpToIsomorphism(c):
+            cAlreadyPresent, match = self.containsUpToIsomorphism(c, returnMatch=True)
+            if not cAlreadyPresent:
                 newCurves.append(c)
+                self.contractionDict[c] = [(curve, len(bufferReductionInfo[c]))]
                 self.addCurve(c)
+            else:
+                oldContractionValue = self.contractionDict[match]
+                newContractionValue = []
+                for contractionPair in oldContractionValue:
+                    contractionCurve = contractionPair[0]
+                    contractionNum = contractionPair[1]
+                    if contractionCurve == curve:
+                        newContractionValue.append((curve, contractionNum + len(bufferReductionInfo[c])))
+                    else:
+                        newContractionValue.append(contractionPair)
+                self.contractionDict[match] = newContractionValue
 
         #print("Found ", len(newCurves), " new curves")
         #print("Currently have ", len(self.curves), " curves!")
