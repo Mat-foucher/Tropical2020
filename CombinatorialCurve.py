@@ -600,7 +600,7 @@ class CombCurve(object):
             ancestorEdges = []
 
             while currentTree.parent is not None:
-                ancestorEdges.append(self.parentConnection)
+                ancestorEdges.append(currentTree.parentConnection)
                 currentTree = currentTree.parent
 
             return ancestorEdges
@@ -609,31 +609,41 @@ class CombCurve(object):
 
     @property
     def spanningTree(self):
-        return getSpanningTree(list(self.vertices)[0])
+        return self.getSpanningTree(list(self.vertices)[0])
 
     # Will return a list of edges in a loop.
     def getLoop(self, e):
-        if e not in self.spanningTree.edges:
+        spanningTree = self.spanningTree
+        if e in spanningTree.getEdges():
             raise ValueError("Edge " + e.name + " must not belong to the spanning tree to determine a unique loop.")
 
-        anc1 = self.spanningTree.getAncestorEdges(e.vert1)
-        anc2 = self.spanningTree.getAncestorEdges(e.vert2)
+        anc1 = spanningTree.getAncestorEdges(e.vert1)
+        anc2 = spanningTree.getAncestorEdges(e.vert2)
 
         leastAncestorIndex = 0
         for i in range(min(len(anc1), len(anc2))):
+            leastAncestorIndex = i
             if anc1[i] != anc2[i]:
                 break
-            leastAncestorIndex = i
+        else:
+            leastAncestorIndex = min(len(anc1), len(anc2))
 
         anc1 = anc1[leastAncestorIndex:]
         anc2 = anc2[leastAncestorIndex:]
+        anc1.reverse()
 
-        return anc1.reverse() + [e] + anc2
+        if anc1 == [None]:
+            anc1 = []
 
-    @property
+        if anc2 == [None]:
+            anc2 = []
+
+        return anc1 + [e] + anc2
+
     # Returns a list of lists of edges.
+    @property
     def loops(self):
-        loopDeterminers = self.edges - self.spanningTree.edges
+        loopDeterminers = self.edges - set(self.spanningTree.getEdges())
         _loops = []
         for nextEdge in loopDeterminers:
             _loops.append(self.getLoop(nextEdge))
