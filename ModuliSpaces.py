@@ -70,7 +70,7 @@ class TropicalModuliSpace(object):
                 if newIsotype:
                     isotypes.append([curve])
             if returnReductionInformation:
-                reductionDict = []
+                reductionDict = {}
                 for t in isotypes:
                     reductionDict[t[0]] = t
                 return {t[0] for t in isotypes}, reductionDict
@@ -86,10 +86,11 @@ class TropicalModuliSpace(object):
                 return False
         else:
             for c in self.curvesDict[curve.edgeNumber]:
-                if c.isIsomorphicTo(curve) and returnMatch:
-                    return True, c
-                else:
-                    return True
+                if c.isIsomorphicTo(curve):
+                    if returnMatch:
+                        return True, c
+                    else:
+                        return True
 
         if returnMatch:
             return False, None
@@ -146,7 +147,9 @@ class TropicalModuliSpace(object):
         newCurvesBuffer, bufferReductionInfo = self.reduceByIsomorphism(newCurves, returnReductionInformation=True)
         newCurves = []
         for c in newCurvesBuffer:
-            cAlreadyPresent, match = self.containsUpToIsomorphism(c, returnMatch=True)
+            searchInfo = self.containsUpToIsomorphism(c, returnMatch=True)
+            cAlreadyPresent = searchInfo[0]
+            match = searchInfo[1]
             if not cAlreadyPresent:
                 newCurves.append(c)
                 self.contractionDict[c] = [(curve, len(bufferReductionInfo[c]))]
