@@ -68,6 +68,13 @@ class TreeTests:
         # The betti number of a tree must be zero
         assert len(tree.getVertices()) == len(tree.getEdges()) + 1
 
+    @staticmethod
+    def verifyLoops(curve, loops):
+        curveLoops = set()
+        for loop in curve.loops:
+            curveLoops.add(frozenset(loop))
+        assert curveLoops == loops
+
 
 class ModuliSpaceTests:
     @staticmethod
@@ -121,6 +128,7 @@ CurveTests.testCore(C)
 TreeTests.testTreeAt(C, v1)
 TreeTests.testTreeAt(C, v2)
 TreeTests.testTreeAt(C, v3)
+TreeTests.verifyLoops(C, {frozenset({e4}), frozenset({e1, e2, e3})})
 
 dict = {v1: 1.0, v2: 0.0, v3: 0.0, l: 0.0}
 f = StrictPiecewiseLinearFunction(C, dict)
@@ -175,8 +183,14 @@ e7 = edge("e7", 1.0, v3, v3)
 C.addEdges({e1, e2, e3, e4, e5, e6, e7})
 CurveTests.verifyGenus(C, 5)
 CurveTests.verifyBettiNumber(C, 5)
+# Do not uncomment the following line of code - a basis of loops for this curve is NOT unique.
+# This line has been retained so it isn't added back in later.
+# TreeTests.verifyLoops(C, {frozenset({e1, e3, e4}), frozenset({e2, e3}), frozenset({e5}), frozenset({e6}), frozenset({e7})})
 
-
+# for loop in C.loops:
+#     print("Printing a loop")
+#     for e in loop:
+#         print(e.name)
 
 
 
@@ -196,6 +210,7 @@ CurveTests.verifyGenus(C, 5)
 CurveTests.verifyBettiNumber(C, 0)
 for v in C.vertices:
     assert v.genus <= 1
+TreeTests.verifyLoops(C, set())
 
 
 
