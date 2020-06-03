@@ -248,12 +248,12 @@ class CombCurve(object):
 
     # Returns the degree of vertex v accounting for legs and self loops
     def degree(self, v):
-        return self.numEdgesAttached(v) + self.numLegsAttached(v)
+        return self.edgeDegree(v) + self.legDegree(v)
 
-    def numEdgesAttached(self, v):
+    def edgeDegree(self, v):
         return sum(1 for e in self.edges if e.vert1 == v) + sum(1 for e in self.edges if e.vert2 == v)
 
-    def numLegsAttached(self, v):
+    def legDegree(self, v):
         return sum(1 for attachedLeg in self.legs if attachedLeg.root == v)
 
     # Returns a copy of this curve where all vertices, edges, and legs are also copied shallowly
@@ -340,10 +340,10 @@ class CombCurve(object):
         if not self._vertexEverythingCacheValid:
             self._vertexEverythingCache = {}
             for v in self.vertices:
-                numEdgesAttached = self.numEdgesAttached(v)
-                numLegsAttached = self.numLegsAttached(v)
+                edgeDegree = self.edgeDegree(v)
+                legDegree = self.legDegree(v)
                 g = v.genus
-                key = (numEdgesAttached, numLegsAttached, g)
+                key = (edgeDegree, legDegree, g)
                 if key in self._vertexEverythingCache:
                     self._vertexEverythingCache[key] += 1
                 else:
@@ -355,10 +355,10 @@ class CombCurve(object):
     def getVerticesByEverything(self):
         vertexDict = {}
         for v in self.vertices:
-            numEdgesAttached = self.numEdgesAttached(v)
-            numLegsAttached = self.numLegsAttached(v)
+            edgeDegree = self.edgeDegree(v)
+            legDegree = self.legDegree(v)
             g = v.genus
-            key = (numEdgesAttached, numLegsAttached, g)
+            key = (edgeDegree, legDegree, g)
             if key in vertexDict:
                 vertexDict[key].append(v)
             else:
