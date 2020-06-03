@@ -41,7 +41,7 @@ class StrictPiecewiseLinearFunction(object):
         assert other.domain == self.domain
 
         newFunctionValues = {}
-        for v in self.domain.vertices:
+        for v in self.domain.edges:
             newFunctionValues[v] = self.functionValues[v] + other.functionValues[v]
         for leg in self.domain.legs:
             newFunctionValues[leg] = self.functionValues[leg] + other.functionValues[leg]
@@ -111,6 +111,42 @@ class StrictPiecewiseLinearFunction(object):
 
         # print("S:", foundAnSVertex, "T:", foundATVertex)
         return False
+
+    def getEdgeSlopesFrom(self, v1, v2):
+
+        edgesAndSlopes = {'edge' : 'slope'}
+
+        firstVertexSet = self.domain.vertices - v2
+        secondVertexSet = self.domain.vertices - v1
+        
+        if ! self.domain.isConnected:
+            raise ValueError("Curve is disconnected, please compute edge slopes for connected components only.")
+
+        edgesToCheckForSlope = {e for e in self.domain.edges if e.vert1 == v1}
+        edgesChecked = set()
+        
+        while len(edgesToCheckForSlope) > 0:
+            nextEdgeToCheck = edgesToCheckForSlope.pop()
+            edgesChecked = edgesChecked | {nextEdgeToCheck}
+
+            v1Val = 0.0
+
+            for key, value in self.functionValues:
+                if nextEdgeToCheck.vert1 == key:
+                    v1Val = value
+            
+            for key, value in self.functionValues:
+                if nextEdgeToCheck.vert2 == key:
+                    edgesAndSlopes[key] = value - v1Val
+
+            if (nextEdge.vert2 == v2):
+                return edgesAndSlopes
+
+            edgesToCheckForSlope = edgesToCheckForSlope | ({e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesChecked)
+
+        raise ValueError("No path from v1 to v2 exists")
+
+
 
     def getSpecialSupport(self):
 
