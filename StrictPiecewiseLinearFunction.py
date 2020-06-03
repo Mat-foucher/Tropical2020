@@ -76,6 +76,7 @@ class StrictPiecewiseLinearFunction(object):
             allowedVertices = self.domain.vertices
 
         edgesToCheck = {e for e in self.domain.edges if (vert in e.vertices and vert in allowedVertices)}
+
         """
         print("S verts: ")
         for e in S:

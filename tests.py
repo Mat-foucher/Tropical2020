@@ -46,6 +46,8 @@ C.addLeg(l)
 
 CurveTests.testCore(C)
 
+cTree = C.getSpanningTree(v1)
+
 dict = {v1: 1.0, v2: 0.0, v3: 0.0, l: 0.0}
 
 f = StrictPiecewiseLinearFunction(C, dict)
@@ -366,6 +368,10 @@ assert C.isIsomorphicTo(D)
 
 # Generate some small, known, moduli spaces
 
+m10 = TropicalModuliSpace(1, 0)
+m10.generateSpaceDFS()
+assert len(m10.curves) == 1
+
 m11 = TropicalModuliSpace(1, 1)
 m11.generateSpaceDFS()
 assert len(m11.curves) == 2
@@ -410,7 +416,18 @@ print("Loading curves from file.")
 m12.loadModuliSpaceFromFile("SavedModuliSpaces/M-1-2.txt")
 print("Curves loaded. Printing now.")
 for curve in m12.curves:
+    
     curve.printSelf()
 """
+
+print("From meeting on june 1: ")
+
+M = TropicalModuliSpace(3,0)
+M.generateSpaceDFS()
+
+A = {X for X in M.curves if len(X.edges) == 6}
+for X in A:
+    X.simplifyNames()
+    X.printSelf()
 
 print("If you see this, then all previous assertations were true!")
