@@ -160,60 +160,6 @@ class TropicalModuliSpace(object):
 
         # print("Generation time: ", generation_complete_time - start_time)
 
-    def generateSpace(self, suppressComments=True):
-
-        seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
-        v = vertex("v", self._g)
-        seedCurve.legs = {leg("leg " + str(i), v) for i in range(self._n)}
-
-        self._curves = self._curves | {seedCurve}
-
-        newCurves = [seedCurve]
-
-        while newCurves:
-            if not suppressComments:
-                print("Found ", len(newCurves), " new curves. Reducing now.")
-            curveBuffer = list(self.reduceByIsomorphism(newCurves))
-            if not suppressComments:
-                print("Reduced to ", len(curveBuffer), " new curves.")
-            self._curves = self._curves | set(curveBuffer)
-            newCurves = []
-            # print("\n\n\n\n\n\n###################### Moving to next level ######################\n\n\n\n\n\n")
-            while curveBuffer:
-                currentCurve = curveBuffer[0]
-
-                # print("\n\n\nCurrent curve:")
-                # self.printCurve(currentCurve)
-
-                for vert in currentCurve.vertices:
-
-                    endpointPartitions = self.getPartitions(currentCurve.getEndpointsOfEdges(vert))
-
-                    if vert.genus > 1:
-                        # print("\nGenus reducing vertex: " + vert.name)
-                        genusReducedCurve = self.getGenusReductionSpecialization(currentCurve, vert)
-                        newCurves.append(genusReducedCurve)
-                        # self.printCurve(genusReducedCurve)
-                    elif vert.genus == 1 and currentCurve.degree(vert) > 0:
-                        genusReducedCurve = self.getGenusReductionSpecialization(currentCurve, vert)
-                        newCurves.append(genusReducedCurve)
-
-                    for g in range(vert.genus + 1):
-                        for p in endpointPartitions:
-                            S, T = p
-                            if not ((g == 0 and len(S) < 2) or (g == vert.genus and len(T) < 2)):
-                                # print("\nSplitting vertex: " + vert.name)
-                                vertexSplitCurve = self.getSplittingSpecialization(currentCurve, vert, g,
-                                                                                   vert.genus - g, S, T)
-                                newCurves.append(vertexSplitCurve)
-                                # self.printCurve(vertexSplitCurve)
-                curveBuffer.remove(currentCurve)
-
-                # print("Current buffer length: ", len(curveBuffer))
-                # print("Number of new curves this loop: ", len(newCurves))
-
-        return self._curves
-
     # Returns the specialization of 'curve' at 'vert' as determined by g1, g2, S, and T
     # Specifically, 'vert' is split into two vertices, v1 and v2, of genuses g1 and g2 respectively,
     # where g1+g2 == vert.genus
@@ -299,10 +245,6 @@ class TropicalModuliSpace(object):
         self.specializeByReducingGenus(c, copyInfo[vert])
         return c
 
-
-
-
-
     def loadModuliSpaceFromFile(self, filename, curveEntryDelimiter = "=", encoding = 'utf-8'):
         self.curves = set()
         with open(filename, mode='r', encoding=encoding) as f:
@@ -349,14 +291,6 @@ class TropicalModuliSpace(object):
                 c.legs = legs
 
                 self.curves.add(c)
-
-
-
-
-
-
-
-
 
     def saveModuliSpaceToFile(self, filename = "", curveEntryDelimiter = "=", encoding = 'utf-8'):
         if filename == "":
