@@ -6,21 +6,49 @@ import time
 
 class CurveTests:
     @staticmethod
+    def verifyStructure(curve, verts, edges, legs):
+        assert curve.vertices == verts
+        assert curve.edges == edges
+        assert curve.legs == legs
+
+    @staticmethod
+    def verifyDegree(curve, vert, deg):
+        assert curve.degree(vert) == deg
+
+    @staticmethod
+    def verifyGenus(curve, genus):
+        assert curve.genus == genus
+
+    @staticmethod
+    def verifyBettiNumber(curve, bettiNum):
+        assert curve.bettiNumber == bettiNum
+
+    @staticmethod
     def testCore(curve):
         assert curve.core.isConnected
         assert curve.core.genus == curve.genus
 
     @staticmethod
-    def testConnectedness(curve, connected=True):
+    def verifyConnectedness(curve, connected=True):
         assert curve.isConnected == connected
+
+    @staticmethod
+    def verifyAndTestEndpointsOfEdges(curve, vert, endpoints):
+        assert curve.getEndpointsOfEdges(vert) == endpoints
+        assert len(endpoints) == curve.edgeDegree(vert) + curve.legDegree(vert)
+
+    @staticmethod
+    def verifyIsomorphism(curve1, curve2, isIsomorphic=True):
+        assert curve1.isIsomorphicTo(curve2) == isIsomorphic
+
 
 class SPLFTests:
     @staticmethod
-    def testMesa(func, isMesa=True):
+    def verifyMesa(func, isMesa=True):
         assert func.mesaTest == isMesa
 
     @staticmethod
-    def testSpecialSupport(func, supportBlocks):
+    def verifySpecialSupport(func, supportBlocks):
         assert func.getSpecialSupportPartition() == supportBlocks
 
     @staticmethod
@@ -29,6 +57,48 @@ class SPLFTests:
             assert (func + func).functionValues[vert] == func.functionValues[vert] + func.functionValues[vert]
             assert (func - func).functionValues[vert] == func.functionValues[vert] - func.functionValues[vert]
             assert (func * func).functionValues[vert] == func.functionValues[vert] * func.functionValues[vert]
+
+
+class TreeTests:
+    @staticmethod
+    def testTreeAt(curve, vert):
+        tree = curve.getSpanningTree(vert)
+        # The tree must be a spanning tree
+        assert tree.getVertices() == curve.vertices
+        # The betti number of a tree must be zero
+        assert len(tree.getVertices()) == len(tree.getEdges()) + 1
+
+
+class ModuliSpaceTests:
+    @staticmethod
+    def verifyCommonSizes():
+        m10 = TropicalModuliSpace(1, 0)
+        m10.generateSpaceDFS()
+        assert len(m10.curves) == 1
+
+        m11 = TropicalModuliSpace(1, 1)
+        m11.generateSpaceDFS()
+        assert len(m11.curves) == 2
+
+        m12 = TropicalModuliSpace(1, 2)
+        m12.generateSpaceDFS()
+        assert len(m12.curves) == 5
+
+        m13 = TropicalModuliSpace(1, 3)
+        m13.generateSpaceDFS()
+        assert len(m13.curves) == 11
+
+        m14 = TropicalModuliSpace(1, 4)
+        m14.generateSpaceDFS()
+        assert len(m14.curves) == 30
+
+        m15 = TropicalModuliSpace(1, 5)
+        m15.generateSpaceDFS()
+        assert len(m15.curves) == 76
+
+        m22 = TropicalModuliSpace(2, 2)
+        m22.generateSpaceDFS()
+        assert len(m22.curves) == 60
 
 C = CombCurve("Example 3.5")
 
@@ -44,37 +114,37 @@ l = leg("l", v1)
 C.addEdges({e1, e2, e3, e4})
 C.addLeg(l)
 
+CurveTests.verifyStructure(C, {v1, v2, v3}, {e1, e2, e3, e4}, {l})
+
 CurveTests.testCore(C)
 
-cTree = C.getSpanningTree(v1)
+TreeTests.testTreeAt(C, v1)
+TreeTests.testTreeAt(C, v2)
+TreeTests.testTreeAt(C, v3)
 
 dict = {v1: 1.0, v2: 0.0, v3: 0.0, l: 0.0}
-
 f = StrictPiecewiseLinearFunction(C, dict)
 
-SPLFTests.testMesa(f, isMesa=False)
-SPLFTests.testSpecialSupport(f, [{e1, e3, e4}])
+SPLFTests.verifyMesa(f, isMesa=False)
+SPLFTests.verifySpecialSupport(f, [{e1, e3, e4}])
 SPLFTests.testSelfArithmetic(f)
 
-assert C.vertices == {v1, v2, v3}
+CurveTests.verifyAndTestEndpointsOfEdges(C, v1, {(e1, 1), (e3, 1), (e4, 1), (e4, 2), (l, 1)})
+CurveTests.verifyAndTestEndpointsOfEdges(C, v2, {(e1, 2), (e2, 1)})
+CurveTests.verifyAndTestEndpointsOfEdges(C, v3, {(e2, 2), (e3, 2)})
 
-assert C.getEndpointsOfEdges(v1) == {(e1, 1), (e3, 1), (e4, 1), (e4, 2), (l, 1)}
-assert C.getEndpointsOfEdges(v2) == {(e1, 2), (e2, 1)}
-assert C.getEndpointsOfEdges(v3) == {(e2, 2), (e3, 2)}
-
-assert C.degree(v1) == 5
-assert C.degree(v2) == 2
-assert C.degree(v3) == 2
-
-assert C.genus == 3
-assert C.bettiNumber == 2
+CurveTests.verifyDegree(C, v1, 5)
+CurveTests.verifyDegree(C, v2, 2)
+CurveTests.verifyDegree(C, v3, 2)
+CurveTests.verifyGenus(C, 3)
+CurveTests.verifyBettiNumber(C, 2)
 
 subdiv, copyInfo = C.getSubdivision(e4, 0.5, returnCopyInfo=True)
-assert subdiv.degree(copyInfo[v1]) == 5
-assert subdiv.degree(copyInfo[v2]) == 2
-assert subdiv.degree(copyInfo[v3]) == 2
-assert subdiv.bettiNumber == 2
-assert subdiv.genus == 3
+CurveTests.verifyDegree(subdiv, copyInfo[v1], C.degree(v1))
+CurveTests.verifyDegree(subdiv, copyInfo[v2], C.degree(v2))
+CurveTests.verifyDegree(subdiv, copyInfo[v3], C.degree(v3))
+CurveTests.verifyGenus(subdiv, C.genus)
+CurveTests.verifyBettiNumber(subdiv, C.bettiNumber)
 assert subdiv.vertexNumber == C.vertexNumber + 1
 assert subdiv.edgeNumber == C.edgeNumber + 1
 
@@ -103,8 +173,8 @@ e5 = edge("e5", 1.0, v1, v1)
 e6 = edge("e6", 1.0, v2, v2)
 e7 = edge("e7", 1.0, v3, v3)
 C.addEdges({e1, e2, e3, e4, e5, e6, e7})
-assert C.bettiNumber == 5
-assert C.genus == 5
+CurveTests.verifyGenus(C, 5)
+CurveTests.verifyBettiNumber(C, 5)
 
 
 
@@ -122,8 +192,8 @@ v3 = vertex("v3", 1)
 v4 = vertex("v4", 1)
 v5 = vertex("v5", 1)
 C.addEdges({edge("e1", 1.0, v1, v2), edge("e2", 1.0, v2, v3), edge("e3", 1.0, v3, v4), edge("e4", 1.0, v4, v5)})
-assert C.bettiNumber == 0
-assert C.genus == 5
+CurveTests.verifyGenus(C, 5)
+CurveTests.verifyBettiNumber(C, 0)
 for v in C.vertices:
     assert v.genus <= 1
 
@@ -140,15 +210,12 @@ e2 = edge("e2", 1.0, v1, None)
 e3 = edge("e3", 1.0, None, None)
 C.addEdges({e1, e2, e3})
 
-assert C.bettiNumber == 1
-assert C.genus == 2
-assert C.vertices == {v1}
+CurveTests.verifyGenus(C, 2)
+CurveTests.verifyBettiNumber(C, 1)
+CurveTests.verifyStructure(C, {v1}, {e1, e2, e3}, set())
 assert C.edgesWithVertices == {e1}
-assert C.edges == {e1, e2, e3}
 
-dict = {v1: 1.0}
-
-f = StrictPiecewiseLinearFunction(C, dict)
+f = StrictPiecewiseLinearFunction(C, {v1: 1.0})
 
 
 # Test the core property
@@ -165,14 +232,8 @@ l = leg("l", v1)
 C.addEdges({e1, e3, e4})
 C.addLeg(l)
 
-core_ = C.core
-
-#core_.showVertices()
-#core_.showEdges()
-
-assert core_.isConnected
-assert core_.genus == C.genus
-assert core_.vertices == {v1, v3} 
+CurveTests.testCore(C)
+CurveTests.verifyStructure(C.core, {v1, v3}, {e3, e4}, set())
 
 
 
@@ -245,7 +306,7 @@ Ex44.addLegs({l1, l2, l3, l4, l5, l6})
 g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0, v4: 1.0, v5: 0.0, v6: 0.0,
                                          l1: 0.0, l2: 0.0, l3: 0.0, l4: 0.0, l5: 0.0, l6: 0.0})
 
-assert g.mesaTest
+SPLFTests.verifyMesa(g)
 
 
 Ex28May = CombCurve("28")
@@ -261,7 +322,7 @@ Ex28May.addEdges({e1, e2, e3})
 
 h = StrictPiecewiseLinearFunction(Ex28May, {v1: 2.0, v2: 1.0, v3: 0.0, v4: 0.0})
 
-assert h.mesaTest
+SPLFTests.verifyMesa(h)
 
 
 
@@ -356,78 +417,18 @@ t1 = leg("t1", w1)
 C.addLeg(s1)
 D.addLeg(t1)
 
-assert C.isIsomorphicTo(C)
-assert C.isIsomorphicTo(C.getFullyShallowCopy())
+CurveTests.verifyIsomorphism(C, C)
+CurveTests.verifyIsomorphism(C, C.getFullyShallowCopy())
 
-assert not C.isIsomorphicTo(D)
+CurveTests.verifyIsomorphism(C, D, False)
 
 C.removeLeg(s1)
 C.addLeg(s2)
 
-assert C.isIsomorphicTo(D)
+CurveTests.verifyIsomorphism(C, D)
 
 # Generate some small, known, moduli spaces
+ModuliSpaceTests.verifyCommonSizes()
 
-m10 = TropicalModuliSpace(1, 0)
-m10.generateSpaceDFS()
-assert len(m10.curves) == 1
-
-m11 = TropicalModuliSpace(1, 1)
-m11.generateSpaceDFS()
-assert len(m11.curves) == 2
-
-m12 = TropicalModuliSpace(1, 2)
-m12.generateSpaceDFS()
-assert len(m12.curves) == 5
-
-m13 = TropicalModuliSpace(1, 3)
-m13.generateSpaceDFS()
-assert len(m13.curves) == 11
-
-m14 = TropicalModuliSpace(1, 4)
-m14.generateSpaceDFS()
-assert len(m14.curves) == 30
-
-m15 = TropicalModuliSpace(1, 5)
-m15.generateSpaceDFS()
-assert len(m15.curves) == 76
-
-m22 = TropicalModuliSpace(2, 2)
-m22.generateSpaceDFS()
-assert len(m22.curves) == 60
-
-"""
-def testTimeAndSize(g, n):
-    m = TropicalModuliSpace(g, n)
-
-    start_time = time.time()
-    m.generateSpaceDFS()
-    end_time = time.time()
-
-    print("\n")
-    print("Finished M(", g, ", ", n, ") in ", end_time - start_time, " seconds.")
-    print("M(", g, ", ", n, ") has ", len(m.curves), " elements.")
-    print("\n")
-
-
-testTimeAndSize(2, 4)
-
-print("Loading curves from file.")
-m12.loadModuliSpaceFromFile("SavedModuliSpaces/M-1-2.txt")
-print("Curves loaded. Printing now.")
-for curve in m12.curves:
-    
-    curve.printSelf()
-"""
-
-print("From meeting on june 1: ")
-
-M = TropicalModuliSpace(3,0)
-M.generateSpaceDFS()
-
-A = {X for X in M.curves if len(X.edges) == 6}
-for X in A:
-    X.simplifyNames()
-    X.printSelf()
 
 print("If you see this, then all previous assertations were true!")
