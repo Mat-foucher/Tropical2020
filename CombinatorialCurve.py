@@ -248,12 +248,12 @@ class CombCurve(object):
 
     # Returns the degree of vertex v accounting for legs and self loops
     def degree(self, v):
-        return self.numEdgesAttached(v) + self.numLegsAttached(v)
+        return self.edgeDegree(v) + self.legDegree(v)
 
-    def numEdgesAttached(self, v):
+    def edgeDegree(self, v):
         return sum(1 for e in self.edges if e.vert1 == v) + sum(1 for e in self.edges if e.vert2 == v)
 
-    def numLegsAttached(self, v):
+    def legDegree(self, v):
         return sum(1 for attachedLeg in self.legs if attachedLeg.root == v)
 
     # Returns a copy of this curve where all vertices, edges, and legs are also copied shallowly
@@ -320,6 +320,41 @@ class CombCurve(object):
         else:
             return subdivision
 
+    def contract(self, e):
+        # Don't contract a nonexistent edge
+        assert e in self.edges
+
+        genus = 0
+        if e.vert1 == e.vert2:
+            # If e is a self loop, then the genus contribution of the loop will be placed in the new vertex
+            genus = e.vert1.genus + 1
+        else:
+            # If e is not a self loop, then the new vertex only bears the genus of the endpoints
+            genus = e.vert1.genus + e.vert2.genus
+
+        v = vertex("(Contraction of " + e.name + ")", genus)
+
+        for nextEdge in copy.copy(self.edges) - {e}:
+            if nextEdge.vert1 in e.vertices:
+                nextEdge.vert1 = v
+            if nextEdge.vert2 in e.vertices:
+                nextEdge.vert2 = v
+        for nextLeg in self.legs:
+            if nextLeg.root in e.vertices:
+                nextLeg.root = v
+
+        self.addVertex(v)
+        self.removeEdge(e)
+        self.removeVertices(e.vertices)
+
+    def getContraction(self, e, returnCopyInfo=False):
+        contraction, copyInfoDict = self.getFullyShallowCopy(True)
+        contraction.contract(copyInfoDict[e])
+        if returnCopyInfo:
+            return contraction, copyInfoDict
+        else:
+            return contraction
+
     # v should be a vector
     # Returns the set of all elements of the form (e, n), where e is an edge, n is 1 or 2,
     # and the n^th endpoint of e is v
@@ -340,10 +375,10 @@ class CombCurve(object):
         if not self._vertexEverythingCacheValid:
             self._vertexEverythingCache = {}
             for v in self.vertices:
-                numEdgesAttached = self.numEdgesAttached(v)
-                numLegsAttached = self.numLegsAttached(v)
+                edgeDegree = self.edgeDegree(v)
+                legDegree = self.legDegree(v)
                 g = v.genus
-                key = (numEdgesAttached, numLegsAttached, g)
+                key = (edgeDegree, legDegree, g)
                 if key in self._vertexEverythingCache:
                     self._vertexEverythingCache[key] += 1
                 else:
@@ -355,10 +390,10 @@ class CombCurve(object):
     def getVerticesByEverything(self):
         vertexDict = {}
         for v in self.vertices:
-            numEdgesAttached = self.numEdgesAttached(v)
-            numLegsAttached = self.numLegsAttached(v)
+            edgeDegree = self.edgeDegree(v)
+            legDegree = self.legDegree(v)
             g = v.genus
-            key = (numEdgesAttached, numLegsAttached, g)
+            key = (edgeDegree, legDegree, g)
             if key in vertexDict:
                 vertexDict[key].append(v)
             else:
@@ -410,7 +445,7 @@ class CombCurve(object):
 
     @staticmethod
     def printCurve(curve):
-        print("\n\nVertices:")
+        print("Vertices:")
         for v in curve.vertices:
             print(v.name, " with genus ", v.genus)
         print("Edges:")
@@ -600,7 +635,7 @@ class CombCurve(object):
             ancestorEdges = []
 
             while currentTree.parent is not None:
-                ancestorEdges.append(self.parentConnection)
+                ancestorEdges.append(currentTree.parentConnection)
                 currentTree = currentTree.parent
 
             return ancestorEdges
@@ -609,31 +644,41 @@ class CombCurve(object):
 
     @property
     def spanningTree(self):
-        return getSpanningTree(list(self.vertices)[0])
+        return self.getSpanningTree(list(self.vertices)[0])
 
     # Will return a list of edges in a loop.
     def getLoop(self, e):
-        if e not in self.spanningTree.edges:
+        spanningTree = self.spanningTree
+        if e in spanningTree.getEdges():
             raise ValueError("Edge " + e.name + " must not belong to the spanning tree to determine a unique loop.")
 
-        anc1 = self.spanningTree.getAncestorEdges(e.vert1)
-        anc2 = self.spanningTree.getAncestorEdges(e.vert2)
+        anc1 = spanningTree.getAncestorEdges(e.vert1)
+        anc2 = spanningTree.getAncestorEdges(e.vert2)
 
         leastAncestorIndex = 0
         for i in range(min(len(anc1), len(anc2))):
+            leastAncestorIndex = i
             if anc1[i] != anc2[i]:
                 break
-            leastAncestorIndex = i
+        else:
+            leastAncestorIndex = min(len(anc1), len(anc2))
 
         anc1 = anc1[leastAncestorIndex:]
         anc2 = anc2[leastAncestorIndex:]
+        anc1.reverse()
 
-        return anc1.reverse() + [e] + anc2
+        if anc1 == [None]:
+            anc1 = []
 
-    @property
+        if anc2 == [None]:
+            anc2 = []
+
+        return anc1 + [e] + anc2
+
     # Returns a list of lists of edges.
+    @property
     def loops(self):
-        loopDeterminers = self.edges - self.spanningTree.edges
+        loopDeterminers = self.edges - set(self.spanningTree.getEdges())
         _loops = []
         for nextEdge in loopDeterminers:
             _loops.append(self.getLoop(nextEdge))

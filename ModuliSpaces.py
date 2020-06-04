@@ -11,6 +11,9 @@ class TropicalModuliSpace(object):
         self._curves = set()
         # Curves organized by number of edges
         self._curvesDict = {}
+        # Dictionary tracking what each curve can contract to
+        # contractionDict[curve]: List[(contraction, number of ways the contraction can occur)]
+        self.contractionDict = {}
 
     @property
     def curves(self):
@@ -45,11 +48,10 @@ class TropicalModuliSpace(object):
 
         return partition
 
-    def reduceByIsomorphism(self, curves=None):
+    def reduceByIsomorphism(self, curves=None, returnReductionInformation=False):
 
         modifySelf = (curves is None)
         if modifySelf:
-
             for n in self.curvesDict:
                 self.curvesDict[n] = self.reduceByIsomorphism(self.curvesDict[n])
             self.curves = set()
@@ -67,18 +69,33 @@ class TropicalModuliSpace(object):
                         break
                 if newIsotype:
                     isotypes.append([curve])
-            return {t[0] for t in isotypes}
+            if returnReductionInformation:
+                reductionDict = {}
+                for t in isotypes:
+                    reductionDict[t[0]] = t
+                return {t[0] for t in isotypes}, reductionDict
+            else:
+                return {t[0] for t in isotypes}
 
-    def containsUpToIsomorphism(self, curve):
+    def containsUpToIsomorphism(self, curve, returnMatch=False):
 
         if curve.edgeNumber not in self.curvesDict:
-            return False
+            if returnMatch:
+                return False, None
+            else:
+                return False
         else:
             for c in self.curvesDict[curve.edgeNumber]:
                 if c.isIsomorphicTo(curve):
-                    return True
+                    if returnMatch:
+                        return True, c
+                    else:
+                        return True
 
-        return False
+        if returnMatch:
+            return False, None
+        else:
+            return False
 
     def addCurve(self, curve):
         # if not self.containsUpToIsomorphism(curve):
@@ -160,59 +177,21 @@ class TropicalModuliSpace(object):
 
         # print("Generation time: ", generation_complete_time - start_time)
 
-    def generateSpace(self, suppressComments=True):
-
-        seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
-        v = vertex("v", self._g)
-        seedCurve.legs = {leg("leg " + str(i), v) for i in range(self._n)}
-
-        self._curves = self._curves | {seedCurve}
-
-        newCurves = [seedCurve]
-
-        while newCurves:
-            if not suppressComments:
-                print("Found ", len(newCurves), " new curves. Reducing now.")
-            curveBuffer = list(self.reduceByIsomorphism(newCurves))
-            if not suppressComments:
-                print("Reduced to ", len(curveBuffer), " new curves.")
-            self._curves = self._curves | set(curveBuffer)
-            newCurves = []
-            # print("\n\n\n\n\n\n###################### Moving to next level ######################\n\n\n\n\n\n")
-            while curveBuffer:
-                currentCurve = curveBuffer[0]
-
-                # print("\n\n\nCurrent curve:")
-                # self.printCurve(currentCurve)
-
-                for vert in currentCurve.vertices:
-
-                    endpointPartitions = self.getPartitions(currentCurve.getEndpointsOfEdges(vert))
-
-                    if vert.genus > 1:
-                        # print("\nGenus reducing vertex: " + vert.name)
-                        genusReducedCurve = self.getGenusReductionSpecialization(currentCurve, vert)
-                        newCurves.append(genusReducedCurve)
-                        # self.printCurve(genusReducedCurve)
-                    elif vert.genus == 1 and currentCurve.degree(vert) > 0:
-                        genusReducedCurve = self.getGenusReductionSpecialization(currentCurve, vert)
-                        newCurves.append(genusReducedCurve)
-
-                    for g in range(vert.genus + 1):
-                        for p in endpointPartitions:
-                            S, T = p
-                            if not ((g == 0 and len(S) < 2) or (g == vert.genus and len(T) < 2)):
-                                # print("\nSplitting vertex: " + vert.name)
-                                vertexSplitCurve = self.getSplittingSpecialization(currentCurve, vert, g,
-                                                                                   vert.genus - g, S, T)
-                                newCurves.append(vertexSplitCurve)
-                                # self.printCurve(vertexSplitCurve)
-                curveBuffer.remove(currentCurve)
-
-                # print("Current buffer length: ", len(curveBuffer))
-                # print("Number of new curves this loop: ", len(newCurves))
-
-        return self._curves
+    def generateContractionDictionary(self):
+        numCurves = len(self.curves)
+        it = 1
+        for curve in self.curves:
+            print("Working on getting contraction history of curve", str(it), "/", str(numCurves), "of M-" + str(self._g) + "-" + str(self._n))
+            contractionPairs = []
+            for nextEdge in curve.edges:
+                contractionCurve = curve.getContraction(nextEdge)
+                p = self.containsUpToIsomorphism(contractionCurve, returnMatch=True)
+                containsAMatch = p[0]
+                match = p[1]
+                assert containsAMatch
+                contractionPairs.append((match, nextEdge))
+            self.contractionDict[curve] = contractionPairs
+            it += 1
 
     # Returns the specialization of 'curve' at 'vert' as determined by g1, g2, S, and T
     # Specifically, 'vert' is split into two vertices, v1 and v2, of genuses g1 and g2 respectively,
@@ -299,11 +278,7 @@ class TropicalModuliSpace(object):
         self.specializeByReducingGenus(c, copyInfo[vert])
         return c
 
-
-
-
-
-    def loadModuliSpaceFromFile(self, filename, curveEntryDelimiter = "=", encoding = 'utf-8'):
+    def loadModuliSpaceFromFile(self, filename, curveEntryDelimiter="=", encoding='utf-8'):
         self.curves = set()
         with open(filename, mode='r', encoding=encoding) as f:
             content = f.read()
@@ -345,20 +320,19 @@ class TropicalModuliSpace(object):
                         legs.add(l)
 
                 c = CombCurve("")
-                c.edges = edges
-                c.legs = legs
+                c.addEdges(edges)
+                c.addLegs(legs)
+                for vName in vertices:
+                    c.addVertex(vertices[vName])
 
                 self.curves.add(c)
 
+                if c.edgeNumber in self.curvesDict:
+                    self.curvesDict[c.edgeNumber].append(c)
+                else:
+                    self.curvesDict[c.edgeNumber] = [c]
 
-
-
-
-
-
-
-
-    def saveModuliSpaceToFile(self, filename = "", curveEntryDelimiter = "=", encoding = 'utf-8'):
+    def saveModuliSpaceToFile(self, filename="", curveEntryDelimiter="=", encoding='utf-8'):
         if filename == "":
             filename = "SavedModuliSpaces/M-" + str(self._g) + "-" + str(self._n) + ".txt"
 
@@ -378,5 +352,36 @@ class TropicalModuliSpace(object):
                 f.write(currentCurve)
                 while curveNames:
                     currentCurve = curveNames.pop()
+                    f.write("\n" + curveEntryDelimiter + "\n")
+                    f.write(currentCurve)
+
+    def saveSpaceAndContractions(self, filename="", curveEntryDelimiter="=", encoding='utf-8'):
+        if filename == "":
+            filename = "SavedModuliSpaces/M-" + str(self._g) + "-" + str(self._n) + ".txt"
+
+        with open(filename, mode='w', encoding=encoding) as f:
+            curveStrings = []
+            curveList = sorted(self.curves, key=lambda x: x.edgeNumber)
+            for c in curveList:
+                c.simplifyNames()
+                vertexNames = [("(" + v.name + " with genus " + str(v.genus) + ")") for v in c.vertices]
+                edgeNames = [e.name for e in c.edges]
+                legNames = [nextLeg.name for nextLeg in c.legs]
+                vertexLine = "Vertices: {" + ",".join(vertexNames) + "}"
+                edgeLine = "Edges: {" + ",".join(edgeNames) + "}"
+                legLine = "Legs: {" + ",".join(legNames) + "}"
+                idLine = "Curve ID Number: " + str(curveList.index(c))
+                contractionLine = "Contraction info: "
+                contractionStrings = []
+                for info in self.contractionDict[c]:
+                    contractionStrings.append("(" + info[1].name + ", curve " + str(curveList.index(info[0])) + ")")
+                contractionLine += ", ".join(contractionStrings)
+                curveStrings.append("\n".join([vertexLine, edgeLine, legLine, idLine, contractionLine]))
+            if curveStrings:
+                curveStrings.reverse()
+                currentCurve = curveStrings.pop()
+                f.write(currentCurve)
+                while curveStrings:
+                    currentCurve = curveStrings.pop()
                     f.write("\n" + curveEntryDelimiter + "\n")
                     f.write(currentCurve)
