@@ -283,6 +283,8 @@ class TropicalModuliSpace(object):
         with open(filename, mode='r', encoding=encoding) as f:
             content = f.read()
             curveStrings = content.split("\n" + curveEntryDelimiter + "\n")
+            curveIdDictionary = {}
+            curveContractionDictionary = {}
             for curveString in curveStrings:
                 curveInfo = curveString.split("\n")
                 vertexInfo = curveInfo[0]
@@ -293,6 +295,12 @@ class TropicalModuliSpace(object):
 
                 legInfo = curveInfo[2]
                 legInfoFinder = re.compile("leg\((v\d*)\)")
+
+                curveIdInfo = curveInfo[3]
+                curveIdInfoFinder = re.compile("\d*")
+
+                contractionInfo = curveInfo[4]
+                contractionInfoFinder = re.compile("\(edge\((v\d*), (v\d*)\), curve (\d*)\)")
 
                 vertices = {}
                 for m in vertexInfoFinder.finditer(vertexInfo):
@@ -331,6 +339,26 @@ class TropicalModuliSpace(object):
                     self.curvesDict[c.edgeNumber].append(c)
                 else:
                     self.curvesDict[c.edgeNumber] = [c]
+
+                m = curveIdInfoFinder.match(curveIdInfo)
+                if m:
+                    curveId = m.group(0)
+                    curveIdDictionary[curveId] = c
+
+                edgeContractions = []
+                for m in contractionInfoFinder.finditer(contractionInfo):
+                    if m:
+                        vert1 = vertices[m.group(1)]
+                        vert2 = vertices[m.group(2)]
+                        contractionID = m.group(3)
+                        edgeContractions.append(({vert1, vert2}, contractionID))
+                curveContractionDictionary[c] = edgeContractions
+            for c in self.curves:
+                self.contractionDict[c] = []
+                edgeContractions = curveContractionDictionary[c]
+                for e in c.edges:
+                    contEntry = {entry for entry in edgeContractions if entry[0] == e.vertices}.pop()
+                    self.contractionDict[c].append((e, curveIdDictionary[contEntry[1]]))
 
     def saveModuliSpaceToFile(self, filename="", curveEntryDelimiter="=", encoding='utf-8'):
         if filename == "":
