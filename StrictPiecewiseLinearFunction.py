@@ -7,7 +7,9 @@ class StrictPiecewiseLinearFunction(object):
     def __init__(self, domain_, functionValues_):
         self._domain = domain_
         self._functionValues = functionValues_
-        self.assertIsAffineLinear()
+        self.assertIsWellDefined()
+        self.generateVertexValues()
+        # self.assertIsAffineLinear()
 
     # Make the domain read only
     @property
@@ -19,6 +21,34 @@ class StrictPiecewiseLinearFunction(object):
     @property
     def functionValues(self):
         return self._functionValues
+
+    def propogateVertexValues(self, tree):
+        for child, connectingEdge in tree.children:
+
+            if connectingEdge.vert1 == tree.value:
+                orientation = 1
+            else:
+                orientation = -1
+
+            self.functionValues[child.value] = self.functionValues[tree.value] + \
+                                               orientation * self.functionValues[connectingEdge] * connectingEdge.length
+            self.propogateVertexValues(child)
+
+    # Todo - Figure out how to handle a disconnected domain
+    def generateVertexValues(self):
+        if len(self.domain.vertices) <= 0:
+            return
+
+        # Get any domain vertex
+        baseVert = list(self.domain.vertices)[0]
+        tree = self.domain.getSpanningTree(baseVert)
+        self.functionValues[tree.value] = 0.0
+        self.propogateVertexValues(tree)
+
+        leastVertexValue = min(self.functionValues[v] for v in self.domain.vertices)
+
+        for v in self.domain.vertices:
+            self.functionValues[v] -= leastVertexValue
 
     def assertIsAffineLinear(self):
         # Assert Non-Negativity at every iteration of the loop!
@@ -41,8 +71,8 @@ class StrictPiecewiseLinearFunction(object):
         assert other.domain == self.domain
 
         newFunctionValues = {}
-        for v in self.domain.vertices:
-            newFunctionValues[v] = self.functionValues[v] + other.functionValues[v]
+        for e in self.domain.edges:
+            newFunctionValues[e] = self.functionValues[e] + other.functionValues[e]
         for leg in self.domain.legs:
             newFunctionValues[leg] = self.functionValues[leg] + other.functionValues[leg]
 
@@ -52,21 +82,10 @@ class StrictPiecewiseLinearFunction(object):
         assert other.domain == self.domain
 
         newFunctionValues = {}
-        for v in self.domain.vertices:
-            newFunctionValues[v] = self.functionValues[v] - other.functionValues[v]
+        for e in self.domain.edges:
+            newFunctionValues[e] = self.functionValues[e] - other.functionValues[e]
         for leg in self.domain.legs:
             newFunctionValues[leg] = self.functionValues[leg] - other.functionValues[leg]
-
-        return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
-
-    def __mul__(self, other):
-        assert other.domain == self.domain
-
-        newFunctionValues = {}
-        for v in self.domain.vertices:
-            newFunctionValues[v] = self.functionValues[v] * other.functionValues[v]
-        for leg in self.domain.legs:
-            newFunctionValues[leg] = self.functionValues[leg] * other.functionValues[leg]
 
         return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
 
@@ -76,16 +95,6 @@ class StrictPiecewiseLinearFunction(object):
             allowedVertices = self.domain.vertices
 
         edgesToCheck = {e for e in self.domain.edges if (vert in e.vertices and vert in allowedVertices)}
-
-        """
-        print("S verts: ")
-        for e in S:
-            print(e.name)
-
-        print("T verts: ")
-        for f in T:
-            print(f.name)
-        """
 
         edgesVisited = set()
 
@@ -105,12 +114,91 @@ class StrictPiecewiseLinearFunction(object):
                 return True
 
             edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (
-                        nextEdge.vert1 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
+                    nextEdge.vert1 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
             edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (
-                        nextEdge.vert2 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
+                    nextEdge.vert2 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
 
         # print("S:", foundAnSVertex, "T:", foundATVertex)
         return False
+
+    # Returns twice the integral of self over the supplied path
+    def doubleIntegrateOverPath(self, path):
+        if len(path) == 0:
+            return 0
+        if len(path) == 1:
+            return self.functionValues[path[0]]
+
+        integral = 0
+
+        # Integrate over everything except for the very last edge of the path
+        for edgeIndex in range(len(path) - 1):
+            currentEdge = path[edgeIndex]
+            nextEdge = path[edgeIndex + 1]
+
+            if (currentEdge.vertices.intersection(nextEdge.vertices)) == 0:
+                raise ValueError("The supplied list of edges is not a path.")
+            connectingVertex = currentEdge.vertices.intersection(nextEdge.vertices).pop()
+
+            # Passing over currentEdge from vert1 to vert 2 <=> normal orientation
+            if connectingVertex == currentEdge.vert2:
+                integral += self.functionValues[currentEdge] * currentEdge.length
+            else:
+                integral += -1 * self.functionValues[currentEdge] * currentEdge.length
+
+        # Integrate over the very last edge
+        secondToLastEdge = path[len(path) - 2]
+        lastEdge = path[len(path) - 1]
+        if (secondToLastEdge.vertices.intersection(lastEdge.vertices)) == 0:
+            raise ValueError("The supplied list of edges is not a path.")
+        connectingVertex = secondToLastEdge.vertices.intersection(lastEdge.vertices).pop()
+
+        # Passing over currentEdge from vert1 to vert 2 <=> normal orientation
+        if connectingVertex == lastEdge.vert2:
+            integral += self.functionValues[lastEdge] * lastEdge.length
+        else:
+            integral += -1 * self.functionValues[lastEdge] * lastEdge.length
+
+        return integral
+
+    def assertIsWellDefined(self):
+        for l in self.domain.loops:
+            assert self.doubleIntegrateOverPath(l) == 0.0
+
+    # We probably will not need this.
+    def getEdgeSlopesFrom(self, v1, v2):
+
+        edgesAndSlopes = {'edge': 'slope'}
+
+        firstVertexSet = self.domain.vertices - v2
+        secondVertexSet = self.domain.vertices - v1
+
+        if not self.domain.isConnected:
+            raise ValueError("Curve is disconnected, please compute edge slopes for connected components only.")
+
+        edgesToCheckForSlope = {e for e in self.domain.edges if e.vert1 == v1}
+        edgesChecked = set()
+
+        while len(edgesToCheckForSlope) > 0:
+            nextEdgeToCheck = edgesToCheckForSlope.pop()
+            edgesChecked = edgesChecked | {nextEdgeToCheck}
+
+            v1Val = 0.0
+
+            for key, value in self.functionValues:
+                if nextEdgeToCheck.vert1 == key:
+                    v1Val = value
+
+            for key, value in self.functionValues:
+                if nextEdgeToCheck.vert2 == key:
+                    edgesAndSlopes[key] = value - v1Val
+
+            if (nextEdge.vert2 == v2):
+                return edgesAndSlopes
+
+            edgesToCheckForSlope = edgesToCheckForSlope | (
+                    {e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesChecked)
+
+        raise ValueError("No path from v1 to v2 exists")
 
     def getSpecialSupport(self):
 

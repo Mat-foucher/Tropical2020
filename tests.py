@@ -56,7 +56,6 @@ class SPLFTests:
         for vert in func.domain.vertices:
             assert (func + func).functionValues[vert] == func.functionValues[vert] + func.functionValues[vert]
             assert (func - func).functionValues[vert] == func.functionValues[vert] - func.functionValues[vert]
-            assert (func * func).functionValues[vert] == func.functionValues[vert] * func.functionValues[vert]
 
 
 class TreeTests:
@@ -110,20 +109,7 @@ class ModuliSpaceTests:
 
 
 
-m = TropicalModuliSpace(1, 2)
-m.generateSpaceDFS()
-m.generateContractionDictionary()
-for curve in m.curves:
-    curve.printSelf()
 
-for key in m.contractionDict:
-    print("Printing contraction info for the following curve:")
-    key.printSelf()
-    for p in m.contractionDict[key]:
-            contraction = p[0]
-            e = p[1]
-            print("Contracting edge", e.name, "produces the following curve:")
-            contraction.printSelf()
 
 
 
@@ -163,11 +149,17 @@ TreeTests.testTreeAt(C, v2)
 TreeTests.testTreeAt(C, v3)
 TreeTests.verifyLoops(C, {frozenset({e4}), frozenset({e1, e2, e3})})
 
-dict = {v1: 1.0, v2: 0.0, v3: 0.0, l: 0.0}
-f = StrictPiecewiseLinearFunction(C, dict)
+zeroDict = {e1: 0, e2: 0, e3: 0, e4: 0, l: 0}
+f = StrictPiecewiseLinearFunction(C, zeroDict)
+SPLFTests.verifyMesa(f)
+
+nonMesaDict = {e1: -1, e2: 0, e3: -1, e4: 0, l: 0}
+f = StrictPiecewiseLinearFunction(C, nonMesaDict)
 
 SPLFTests.verifyMesa(f, isMesa=False)
 SPLFTests.verifySpecialSupport(f, [{e1, e3, e4}])
+
+
 SPLFTests.testSelfArithmetic(f)
 
 CurveTests.verifyAndTestEndpointsOfEdges(C, v1, {(e1, 1), (e3, 1), (e4, 1), (e4, 2), (l, 1)})
@@ -251,19 +243,19 @@ TreeTests.verifyLoops(C, set())
 
 
 
-C = CombCurve("Curve with some vertices missing")
-v1 = vertex("v1", 1)
-e1 = edge("e1", 1.0, v1, v1)
-e2 = edge("e2", 1.0, v1, None)
-e3 = edge("e3", 1.0, None, None)
-C.addEdges({e1, e2, e3})
+#C = CombCurve("Curve with some vertices missing")
+#v1 = vertex("v1", 1)
+#e1 = edge("e1", 1.0, v1, v1)
+#e2 = edge("e2", 1.0, v1, None)
+#e3 = edge("e3", 1.0, None, None)
+#C.addEdges({e1, e2, e3})
 
-CurveTests.verifyGenus(C, 2)
-CurveTests.verifyBettiNumber(C, 1)
-CurveTests.verifyStructure(C, {v1}, {e1, e2, e3}, set())
-assert C.edgesWithVertices == {e1}
+#CurveTests.verifyGenus(C, 2)
+#CurveTests.verifyBettiNumber(C, 1)
+#CurveTests.verifyStructure(C, {v1}, {e1, e2, e3}, set())
+#assert C.edgesWithVertices == {e1}
 
-f = StrictPiecewiseLinearFunction(C, {v1: 1.0})
+#f = StrictPiecewiseLinearFunction(C, {v1: 1.0})
 
 
 # Test the core property
@@ -307,21 +299,9 @@ e8 = edge("e8", 1.0, v8, v9)
 
 C.addEdges({e1, e2, e3, e4, e5, e6, e7, e8})
 
-f = StrictPiecewiseLinearFunction(C, {v1: 0.0, v2: 1.0, v3: 0.0, v4: 1.0, v5: 0.0, v6: 0.0, v7: 1.0, v8: 1.0, v9: 0.0})
+f = StrictPiecewiseLinearFunction(C, {e1: 1, e2: -1, e3: 1, e4: -1, e5: 0, e6: 1, e7: 0, e8: -1})
 
-
-
-#supportEdges, supportVertices = f.getSpecialSupport()
-#for e in supportEdges:
-#    print(e.name)
-#for v in supportVertices:
-#    print(v.name)
 s = f.getSpecialSupportPartition()
-#print(s)
-#for x in s:
-#    print("Next support block:")
-#    for e in x:
-#        print(e.name)
 
 # Python doesn't allow sets of mutable sets, so we convert these to sets of immutable sets before comparing
 assert {frozenset(block) for block in s} == {frozenset({e1, e2}), frozenset({e3, e4}), frozenset({e6, e7, e8})}
@@ -351,7 +331,7 @@ l6 = leg("l6", v6)
 Ex44.addEdges({e1, e2, e3, e4, e5})
 Ex44.addLegs({l1, l2, l3, l4, l5, l6})
 
-g = StrictPiecewiseLinearFunction(Ex44, {v1: 0.0, v2: 2.0, v3: 2.0, v4: 1.0, v5: 0.0, v6: 0.0,
+g = StrictPiecewiseLinearFunction(Ex44, {e1: 1, e2: 0, e3: -1, e4: -1, e5: -1, e6: 0,
                                          l1: 0.0, l2: 0.0, l3: 0.0, l4: 0.0, l5: 0.0, l6: 0.0})
 
 SPLFTests.verifyMesa(g)
@@ -368,7 +348,7 @@ e3 = edge("e3", 2.0, v1, v4)
 
 Ex28May.addEdges({e1, e2, e3})
 
-h = StrictPiecewiseLinearFunction(Ex28May, {v1: 2.0, v2: 1.0, v3: 0.0, v4: 0.0})
+h = StrictPiecewiseLinearFunction(Ex28May, {e1: -1, e2: -1, e3: -1})
 
 SPLFTests.verifyMesa(h)
 
