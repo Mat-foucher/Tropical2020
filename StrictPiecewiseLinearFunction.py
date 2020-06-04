@@ -7,7 +7,9 @@ class StrictPiecewiseLinearFunction(object):
     def __init__(self, domain_, functionValues_):
         self._domain = domain_
         self._functionValues = functionValues_
-        self.assertIsAffineLinear()
+        self.assertIsWellDefined()
+        self.generateVertexValues()
+        #self.assertIsAffineLinear()
 
     # Make the domain read only
     @property
@@ -19,6 +21,30 @@ class StrictPiecewiseLinearFunction(object):
     @property
     def functionValues(self):
         return self._functionValues
+
+    def propogateVertexValues(self, tree):
+        for child, connectingEdge in tree.children:
+            self.functionValues[child.value] = self.functionValues[tree.value] + self.functionValues[connectingEdge] * connectingEdge.length
+            self.propogateVertexValues(child)
+
+    # Todo - Figure out how to handle a disconnected domain
+    def generateVertexValues(self):
+        if len(self.domain.vertices) <= 0:
+            return
+
+        # Get any domain vertex
+        baseVert = list(self.domain.vertices)[0]
+        tree = self.domain.getSpanningTree(baseVert)
+        self.functionValues[tree.value] = 0.0
+        self.propogateVertexValues(tree)
+
+        leastVertexValue = min(self.functionValues[v] for v in self.domain.vertices)
+
+        for v in self.domain.vertices:
+            self.functionValues[v] -= leastVertexValue
+
+
+
 
     def assertIsAffineLinear(self):
         # Assert Non-Negativity at every iteration of the loop!
@@ -41,8 +67,8 @@ class StrictPiecewiseLinearFunction(object):
         assert other.domain == self.domain
 
         newFunctionValues = {}
-        for v in self.domain.edges:
-            newFunctionValues[v] = self.functionValues[v] + other.functionValues[v]
+        for e in self.domain.edges:
+            newFunctionValues[e] = self.functionValues[e] + other.functionValues[e]
         for leg in self.domain.legs:
             newFunctionValues[leg] = self.functionValues[leg] + other.functionValues[leg]
 
@@ -52,8 +78,8 @@ class StrictPiecewiseLinearFunction(object):
         assert other.domain == self.domain
 
         newFunctionValues = {}
-        for v in self.domain.vertices:
-            newFunctionValues[v] = self.functionValues[v] - other.functionValues[v]
+        for e in self.domain.edges:
+            newFunctionValues[e] = self.functionValues[e] - other.functionValues[e]
         for leg in self.domain.legs:
             newFunctionValues[leg] = self.functionValues[leg] - other.functionValues[leg]
 
@@ -63,8 +89,8 @@ class StrictPiecewiseLinearFunction(object):
         assert other.domain == self.domain
 
         newFunctionValues = {}
-        for v in self.domain.vertices:
-            newFunctionValues[v] = self.functionValues[v] * other.functionValues[v]
+        for e in self.domain.edges:
+            newFunctionValues[e] = self.functionValues[e] * other.functionValues[e]
         for leg in self.domain.legs:
             newFunctionValues[leg] = self.functionValues[leg] * other.functionValues[leg]
 
@@ -119,6 +145,13 @@ class StrictPiecewiseLinearFunction(object):
         if len(path) == 1:
             return self.functionValues[path[0]]
 
+        print("Integrating over path:")
+        for nextEdge in path:
+            print(nextEdge.name)
+        print("Available keys:")
+        for key in self.functionValues:
+            print(key.name)
+
         integral = 0
 
         # Integrate over everything except for the very last edge of the path
@@ -151,12 +184,9 @@ class StrictPiecewiseLinearFunction(object):
 
         return integral
 
-    @property
     def assertIsWellDefined(self):
         for l in self.domain.loops:
-            change = self.doubleIntegrateOverPath(l)
-
-            assert change == 0.0
+            assert self.doubleIntegrateOverPath(l) == 0.0
 
     # We probably will not need this.
     def getEdgeSlopesFrom(self, v1, v2):

@@ -110,20 +110,7 @@ class ModuliSpaceTests:
 
 
 
-m = TropicalModuliSpace(1, 2)
-m.generateSpaceDFS()
-m.generateContractionDictionary()
-for curve in m.curves:
-    curve.printSelf()
 
-for key in m.contractionDict:
-    print("Printing contraction info for the following curve:")
-    key.printSelf()
-    for p in m.contractionDict[key]:
-            contraction = p[0]
-            e = p[1]
-            print("Contracting edge", e.name, "produces the following curve:")
-            contraction.printSelf()
 
 
 
@@ -163,15 +150,19 @@ TreeTests.testTreeAt(C, v2)
 TreeTests.testTreeAt(C, v3)
 TreeTests.verifyLoops(C, {frozenset({e4}), frozenset({e1, e2, e3})})
 
-dict = {v1: 1.0, v2: 0.0, v3: 0.0, l: 0.0}
-f = StrictPiecewiseLinearFunction(C, dict)
+zeroDict = {e1: 0, e2: 0, e3: 0, e4: 0, l: 0}
+f = StrictPiecewiseLinearFunction(C, zeroDict)
 
+f.assertIsWellDefined()
 s = f.getSpecialSupportPartition()
 
-assert f.assertIsWellDefined
 
-SPLFTests.verifyMesa(f, isMesa=False)
-SPLFTests.verifySpecialSupport(f, [{e1, e3, e4}])
+#SPLFTests.verifyMesa(f, isMesa=False)
+#SPLFTests.verifySpecialSupport(f, [{e1, e3, e4}])
+
+for key in f.functionValues:
+    print(key.name, ": ", f.functionValues[key])
+
 SPLFTests.testSelfArithmetic(f)
 
 CurveTests.verifyAndTestEndpointsOfEdges(C, v1, {(e1, 1), (e3, 1), (e4, 1), (e4, 2), (l, 1)})
@@ -255,19 +246,19 @@ TreeTests.verifyLoops(C, set())
 
 
 
-C = CombCurve("Curve with some vertices missing")
-v1 = vertex("v1", 1)
-e1 = edge("e1", 1.0, v1, v1)
-e2 = edge("e2", 1.0, v1, None)
-e3 = edge("e3", 1.0, None, None)
-C.addEdges({e1, e2, e3})
+#C = CombCurve("Curve with some vertices missing")
+#v1 = vertex("v1", 1)
+#e1 = edge("e1", 1.0, v1, v1)
+#e2 = edge("e2", 1.0, v1, None)
+#e3 = edge("e3", 1.0, None, None)
+#C.addEdges({e1, e2, e3})
 
-CurveTests.verifyGenus(C, 2)
-CurveTests.verifyBettiNumber(C, 1)
-CurveTests.verifyStructure(C, {v1}, {e1, e2, e3}, set())
-assert C.edgesWithVertices == {e1}
+#CurveTests.verifyGenus(C, 2)
+#CurveTests.verifyBettiNumber(C, 1)
+#CurveTests.verifyStructure(C, {v1}, {e1, e2, e3}, set())
+#assert C.edgesWithVertices == {e1}
 
-f = StrictPiecewiseLinearFunction(C, {v1: 1.0})
+#f = StrictPiecewiseLinearFunction(C, {v1: 1.0})
 
 
 # Test the core property
