@@ -107,6 +107,31 @@ class ModuliSpaceTests:
         m22.generateSpaceDFS()
         assert len(m22.curves) == 60
 
+
+
+
+m = TropicalModuliSpace(1, 2)
+m.generateSpaceDFS()
+m.generateContractionDictionary()
+for curve in m.curves:
+    curve.printSelf()
+
+for key in m.contractionDict:
+    print("Printing contraction info for the following curve:")
+    key.printSelf()
+    for p in m.contractionDict[key]:
+            contraction = p[0]
+            e = p[1]
+            print("Contracting edge", e.name, "produces the following curve:")
+            contraction.printSelf()
+
+
+
+
+
+
+
+
 C = CombCurve("Example 3.5")
 
 v1 = vertex("v1", 0)
@@ -120,6 +145,14 @@ l = leg("l", v1)
 
 C.addEdges({e1, e2, e3, e4})
 C.addLeg(l)
+
+#contraction = C.getContraction(e4)
+#print("Printing contraction:")
+#contraction.printSelf()
+#contraction = C.getContraction(e2)
+#contraction.simplifyNames()
+#print("Printing contraction:")
+#contraction.printSelf()
 
 CurveTests.verifyStructure(C, {v1, v2, v3}, {e1, e2, e3, e4}, {l})
 

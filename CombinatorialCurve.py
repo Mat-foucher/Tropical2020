@@ -320,6 +320,41 @@ class CombCurve(object):
         else:
             return subdivision
 
+    def contract(self, e):
+        # Don't contract a nonexistent edge
+        assert e in self.edges
+
+        genus = 0
+        if e.vert1 == e.vert2:
+            # If e is a self loop, then the genus contribution of the loop will be placed in the new vertex
+            genus = e.vert1.genus + 1
+        else:
+            # If e is not a self loop, then the new vertex only bears the genus of the endpoints
+            genus = e.vert1.genus + e.vert2.genus
+
+        v = vertex("(Contraction of " + e.name + ")", genus)
+
+        for nextEdge in copy.copy(self.edges) - {e}:
+            if nextEdge.vert1 in e.vertices:
+                nextEdge.vert1 = v
+            if nextEdge.vert2 in e.vertices:
+                nextEdge.vert2 = v
+        for nextLeg in self.legs:
+            if nextLeg.root in e.vertices:
+                nextLeg.root = v
+
+        self.addVertex(v)
+        self.removeEdge(e)
+        self.removeVertices(e.vertices)
+
+    def getContraction(self, e, returnCopyInfo=False):
+        contraction, copyInfoDict = self.getFullyShallowCopy(True)
+        contraction.contract(copyInfoDict[e])
+        if returnCopyInfo:
+            return contraction, copyInfoDict
+        else:
+            return contraction
+
     # v should be a vector
     # Returns the set of all elements of the form (e, n), where e is an edge, n is 1 or 2,
     # and the n^th endpoint of e is v
@@ -410,7 +445,7 @@ class CombCurve(object):
 
     @staticmethod
     def printCurve(curve):
-        print("\n\nVertices:")
+        print("Vertices:")
         for v in curve.vertices:
             print(v.name, " with genus ", v.genus)
         print("Edges:")
