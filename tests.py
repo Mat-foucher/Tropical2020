@@ -111,8 +111,25 @@ class ModuliSpaceTests:
 
 
 
-
-
+"""
+print("Starting new load test for M-1-2...")
+m = TropicalModuliSpace(1, 2)
+m.loadModuliSpaceFromFile("SavedModuliSpaces/M-1-2.txt")
+print("Done loading space. Printing curves now...")
+for curve in m.curves:
+    print("")
+    curve.printSelf()
+print("Done printing curves. Printing contraction data now...")
+for curve in m.curves:
+    print("\nPrinting contraction info for the following curve:")
+    curve.printSelf()
+    for e in curve.edges:
+        print("Contracting", e.name, 'produces the following curve:')
+        # Filtering a list doesn't produce a list :'(
+        for p in filter(lambda x: x[0] == e, m.contractionDict[curve]):
+            p[1].printSelf()
+            break
+"""
 
 
 
