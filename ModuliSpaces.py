@@ -365,29 +365,6 @@ class TropicalModuliSpace(object):
             filename = "SavedModuliSpaces/M-" + str(self._g) + "-" + str(self._n) + ".txt"
 
         with open(filename, mode='w', encoding=encoding) as f:
-            curveNames = []
-            for c in sorted(self.curves, key=lambda x: x.edgeNumber):
-                c.simplifyNames()
-                vertexNames = [("(" + v.name + " with genus " + str(v.genus) + ")") for v in c.vertices]
-                edgeNames = [e.name for e in c.edges]
-                legNames = [nextLeg.name for nextLeg in c.legs]
-                vertexLine = "Vertices: {" + ",".join(vertexNames) + "}"
-                edgeLine = "Edges: {" + ",".join(edgeNames) + "}"
-                legLine = "Legs: {" + ",".join(legNames) + "}"
-                curveNames.append("\n".join([vertexLine, edgeLine, legLine]))
-            if curveNames:
-                currentCurve = curveNames.pop()
-                f.write(currentCurve)
-                while curveNames:
-                    currentCurve = curveNames.pop()
-                    f.write("\n" + curveEntryDelimiter + "\n")
-                    f.write(currentCurve)
-
-    def saveSpaceAndContractions(self, filename="", curveEntryDelimiter="=", encoding='utf-8'):
-        if filename == "":
-            filename = "SavedModuliSpaces/M-" + str(self._g) + "-" + str(self._n) + ".txt"
-
-        with open(filename, mode='w', encoding=encoding) as f:
             curveStrings = []
             curveList = sorted(self.curves, key=lambda x: x.edgeNumber)
             for c in curveList:
