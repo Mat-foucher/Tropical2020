@@ -274,7 +274,7 @@ class TropicalModuliSpace(object):
         self.specializeByReducingGenus(c, copyInfo[vert])
         return c
 
-    def loadModuliSpaceFromFile(self, filename, curveEntryDelimiter = "=", encoding = 'utf-8'):
+    def loadModuliSpaceFromFile(self, filename, curveEntryDelimiter="=", encoding='utf-8'):
         self.curves = set()
         with open(filename, mode='r', encoding=encoding) as f:
             content = f.read()
@@ -316,12 +316,17 @@ class TropicalModuliSpace(object):
                         legs.add(l)
 
                 c = CombCurve("")
-                c.edges = edges
-                c.legs = legs
+                c.addEdges(edges)
+                c.addLegs(legs)
 
                 self.curves.add(c)
 
-    def saveModuliSpaceToFile(self, filename = "", curveEntryDelimiter = "=", encoding = 'utf-8'):
+                if c.edgeNumber in self.curvesDict:
+                    self.curvesDict[c.edgeNumber].append(c)
+                else:
+                    self.curvesDict[c.edgeNumber] = [c]
+
+    def saveModuliSpaceToFile(self, filename="", curveEntryDelimiter="=", encoding='utf-8'):
         if filename == "":
             filename = "SavedModuliSpaces/M-" + str(self._g) + "-" + str(self._n) + ".txt"
 
@@ -341,5 +346,36 @@ class TropicalModuliSpace(object):
                 f.write(currentCurve)
                 while curveNames:
                     currentCurve = curveNames.pop()
+                    f.write("\n" + curveEntryDelimiter + "\n")
+                    f.write(currentCurve)
+
+    def saveSpaceAndContractions(self, filename="", curveEntryDelimiter="=", encoding='utf-8'):
+        if filename == "":
+            filename = "SavedModuliSpaces/M-" + str(self._g) + "-" + str(self._n) + " with contraction info.txt"
+
+        with open(filename, mode='w', encoding=encoding) as f:
+            curveStrings = []
+            curveList = sorted(self.curves, key=lambda x: x.edgeNumber)
+            for c in curveList:
+                c.simplifyNames()
+                vertexNames = [("(" + v.name + " with genus " + str(v.genus) + ")") for v in c.vertices]
+                edgeNames = [e.name for e in c.edges]
+                legNames = [nextLeg.name for nextLeg in c.legs]
+                vertexLine = "Vertices: {" + ",".join(vertexNames) + "}"
+                edgeLine = "Edges: {" + ",".join(edgeNames) + "}"
+                legLine = "Legs: {" + ",".join(legNames) + "}"
+                idLine = "Curve ID Number: " + str(curveList.index(c))
+                contractionLine = "Contraction info: "
+                contractionStrings = []
+                for info in self.contractionDict[c]:
+                    contractionStrings.append("(" + info[1].name + ", curve " + str(curveList.index(info[0])) + ")")
+                contractionLine += ", ".join(contractionStrings)
+                curveStrings.append("\n".join([vertexLine, edgeLine, legLine, idLine, contractionLine]))
+            if curveStrings:
+                curveStrings.reverse()
+                currentCurve = curveStrings.pop()
+                f.write(currentCurve)
+                while curveStrings:
+                    currentCurve = curveStrings.pop()
                     f.write("\n" + curveEntryDelimiter + "\n")
                     f.write(currentCurve)

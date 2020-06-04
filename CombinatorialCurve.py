@@ -445,7 +445,7 @@ class CombCurve(object):
 
     @staticmethod
     def printCurve(curve):
-        print("\n\nVertices:")
+        print("Vertices:")
         for v in curve.vertices:
             print(v.name, " with genus ", v.genus)
         print("Edges:")
