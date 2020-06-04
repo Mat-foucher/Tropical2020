@@ -56,7 +56,6 @@ class SPLFTests:
         for vert in func.domain.vertices:
             assert (func + func).functionValues[vert] == func.functionValues[vert] + func.functionValues[vert]
             assert (func - func).functionValues[vert] == func.functionValues[vert] - func.functionValues[vert]
-            assert (func * func).functionValues[vert] == func.functionValues[vert] * func.functionValues[vert]
 
 
 class TreeTests:
@@ -152,12 +151,13 @@ TreeTests.verifyLoops(C, {frozenset({e4}), frozenset({e1, e2, e3})})
 
 zeroDict = {e1: 0, e2: 0, e3: 0, e4: 0, l: 0}
 f = StrictPiecewiseLinearFunction(C, zeroDict)
+SPLFTests.verifyMesa(f)
 
-f.assertIsWellDefined()
+nonMesaDict = {e1: -1, e2: 0, e3: -1, e4: 0, l: 0}
+f = StrictPiecewiseLinearFunction(C, nonMesaDict)
 
-
-#SPLFTests.verifyMesa(f, isMesa=False)
-#SPLFTests.verifySpecialSupport(f, [{e1, e3, e4}])
+SPLFTests.verifyMesa(f, isMesa=False)
+SPLFTests.verifySpecialSupport(f, [{e1, e3, e4}])
 
 
 SPLFTests.testSelfArithmetic(f)

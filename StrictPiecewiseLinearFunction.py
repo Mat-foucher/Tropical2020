@@ -89,17 +89,6 @@ class StrictPiecewiseLinearFunction(object):
 
         return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
 
-    def __mul__(self, other):
-        assert other.domain == self.domain
-
-        newFunctionValues = {}
-        for e in self.domain.edges:
-            newFunctionValues[e] = self.functionValues[e] * other.functionValues[e]
-        for leg in self.domain.legs:
-            newFunctionValues[leg] = self.functionValues[leg] * other.functionValues[leg]
-
-        return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
-
     def floodfillVertices(self, vert, S, T, allowedVertices=None):
 
         if allowedVertices is None:
