@@ -297,7 +297,7 @@ class TropicalModuliSpace(object):
                 legInfoFinder = re.compile("leg\((v\d*)\)")
 
                 curveIdInfo = curveInfo[3]
-                curveIdInfoFinder = re.compile("\d*")
+                curveIdInfoFinder = re.compile("Curve ID Number: (\d*)$")
 
                 contractionInfo = curveInfo[4]
                 contractionInfoFinder = re.compile("\(edge\((v\d*), (v\d*)\), curve (\d*)\)")
@@ -342,7 +342,7 @@ class TropicalModuliSpace(object):
 
                 m = curveIdInfoFinder.match(curveIdInfo)
                 if m:
-                    curveId = m.group(0)
+                    curveId = m.group(1)
                     curveIdDictionary[curveId] = c
 
                 edgeContractions = []
@@ -357,7 +357,7 @@ class TropicalModuliSpace(object):
                 self.contractionDict[c] = []
                 edgeContractions = curveContractionDictionary[c]
                 for e in c.edges:
-                    contEntry = {entry for entry in edgeContractions if entry[0] == e.vertices}.pop()
+                    contEntry = [entry for entry in edgeContractions if entry[0] == e.vertices].pop()
                     self.contractionDict[c].append((e, curveIdDictionary[contEntry[1]]))
 
     def saveModuliSpaceToFile(self, filename="", curveEntryDelimiter="=", encoding='utf-8'):
