@@ -178,7 +178,10 @@ class TropicalModuliSpace(object):
         # print("Generation time: ", generation_complete_time - start_time)
 
     def generateContractionDictionary(self):
+        numCurves = len(self.curves)
+        it = 1
         for curve in self.curves:
+            print("Working on getting contraction history of curve", str(it), "/", str(numCurves), "of M-" + str(self._g) + "-" + str(self._n))
             contractionPairs = []
             for nextEdge in curve.edges:
                 contractionCurve = curve.getContraction(nextEdge)
@@ -188,6 +191,7 @@ class TropicalModuliSpace(object):
                 assert containsAMatch
                 contractionPairs.append((match, nextEdge))
             self.contractionDict[curve] = contractionPairs
+            it += 1
 
     # Returns the specialization of 'curve' at 'vert' as determined by g1, g2, S, and T
     # Specifically, 'vert' is split into two vertices, v1 and v2, of genuses g1 and g2 respectively,
@@ -318,6 +322,8 @@ class TropicalModuliSpace(object):
                 c = CombCurve("")
                 c.addEdges(edges)
                 c.addLegs(legs)
+                for vName in vertices:
+                    c.addVertex(vertices[vName])
 
                 self.curves.add(c)
 
@@ -351,7 +357,7 @@ class TropicalModuliSpace(object):
 
     def saveSpaceAndContractions(self, filename="", curveEntryDelimiter="=", encoding='utf-8'):
         if filename == "":
-            filename = "SavedModuliSpaces/M-" + str(self._g) + "-" + str(self._n) + " with contraction info.txt"
+            filename = "SavedModuliSpaces/M-" + str(self._g) + "-" + str(self._n) + ".txt"
 
         with open(filename, mode='w', encoding=encoding) as f:
             curveStrings = []
