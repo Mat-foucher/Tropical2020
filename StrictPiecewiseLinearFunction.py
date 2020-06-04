@@ -9,7 +9,7 @@ class StrictPiecewiseLinearFunction(object):
         self._functionValues = functionValues_
         self.assertIsWellDefined()
         self.generateVertexValues()
-        #self.assertIsAffineLinear()
+        # self.assertIsAffineLinear()
 
     # Make the domain read only
     @property
@@ -24,7 +24,14 @@ class StrictPiecewiseLinearFunction(object):
 
     def propogateVertexValues(self, tree):
         for child, connectingEdge in tree.children:
-            self.functionValues[child.value] = self.functionValues[tree.value] + self.functionValues[connectingEdge] * connectingEdge.length
+
+            if connectingEdge.vert1 == tree.value:
+                orientation = 1
+            else:
+                orientation = -1
+
+            self.functionValues[child.value] = self.functionValues[tree.value] + \
+                                               orientation * self.functionValues[connectingEdge] * connectingEdge.length
             self.propogateVertexValues(child)
 
     # Todo - Figure out how to handle a disconnected domain
@@ -42,9 +49,6 @@ class StrictPiecewiseLinearFunction(object):
 
         for v in self.domain.vertices:
             self.functionValues[v] -= leastVertexValue
-
-
-
 
     def assertIsAffineLinear(self):
         # Assert Non-Negativity at every iteration of the loop!
@@ -103,16 +107,6 @@ class StrictPiecewiseLinearFunction(object):
 
         edgesToCheck = {e for e in self.domain.edges if (vert in e.vertices and vert in allowedVertices)}
 
-        """
-        print("S verts: ")
-        for e in S:
-            print(e.name)
-
-        print("T verts: ")
-        for f in T:
-            print(f.name)
-        """
-
         edgesVisited = set()
 
         foundAnSVertex = False
@@ -131,9 +125,9 @@ class StrictPiecewiseLinearFunction(object):
                 return True
 
             edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (
-                        nextEdge.vert1 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
+                    nextEdge.vert1 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
             edgesToCheck = edgesToCheck | ({e for e in self.domain.edges if (
-                        nextEdge.vert2 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
+                    nextEdge.vert2 in e.vertices and e.vert1 in allowedVertices and e.vert2 in allowedVertices)} - edgesVisited)
 
         # print("S:", foundAnSVertex, "T:", foundATVertex)
         return False
@@ -145,17 +139,10 @@ class StrictPiecewiseLinearFunction(object):
         if len(path) == 1:
             return self.functionValues[path[0]]
 
-        print("Integrating over path:")
-        for nextEdge in path:
-            print(nextEdge.name)
-        print("Available keys:")
-        for key in self.functionValues:
-            print(key.name)
-
         integral = 0
 
         # Integrate over everything except for the very last edge of the path
-        for edgeIndex in range(len(path)-1):
+        for edgeIndex in range(len(path) - 1):
             currentEdge = path[edgeIndex]
             nextEdge = path[edgeIndex + 1]
 
@@ -191,7 +178,7 @@ class StrictPiecewiseLinearFunction(object):
     # We probably will not need this.
     def getEdgeSlopesFrom(self, v1, v2):
 
-        edgesAndSlopes = {'edge' : 'slope'}
+        edgesAndSlopes = {'edge': 'slope'}
 
         firstVertexSet = self.domain.vertices - v2
         secondVertexSet = self.domain.vertices - v1
@@ -201,7 +188,7 @@ class StrictPiecewiseLinearFunction(object):
 
         edgesToCheckForSlope = {e for e in self.domain.edges if e.vert1 == v1}
         edgesChecked = set()
-        
+
         while len(edgesToCheckForSlope) > 0:
             nextEdgeToCheck = edgesToCheckForSlope.pop()
             edgesChecked = edgesChecked | {nextEdgeToCheck}
@@ -211,7 +198,7 @@ class StrictPiecewiseLinearFunction(object):
             for key, value in self.functionValues:
                 if nextEdgeToCheck.vert1 == key:
                     v1Val = value
-            
+
             for key, value in self.functionValues:
                 if nextEdgeToCheck.vert2 == key:
                     edgesAndSlopes[key] = value - v1Val
@@ -219,11 +206,10 @@ class StrictPiecewiseLinearFunction(object):
             if (nextEdge.vert2 == v2):
                 return edgesAndSlopes
 
-            edgesToCheckForSlope = edgesToCheckForSlope | ({e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesChecked)
+            edgesToCheckForSlope = edgesToCheckForSlope | (
+                    {e for e in self.domain.edges if nextEdge.vert2 in e.vertices} - edgesChecked)
 
         raise ValueError("No path from v1 to v2 exists")
-
-
 
     def getSpecialSupport(self):
 
@@ -267,8 +253,6 @@ class StrictPiecewiseLinearFunction(object):
             connectedComponents.append(supportComponentEdges)
 
         return connectedComponents
-
-    
 
     @property
     def mesaTest(self):
