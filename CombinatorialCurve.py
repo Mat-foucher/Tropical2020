@@ -151,6 +151,10 @@ class CombCurve(object):
     def edgesWithVertices(self):
         return {e for e in self.edges if not (e.vert1 is None or e.vert2 is None)}
 
+    @property
+    def legs(self):
+        return self._legs
+
     # Control how edges are set
     # edges_ should be a set of edges
     @edges.setter

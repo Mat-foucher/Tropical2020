@@ -1,4 +1,5 @@
 from CombinatorialCurve import *
+from ModuliSpaces import *
 
 
 class StrictPiecewiseLinearFunction(object):
@@ -60,8 +61,6 @@ class StrictPiecewiseLinearFunction(object):
         for l in self.domain.legs:
             # Ensure that every leg is in the domain of the function
             assert l in self.functionValues
-            # Ensure that each m(l) is an integer
-            assert self.functionValues[l].is_integer()
         for e in self.domain.edgesWithVertices:
             if e.length > 0.0:
                 # Ensure the function has integer slope
@@ -342,3 +341,27 @@ class StrictPiecewiseLinearFunction(object):
 
         # print("A Mesa I Am")
         return True
+
+    # functionContractions will return a dictionary of curves as keys with SPLFs as values.
+    def functionContractions(self):
+        function = copy.copy(self)
+
+        numberLegs = len(function.domain.legs)
+        genus = function.domain.genus
+
+        curveModSpace = TropicalModuliSpace(genus, numberLegs)
+
+        dictOfContractedFunctions = {}
+
+        for c in curveModSpace.curves:
+            for e in self.domain.edges:
+                if e not in c.edges:
+                    del function.functionValues[e]
+                
+            for l in self.domain.legs:
+                if l not in c.legs:
+                    del function.functionValues[l]
+
+            dictOfContractedFunctions[c] = function
+
+        return dictOfContractedFunctions

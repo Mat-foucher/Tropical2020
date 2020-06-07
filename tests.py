@@ -369,6 +369,8 @@ h = StrictPiecewiseLinearFunction(Ex28May, {e1: -1, e2: -1, e3: -1})
 
 SPLFTests.verifyMesa(h)
 
+contractions = h.functionContractions()
+
 
 
 
