@@ -88,6 +88,15 @@ class StrictPiecewiseLinearFunction(object):
 
         return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
 
+    def printSelf(self):
+        for v in self.domain.vertices:
+            print(v.name, self.functionValues[v])
+        for e in self.domain.edges:
+            print(e.name, self.functionValues[e])
+        
+        for l in self.domain.legs:
+            print(l.name, self.functionValues[l])
+
     def floodfillVertices(self, vert, S, T, allowedVertices=None):
 
         if allowedVertices is None:
@@ -161,6 +170,10 @@ class StrictPiecewiseLinearFunction(object):
 
     def assertIsWellDefined(self):
         for l in self.domain.loops:
+            print("Integrating over the following path: ")
+            for e in l:
+                print(e.name)
+            print(self.doubleIntegrateOverPath(l))
             assert self.doubleIntegrateOverPath(l) == 0.0
 
     # We probably will not need this.
@@ -344,28 +357,31 @@ class StrictPiecewiseLinearFunction(object):
 
     # functionContractions will return a dictionary of curves as keys with SPLFs as values.
     def functionContractions(self):
-        function = copy.copy(self)
-
-        numberLegs = len(function.domain.legs)
-        genus = function.domain.genus
-
-        curveModSpace = TropicalModuliSpace(genus, numberLegs)
 
         dictOfContractedFunctions = {}
 
-        for c in curveModSpace.curves:
-            for e in self.domain.edges:
-                if e not in c.edges:
-                    del function.functionValues[e]
-                
-            for l in self.domain.legs:
-                if l not in c.legs:
-                    del function.functionValues[l]
+        for e in self.domain.edges:
+            contraction, copyInfo = self.domain.getContraction(e, True)
 
-            if function.assertIsWellDefined():
-                dictOfContractedFunctions[c] = function
-            else:
-                print("ERROR: SPLF Contraction from " + c.name + " is not well defined.")
-                del dictOfContractedFunctions[c]
+            newFunctionValues = {}
+
+            for i in self.domain.edges:
+                if copyInfo[i] in contraction.edges:
+                    newFunctionValues[copyInfo[i]] = self.functionValues[i] 
+            
+            for l in self.domain.legs:
+                newFunctionValues[copyInfo[l]] = self.functionValues[l]
+
+            try:
+
+                for f in newFunctionValues:
+                    print(f.name, newFunctionValues[f])
+
+                contraction.printSelf()
+                function = StrictPiecewiseLinearFunction(contraction, newFunctionValues)
+                dictOfContractedFunctions[e] = function
+            except:
+                print("ERROR: In initializing function for " + contraction.name)    
+
 
         return dictOfContractedFunctions
