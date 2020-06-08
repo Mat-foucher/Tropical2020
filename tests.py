@@ -173,6 +173,13 @@ SPLFTests.verifyMesa(f)
 nonMesaDict = {e1: -1, e2: 0, e3: -1, e4: 0, l: 0}
 f = StrictPiecewiseLinearFunction(C, nonMesaDict)
 
+contractions = f.functionContractions()
+
+for e in contractions:
+    print(" ")
+    print(e.name, "Contractions:")
+    contractions[e].printSelf()
+
 SPLFTests.verifyMesa(f, isMesa=False)
 SPLFTests.verifySpecialSupport(f, [{e1, e3, e4}])
 
@@ -348,8 +355,7 @@ l6 = leg("l6", v6)
 Ex44.addEdges({e1, e2, e3, e4, e5})
 Ex44.addLegs({l1, l2, l3, l4, l5, l6})
 
-g = StrictPiecewiseLinearFunction(Ex44, {e1: 1, e2: 0, e3: -1, e4: -1, e5: -1, e6: 0,
-                                         l1: 0.0, l2: 0.0, l3: 0.0, l4: 0.0, l5: 0.0, l6: 0.0})
+g = StrictPiecewiseLinearFunction(Ex44, {e1: 1, e2: 0, e3: -1, e4: -1, e5: -1, e6: 0, l1: 0.0, l2: 0.0, l3: 0.0, l4: 0.0, l5: 0.0, l6: 0.0})
 
 SPLFTests.verifyMesa(g)
 
@@ -369,7 +375,8 @@ h = StrictPiecewiseLinearFunction(Ex28May, {e1: -1, e2: -1, e3: -1})
 
 SPLFTests.verifyMesa(h)
 
-contractions = h.functionContractions()
+
+
 
 
 
