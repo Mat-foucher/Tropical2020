@@ -362,6 +362,10 @@ class StrictPiecewiseLinearFunction(object):
                 if l not in c.legs:
                     del function.functionValues[l]
 
-            dictOfContractedFunctions[c] = function
+            if function.assertIsWellDefined():
+                dictOfContractedFunctions[c] = function
+            else:
+                print("ERROR: SPLF Contraction from " + c.name + " is not well defined.")
+                del dictOfContractedFunctions[c]
 
         return dictOfContractedFunctions
