@@ -182,6 +182,7 @@ class StrictPiecewiseLinearFunction(object):
 
     def assertIsWellDefined(self):
         for l in self.domain.loops:
+            print(self.doubleIntegrateOverLoop(l))
             assert self.doubleIntegrateOverLoop(l) == 0.0
 
     # We probably will not need this.
@@ -387,6 +388,7 @@ class StrictPiecewiseLinearFunction(object):
 
                 #contraction.printSelf()
                 function = StrictPiecewiseLinearFunction(contraction, newFunctionValues)
+                function.assertIsWellDefined()
                 dictOfContractedFunctions[e] = function
             except:
                 print("ERROR: In initializing function for " + contraction.name)    
