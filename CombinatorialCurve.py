@@ -472,20 +472,6 @@ class CombCurve(object):
     def getNumSelfLoops(self):
         return sum(1 for e in self.edges if len(e.vertices) == 1)
 
-
-    @property
-    def vertexSelfLoopDict(self):
-        if not self._vertexSelfLoopsCacheValid:
-            self._vertexSelfLoopsCache = {}
-            for v in self.vertices:
-                numLoops = sum(1 for e in self.edges if e.vertices == {v})
-                if numLoops in self._vertexSelfLoopsCache:
-                    self._vertexSelfLoopsCache[numLoops] += 1
-                else:
-                    self._vertexSelfLoopsCache[numLoops] = 1
-            self._vertexSelfLoopsCacheValid = True
-        return self._vertexSelfLoopsCache
-
     def getPermutations(self, lst):
         return GraphIsoHelper.getPermutations(lst)
 
