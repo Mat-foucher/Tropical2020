@@ -346,26 +346,22 @@ class StrictPiecewiseLinearFunction(object):
     def functionContractions(self):
         function = copy.copy(self)
 
-        numberLegs = len(function.domain.legs)
-        genus = function.domain.genus
-
-        curveModSpace = TropicalModuliSpace(genus, numberLegs)
-
         dictOfContractedFunctions = {}
 
-        for c in curveModSpace.curves:
-            for e in self.domain.edges:
-                if e not in c.edges:
-                    del function.functionValues[e]
+        for e in function.domain.edges:
+            contraction, copyInfo = self.domain.getContraction(e, True)
+
+            for d in self.domain.edges:
+                if d not in contraction.edges:
+                    del function.functionValues[d]
                 
             for l in self.domain.legs:
-                if l not in c.legs:
+                if l not in contraction.legs:
                     del function.functionValues[l]
 
             if function.assertIsWellDefined():
-                dictOfContractedFunctions[c] = function
+                dictOfContractedFunctions[copyInfo[e]] = function
             else:
-                print("ERROR: SPLF Contraction from " + c.name + " is not well defined.")
-                del dictOfContractedFunctions[c]
+                print("ERROR: SPLF Contraction from " + contraction.name + " is not well defined.")
 
         return dictOfContractedFunctions
