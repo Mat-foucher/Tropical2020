@@ -122,11 +122,5 @@ class GraphIsoHelper(object):
             # print(other.vertexEverythingDict)
             return False
 
-        loop1 = domain.vertexSelfLoopDict
-        loop2 = codomain.vertexSelfLoopDict
-        if loop1 != loop2:
-            # print("Different Instances of Self Loops")
-            return False
-
         # print("Easy tests were inconclusive - switching to brute force")
         return domain.isBruteForceIsomorphicTo(codomain)

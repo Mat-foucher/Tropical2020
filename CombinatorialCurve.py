@@ -417,8 +417,8 @@ class CombCurve(object):
         return set(endpoints)
 
     # This dictionary keeps track of the number of vertices of a certain characteristic
-    # Currently, the characteristic of a vertex v is a triple (d_e, d_l, g), where d_e is the edge degree of v,
-    # d_l is the leg degree of v, and g is the genus of v.
+    # Currently, the characteristic of a vertex v is a triple (d_e, d_l, g, l), where d_e is the edge degree of v,
+    # d_l is the leg degree of v, and g is the genus of v, and there are l loops based at v.
     # The characteristic of a vertex is invariant under isomorphism, so if two graphs have different
     # "vertexEverythingDict"s, then they are definitely not isomorphic.
     @property
@@ -431,7 +431,8 @@ class CombCurve(object):
                 edgeDegree = self.edgeDegree(v)
                 legDegree = self.legDegree(v)
                 g = v.genus
-                key = (edgeDegree, legDegree, g)
+                loops = sum(1 for e in self.edges if e.vertices == {v})
+                key = (edgeDegree, legDegree, g, loops)
 
                 # Increase the count of that characteristic, or set it to 1 if not already seen
                 if key in self._vertexCharacteristicCache:
@@ -444,8 +445,8 @@ class CombCurve(object):
         return self._vertexCharacteristicCache
 
     # Very similar to the vertexCharacteristicCounts. Returns a dictionary vertexDict defined as follows. The keys of
-    # vertexDict are triples of integers (d_e, d_l, g), and vertexDict[(d_e, d_l, g)] is the list of all vertices
-    # with edge degree d_e, leg degree d_l, and genus g.
+    # vertexDict are triples of integers (d_e, d_l, g, l), and vertexDict[(d_e, d_l, g)] is the list of all vertices
+    # with edge degree d_e, leg degree d_l, genus g, and l loops based at that vertex.
     # The values of vertexDict form a partition of self.vertices and every value of vertexDict is nonempty.
     # When brute-force checking for an isomorphism between two graphs, we only need to check bijections that preserve
     # corresponding characteristic blocks. (i.e., reduce the number of things to check from n! to
@@ -457,7 +458,8 @@ class CombCurve(object):
             edgeDegree = self.edgeDegree(v)
             legDegree = self.legDegree(v)
             g = v.genus
-            key = (edgeDegree, legDegree, g)
+            loops = sum(1 for e in self.edges if e.vertices == {v})
+            key = (edgeDegree, legDegree, g, loops)
 
             # Update that characteristic entry, or initialize it if not already present
             if key in vertexDict:
