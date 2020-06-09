@@ -472,21 +472,33 @@ class CombCurve(object):
     def getNumSelfLoops(self):
         return sum(1 for e in self.edges if len(e.vertices) == 1)
 
+    # Returns a list of all permutations of lst. A permutation of lst is itself a list.
     def getPermutations(self, lst):
         return GraphIsoHelper.getPermutations(lst)
 
+    # Checks if the given data constitutes an isomorphism from self to other.
+    # domainOrderingDict and codomainOrderingDict should have the same keys, and their values should partition the
+    # vertices of self and other with all blocks of the partitions nonempty. The bijection f recovered from this data
+    # is as follows: for each key k, and each index of domainOrderingDict[k],
+    # f(domainOrderingDict[k][i]) = codomainOrderingDict[k][i].
     def checkIfBijectionIsIsomorphism(self, other, domainOrderingDict, codomainOrderingDict):
         return GraphIsoHelper.checkIfBijectionIsIsomorphism(self, other, domainOrderingDict, codomainOrderingDict)
 
+    # permDict should be of type Dict[Any, List[List[Vertex]]]. It should have the property that for any choice function
+    # f for the values of permDict, f(k_1) + ... + f(k_n) is a permutation of self.vertices, where k_1, ..., k_n are
+    # the keys of permDict. Moreover, every permutation of self.vertices should arise in this manner.
     def getBijections(self, permDict):
         return GraphIsoHelper.getBijections(permDict)
 
+    # Checks all bijections that preserve characteristic
     def isBruteForceIsomorphicTo(self, other):
         return GraphIsoHelper.isBruteForceIsomorphicTo(self, other)
 
+    # Checks if some easy to check invariants are preserved, and then checks candidate bijections
     def isIsomorphicTo(self, other):
         return GraphIsoHelper.isIsomorphicTo(self, other)
 
+    # Simplifies names of vertices, edges, and legs in place.
     def simplifyNames(self):
         orderedVertices = list(self.vertices)
         for i in range(len(orderedVertices)):
@@ -609,6 +621,7 @@ class CombCurve(object):
         # Return the saved copy of the core (possibly just calculated)
         return self._coreCache
 
+    # Class to assist in reasoning about loops and spanning trees
     class Tree:
         def __init__(self):
             # Tree Parent
