@@ -125,7 +125,7 @@ class Monoid(object):
 			# the basis element without a pivot
 			lastcol = next(y for y in basis if y not in pivots)
 
-			def F( v, pivots=pivots ): # this is the linear function
+			def F( v, pivots=pivots, lastcol=lastcol ): # this is the linear function
 				# v is an M.Element
 				# we put v in RREF relative to T
 
@@ -215,5 +215,4 @@ class Monoid(object):
 		return not all(z.coeffs.values())
 
 	def isgeqzero( M, x ):
-		L = [ F(x) for F in M.dual ] 
-		return all(L)
+		return all( [ F(x) >= 0 for F in M.dual ] )
