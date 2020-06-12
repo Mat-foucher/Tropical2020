@@ -16,17 +16,17 @@ M.addrel(x-y)
 assert M.eq(x,y)
 
 
-M = Monoid()
-M.addgen(1)
-M.addgen(2)
-M.addgen(3)
-x = M.Element({1:1})
-y = M.Element({2:1})
-z = M.Element({3:1})
-M.addrel(x + y - 2 * z)
+P = Monoid()
+P.addgen(1)
+P.addgen(2)
+P.addgen(3)
+x = P.Element({1:1})
+y = P.Element({2:1})
+z = P.Element({3:1})
+P.addrel(x + y - 2 * z)
 
 
-M.compute_dual()
+P.compute_dual()
 
 
 w = y - x

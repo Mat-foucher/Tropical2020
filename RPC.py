@@ -11,15 +11,20 @@ def gcd( a, b ):
 def lcm( a, b ):
 	return a*b/gcd(a,b)
 
-class Monoid(object):
-	def __init__( m ):
-		m.gens = list()		# must store as a list so iterations 
-							# are always in the same order
+class Monoid( object ):
+	def __init__( m, gens=[], rels={} ):
+		m.gens = list( gens )		# must store as a list so iterations 
+									# are always in the same order
+									# this should be changd to a tuple
 
-		m.rels = dict()		# a dictionary indexed by elements of m.gens
-							# consists of relations in row echelon form
+		m.rels = { }
 
 		m.dual = None
+
+		for R in rels:
+			m.addrel( R )
+
+		m.compute_dual()
 
 		class Element( object ):
 			# elements here mean elements of the associated group
@@ -32,12 +37,21 @@ class Monoid(object):
 				e.monoid = m
 				e.coeffs = coeffs
 				e.denom = d
+
+			def __hash__( x ):
+				return hash( x.coeffs.values() )
 			
 			def __add__( self, other ):
 				return m.add( self, other )
 
+			def __radd__( self, other ):
+				return m.add( self, other )
+
 			def __iadd__( self, other ):
 				return m.iadd( self, other )
+
+			def __neg__( self ):
+				return (-1) * self
 
 			def __isub__( self, other ):
 				return m.isub( self, other )
@@ -81,7 +95,8 @@ class Monoid(object):
 		return self.Element( { } )
 
 
-	def addgen( self, gen ):
+	def addgen( self, gen ):			# this should be removed;
+										# just make this part of __init__
 		self.gens.append( gen )
 
 	def addrel( self, rel ):
@@ -99,10 +114,11 @@ class Monoid(object):
 				for v in rel.coeffs.values(): d = math.gcd(d,v)
 				self.rels[x] = rel // d
 				break
+		if self.dual:   # if the dual has already been computed, we need to
+						# recompute because the relations have changed
+			self.compute_dual()
 
 	def compute_dual( M ):
-		if M.dual: return M.dual
-
 		M.dual = set()
 
 		basis = [ x for x in M.gens if x not in M.rels.keys() ]
@@ -216,3 +232,26 @@ class Monoid(object):
 
 	def isgeqzero( M, x ):
 		return all( [ F(x) >= 0 for F in M.dual ] )
+
+	def matrix_vector_mult( M, A, x ):
+		return sum( ( x[z] * A[z] for z in x.coeffs ), M.zero() )
+
+class MonoidHomomorphism( object ):
+	def __init__( F, domain, codomain, matrix ):
+		assert isinstance( domain, Monoid )
+		assert isinstance( codomain, Monoid )
+		assert isinstance( matrix, dict )
+		assert set( matrix.keys() ) == set( domain.gens )
+		assert all( ( isinstance( matrix[x], codomain.Element ) 
+						for x in domain.gens ) )
+		assert all( ( codomain.isgeqzero( matrix[x] )
+						for x in domain.gens ) )
+		assert all( ( codomain.matrix_vector_mult( matrix, domain.rels[x] ) 
+													== codomain.zero() 
+						for x in domain.rels ) ), "Not a well-defined function!"
+		F.domain = domain
+		F.codomain = codomain
+		F.matrix = matrix
+
+	def __call__( F, x ):
+		return F.codomain.matrix_vector_mult( F.matrix, x )
