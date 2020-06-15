@@ -196,15 +196,6 @@ CurveTests.verifyDegree(C, v3, 2)
 CurveTests.verifyGenus(C, 3)
 CurveTests.verifyBettiNumber(C, 2)
 
-subdiv, copyInfo = C.getSubdivision(e4, 0.5, returnCopyInfo=True)
-CurveTests.verifyDegree(subdiv, copyInfo[v1], C.degree(v1))
-CurveTests.verifyDegree(subdiv, copyInfo[v2], C.degree(v2))
-CurveTests.verifyDegree(subdiv, copyInfo[v3], C.degree(v3))
-CurveTests.verifyGenus(subdiv, C.genus)
-CurveTests.verifyBettiNumber(subdiv, C.bettiNumber)
-assert subdiv.numVertices == C.numVertices + 1
-assert subdiv.numEdges == C.numEdges + 1
-
 
 
 
