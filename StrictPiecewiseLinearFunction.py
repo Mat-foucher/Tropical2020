@@ -393,5 +393,4 @@ class StrictPiecewiseLinearFunction(object):
             except:
                 print("ERROR: In initializing function for " + contraction.name)    
 
-
         return dictOfContractedFunctions
