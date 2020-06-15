@@ -228,7 +228,7 @@ class Monoid( object ):
 
 		z = x - y
 		z.scalereduce()
-		return not all(z.coeffs.values())
+		return not any(z.coeffs.values())
 
 	def isgeqzero( M, x ):
 		return all( [ F(x) >= 0 for F in M.dual ] )
