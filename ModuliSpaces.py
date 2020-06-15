@@ -79,13 +79,13 @@ class TropicalModuliSpace(object):
 
     def containsUpToIsomorphism(self, curve, returnMatch=False):
 
-        if curve.edgeNumber not in self.curvesDict:
+        if curve.numEdges not in self.curvesDict:
             if returnMatch:
                 return False, None
             else:
                 return False
         else:
-            for c in self.curvesDict[curve.edgeNumber]:
+            for c in self.curvesDict[curve.numEdges]:
                 if c.isIsomorphicTo(curve):
                     if returnMatch:
                         return True, c
@@ -101,7 +101,7 @@ class TropicalModuliSpace(object):
         # if not self.containsUpToIsomorphism(curve):
         #     self.curves = self.curves | {curve}
 
-        numEdges = curve.edgeNumber
+        numEdges = curve.numEdges
         if numEdges in self.curvesDict:
             curveIsNew = True
             for c in self.curvesDict[numEdges]:
@@ -335,10 +335,10 @@ class TropicalModuliSpace(object):
 
                 self.curves.add(c)
 
-                if c.edgeNumber in self.curvesDict:
-                    self.curvesDict[c.edgeNumber].append(c)
+                if c.numEdges in self.curvesDict:
+                    self.curvesDict[c.numEdges].append(c)
                 else:
-                    self.curvesDict[c.edgeNumber] = [c]
+                    self.curvesDict[c.numEdges] = [c]
 
                 m = curveIdInfoFinder.match(curveIdInfo)
                 if m:
@@ -366,7 +366,7 @@ class TropicalModuliSpace(object):
 
         with open(filename, mode='w', encoding=encoding) as f:
             curveStrings = []
-            curveList = sorted(self.curves, key=lambda x: x.edgeNumber)
+            curveList = sorted(self.curves, key=lambda x: x.numEdges)
             for c in curveList:
                 c.simplifyNames()
                 vertexNames = [("(" + v.name + " with genus " + str(v.genus) + ")") for v in c.vertices]

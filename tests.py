@@ -202,8 +202,8 @@ CurveTests.verifyDegree(subdiv, copyInfo[v2], C.degree(v2))
 CurveTests.verifyDegree(subdiv, copyInfo[v3], C.degree(v3))
 CurveTests.verifyGenus(subdiv, C.genus)
 CurveTests.verifyBettiNumber(subdiv, C.bettiNumber)
-assert subdiv.vertexNumber == C.vertexNumber + 1
-assert subdiv.edgeNumber == C.edgeNumber + 1
+assert subdiv.numVertices == C.numVertices + 1
+assert subdiv.numEdges == C.numEdges + 1
 
 
 
