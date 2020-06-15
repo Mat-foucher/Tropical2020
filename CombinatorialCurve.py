@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+from GraphIsoHelper import *
 
 
 # A vertex has a name and non-negative genus
@@ -83,6 +84,7 @@ class CombCurve(object):
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
     def __init__(self, name_):
         self.name = name_
+        self._vertices = set()
         self._edges = set()
         self._legs = set()
 
@@ -99,33 +101,97 @@ class CombCurve(object):
         self._vertexSelfLoopsCache = {}
 
         # Variables for caching vertex everything couns
-        self._vertexEverythingCacheValid = False
-        self._vertexEverythingCache = {}
+        self._vertexCharacteristicCacheValid = False
+        self._vertexCharacteristicCache = {}
 
         # Variables for caching the core
         self._coreCacheValid = False
         self._coreCache = None
 
+    def invalidateCaches(self):
+        self._vertexCacheValid = False
+        self._genusCacheValid = False
+        self._vertexSelfLoopsCacheValid = False
+        self._vertexCharacteristicCacheValid = False
+        self._coreCacheValid = False
+
+    # The set of vertices is a read only property computed upon access, unless a valid cache is available
+    # It is the collection of vertices that are endpoints of edges or roots of legs
+    @property
+    def vertices(self):
+        return self._vertices
+
+    def addVertex(self, v):
+        if v is not None:
+            self._vertices.add(v)
+
+            # Possibly need to recalculate genus/core/etc.
+            self.invalidateCaches()
+
+    def addVertices(self, vertices):
+        for v in copy.copy(vertices):
+            self.addVertex(v)
+
+    def removeVertex(self, v, removeDanglingVertices=False):
+        if v in self._vertices:
+            self._vertices.remove(v)
+
+            # Removing a vertex removes all connected legs and edges
+            for e in {e for e in self.edges if v in e.vertices}:
+                self.removeEdge(e, removeDanglingVertices)
+            for nextLeg in {nextLeg for nextLeg in self.legs if v in nextLeg.vertices}:
+                self.removeLeg(nextLeg)
+
+            # Possibly need to recalculate genus/core/etc.
+            self.invalidateCaches()
+
+    def removeVertices(self, vertices):
+        for v in copy.copy(vertices):
+            self.removeVertex(v)
 
     @property
     def edges(self):
         return self._edges
+
+    @property
+    def edgesWithVertices(self):
+        return {e for e in self.edges if not (e.vert1 is None or e.vert2 is None)}
 
     # Control how edges are set
     # edges_ should be a set of edges
     @edges.setter
     def edges(self, edges_):
         self._edges = edges_
-        self._vertexCacheValid = False
-        self._genusCacheValid = False
-        self._vertexSelfLoopsCacheValid = False
-        self._vertexEverythingCacheValid = False
-        self._coreCacheValid = False
+        self.invalidateCaches()
 
+    def addEdge(self, e):
+        self._edges.add(e)
+        self.addVertices(e.vertices)
 
-    @property
-    def edgesWithVertices(self):
-        return {e for e in self.edges if not (e.vert1 is None or e.vert2 is None)}
+        # Possibly need to recalculate genus/core/etc.
+        self.invalidateCaches()
+
+    def addEdges(self, edges):
+        for e in copy.copy(edges):
+            self.addEdge(e)
+
+    def removeEdge(self, e, removeDanglingVertices=True):
+        if e in self._edges:
+            self._edges.remove(e)
+
+            # A "dangling vertex" is an endpoint of e is isolated after we remove edge e
+            # By default, removing an edge removes such vertices
+            if removeDanglingVertices:
+                for v in e.vertices:
+                    if self.degree(v) == 0:
+                        self.removeVertex(v)
+
+            # Possibly need to recalculate genus/core/etc.
+            self.invalidateCaches()
+
+    def removeEdges(self, edges):
+        for e in copy.copy(edges):
+            self.removeEdge(e)
 
     @property
     def legs(self):
@@ -140,37 +206,45 @@ class CombCurve(object):
     @legs.setter
     def legs(self, legs_):
         self._legs = legs_
-        self._vertexCacheValid = False
-        self._genusCacheValid = False
-        self._vertexEverythingCacheValid = False
 
-    # The set of vertices is a read only property computed upon access, unless a valid cache is available
-    # It is the collection of vertices that are endpoints of edges or roots of legs
+        # Possibly need to recalculate genus/core/etc.
+        self.invalidateCaches()
+
+    def addLeg(self, newLeg):
+        self._legs.add(newLeg)
+        self.addVertices(newLeg.vertices)
+
+        # Possibly need to recalculate genus/core/etc.
+        self.invalidateCaches()
+
+    def addLegs(self, newLegs):
+        for newLeg in copy.copy(newLegs):
+            self.addLeg(newLeg)
+
+    def removeLeg(self, badLeg, removeDanglingVertices=True):
+        if badLeg in self._legs:
+            self._legs.remove(badLeg)
+
+            # The root of a leg is "dangling" if it becomes isolated after removing the leg
+            # By default, removing a leg removes such a vertex
+            if removeDanglingVertices:
+                for v in badLeg.vertices:
+                    if self.degree(v) == 0:
+                        self.removeVertex(v)
+
+            # Possibly need to recalculate genus/core/etc.
+            self.invalidateCaches()
+
+    def removeLegs(self, badLegs):
+        for badLeg in copy.copy(badLegs):
+            self.removeLeg(badLeg)
+
     @property
-    def vertices(self):
-        if not self._vertexCacheValid:
-            # Flatmap self.edges with the function e => e.vertices
-            unflattened_vertex_list = [e.vertices for e in self.edges] + [nextLeg.vertices for nextLeg in self.legs]
-            flattened_vertex_list = []
-            for sublist in unflattened_vertex_list:
-                for v in sublist:
-                    flattened_vertex_list.append(v)
-
-            self._vertexCache = set(flattened_vertex_list) - {None}
-            self._vertexCacheValid = True
-
-        return self._vertexCache
-
-    # The number of vertices is a read only property computed upon access
-    # It is the number of vertices
-    @property
-    def vertexNumber(self):
+    def numVertices(self):
         return len(self.vertices)
 
-    # The number of edges is a read only property computed upon access
-    # It is the number of edges
     @property
-    def edgeNumber(self):
+    def numEdges(self):
         return len(self.edges)
 
     @property
@@ -180,11 +254,11 @@ class CombCurve(object):
     # The Betti number is a read only property computed upon access
     @property
     def bettiNumber(self):
-        return self.numEdgesWithVertices - self.vertexNumber + 1
+        return self.numEdgesWithVertices - self.numVertices + 1
 
-    # Genus is a read only property computed upon access
     @property
     def genus(self):
+        # If the cached copy of genus is invalid, then recalculate it
         if not self._genusCacheValid:
             self._genusCache = self.bettiNumber + sum([v.genus for v in self.vertices])
             self._genusCacheValid = True
@@ -192,17 +266,24 @@ class CombCurve(object):
 
     # Returns the degree of vertex v accounting for legs and self loops
     def degree(self, v):
-        return self.numEdgesAttached(v) + self.numLegsAttached(v)
+        return self.edgeDegree(v) + self.legDegree(v)
 
-    def numEdgesAttached(self, v):
+    # Returns the number of endpoints of finite edges at vertex v
+    def edgeDegree(self, v):
         return sum(1 for e in self.edges if e.vert1 == v) + sum(1 for e in self.edges if e.vert2 == v)
 
-    def numLegsAttached(self, v):
+    # Returns the number of roots of legs at v
+    def legDegree(self, v):
         return sum(1 for attachedLeg in self.legs if attachedLeg.root == v)
 
     # Returns a copy of this curve where all vertices, edges, and legs are also copied shallowly
     def getFullyShallowCopy(self, returnCopyInfo=False):
+        # copyInfo will be a dictionary whose keys are the legs, edges, and vertices of self
+        # copyInfo[*] will be the copy of *
         copyInfo = {}
+
+        # First, copy the vertices of the graph and keep track of how it was done.
+        # Even if the copy info is not returned, we need to know how vertices are copied to get compatible edge copies
         vertexCopyDict = {}
         for v in self.vertices:
             vCopy = copy.copy(v)
@@ -211,9 +292,10 @@ class CombCurve(object):
             if returnCopyInfo:
                 copyInfo[v] = vCopy
 
+        # Next, copy edges and legs
         edgeCopies = set()
-        legCopies = set()
         for nextEdge in self.edges:
+            # Keep the same name and length, but use the new versions of endpoints
             nextEdgeCopy = edge(nextEdge.name, nextEdge.length,
                                 vertexCopyDict[nextEdge.vert1], vertexCopyDict[nextEdge.vert2])
             edgeCopies.add(nextEdgeCopy)
@@ -221,24 +303,26 @@ class CombCurve(object):
             if returnCopyInfo:
                 copyInfo[nextEdge] = nextEdgeCopy
 
+        legCopies = set()
         for nextLeg in self.legs:
+            # Keep the sane name, but use the new version of the root
             nextLegCopy = leg(nextLeg.name, vertexCopyDict[nextLeg.root])
             legCopies.add(nextLegCopy)
 
             if returnCopyInfo:
                 copyInfo[nextLeg] = nextLegCopy
 
+        # Build the copy
         curveCopy = CombCurve(self.name)
-        curveCopy.edges = edgeCopies
-        curveCopy.legs = legCopies
+        curveCopy.addEdges(edgeCopies)
+        curveCopy.addLegs(legCopies)
 
         if returnCopyInfo:
             return curveCopy, copyInfo
         else:
             return curveCopy
 
-    # e should be an edge and the length should be a double
-    # genus should be a non-negative integer
+    # Subdivide at edge e with a given length from e.vert1
     def subdivide(self, e, length, genus=0):
         # Don't force a negative length
         assert 0.0 <= length <= e.length
@@ -246,206 +330,175 @@ class CombCurve(object):
         # Don't split a nonexistent edge
         assert e in self.edges
 
+        # Form the two new edges and one new vertex of the subdivision
         v = vertex("(vertex splitting " + e.name + ")", genus)
         e1 = edge("(subdivision 1 of " + e.name + ")", length, e.vert1, v)
         e2 = edge("(subdivision 2 of " + e.name + ")", e.length - length, v, e.vert2)
 
-        self.edges = self.edges - {e}
-        self.edges = self.edges | {e1}
-        self.edges = self.edges | {e2}
+        # Apply the subdivision
+        self.removeEdge(e)
+        self.addEdges({e1, e2})
 
     # e should be an edge and the length should be a double
     # genus should be a non-negative integer
-    # returns a new CombCurve with edge e subdivided
-    def getSubdivision(self, e, length, genus=0):
-        subdivision = copy.copy(self)
-        subdivision.subdivide(e, length, genus)
-        return subdivision
+    # returns a new CombCurve with edge e subdivided at the given length from e.vert1
+    def getSubdivision(self, e, length, returnCopyInfo=False, genus=0):
+        # To avoid accidentally modifying self, we work with a fully shallow copy
+        subdivision, copyInfoDict = self.getFullyShallowCopy(True)
 
-    # v should be a vector
-    # Returns the set of all elements of the form (e, n), where e is an edge, n is 1 or 2,
+        # Safely subdivide the copy in place
+        subdivision.subdivide(copyInfoDict[e], length, genus)
+
+        if returnCopyInfo:
+            return subdivision, copyInfoDict
+        else:
+            return subdivision
+
+    # Contract edge e in place
+    def contract(self, e):
+        # Don't contract a nonexistent edge
+        assert e in self.edges
+
+        genus = 0
+        if e.vert1 == e.vert2:
+            # If e is a self loop, then the genus contribution of the loop will be placed in the new vertex
+            genus = e.vert1.genus + 1
+        else:
+            # If e is not a self loop, then the new vertex only bears the genus of the endpoints
+            genus = e.vert1.genus + e.vert2.genus
+
+        v = vertex("(Contraction of " + e.name + ")", genus)
+
+        # For each edge or leg adjacent to e, move endpoints to the contraction of e
+        for nextEdge in copy.copy(self.edges) - {e}:
+            if nextEdge.vert1 in e.vertices:
+                nextEdge.vert1 = v
+            if nextEdge.vert2 in e.vertices:
+                nextEdge.vert2 = v
+        for nextLeg in self.legs:
+            if nextLeg.root in e.vertices:
+                nextLeg.root = v
+
+        # Apply the contraction
+        self.addVertex(v)
+        self.removeEdge(e)
+
+    # Returns a new CombCurve with edge e contracted
+    def getContraction(self, e, returnCopyInfo=False):
+        # To avoid accidentally modifying self, we work with a fully shallow copy
+        contraction, copyInfoDict = self.getFullyShallowCopy(True)
+
+        # Safely contract the copy in place
+        contraction.contract(copyInfoDict[e])
+
+        if returnCopyInfo:
+            return contraction, copyInfoDict
+        else:
+            return contraction
+
+    # v should be a vertex
+    # Returns the set of all elements of the form (e, n), where e is an edge or leg, n is 1 or 2,
     # and the n^th endpoint of e is v
     def getEndpointsOfEdges(self, v):
+
         endpoints = []
+
         for e in self.edges:
             if e.vert1 == v:
                 endpoints += [(e, 1)]
             if e.vert2 == v:
                 endpoints += [(e, 2)]
+
+        # By default, consider the root of a leg to be its first endpoint
         for nextLeg in self.legs:
             if nextLeg.root == v:
                 endpoints += [(nextLeg, 1)]
+
         return set(endpoints)
 
+    # This dictionary keeps track of the number of vertices of a certain characteristic
+    # Currently, the characteristic of a vertex v is a triple (d_e, d_l, g, l), where d_e is the edge degree of v,
+    # d_l is the leg degree of v, and g is the genus of v, and there are l loops based at v.
+    # The characteristic of a vertex is invariant under isomorphism, so if two graphs have different
+    # "vertexEverythingDict"s, then they are definitely not isomorphic.
     @property
-    def vertexEverythingDict(self):
-        if not self._vertexEverythingCacheValid:
-            self._vertexEverythingCache = {}
+    def vertexCharacteristicCounts(self):
+        # If the cached copy of the dictionary is invalid, then recalculate it.
+        if not self._vertexCharacteristicCacheValid:
+            self._vertexCharacteristicCache = {}
             for v in self.vertices:
-                numEdgesAttached = self.numEdgesAttached(v)
-                numLegsAttached = self.numLegsAttached(v)
+                # Calculate the characteristic of v
+                edgeDegree = self.edgeDegree(v)
+                legDegree = self.legDegree(v)
                 g = v.genus
-                key = (numEdgesAttached, numLegsAttached, g)
-                if key in self._vertexEverythingCache:
-                    self._vertexEverythingCache[key] += 1
+                loops = sum(1 for e in self.edges if e.vertices == {v})
+                key = (edgeDegree, legDegree, g, loops)
+
+                # Increase the count of that characteristic, or set it to 1 if not already seen
+                if key in self._vertexCharacteristicCache:
+                    self._vertexCharacteristicCache[key] += 1
                 else:
-                    self._vertexEverythingCache[key] = 1
+                    self._vertexCharacteristicCache[key] = 1
 
-            self._vertexEverythingCacheValid = True
-        return self._vertexEverythingCache
+            self._vertexCharacteristicCacheValid = True
 
-    def getVerticesByEverything(self):
+        return self._vertexCharacteristicCache
+
+    # Very similar to the vertexCharacteristicCounts. Returns a dictionary vertexDict defined as follows. The keys of
+    # vertexDict are triples of integers (d_e, d_l, g, l), and vertexDict[(d_e, d_l, g)] is the list of all vertices
+    # with edge degree d_e, leg degree d_l, genus g, and l loops based at that vertex.
+    # The values of vertexDict form a partition of self.vertices and every value of vertexDict is nonempty.
+    # When brute-force checking for an isomorphism between two graphs, we only need to check bijections that preserve
+    # corresponding characteristic blocks. (i.e., reduce the number of things to check from n! to
+    # (n_1)! * (n_2)! * ... * (n_k)!, where n = n_1 + ... + n_k)
+    def getVerticesByCharacteristic(self):
         vertexDict = {}
         for v in self.vertices:
-            numEdgesAttached = self.numEdgesAttached(v)
-            numLegsAttached = self.numLegsAttached(v)
+            # Get the characteristic of v
+            edgeDegree = self.edgeDegree(v)
+            legDegree = self.legDegree(v)
             g = v.genus
-            key = (numEdgesAttached, numLegsAttached, g)
+            loops = sum(1 for e in self.edges if e.vertices == {v})
+            key = (edgeDegree, legDegree, g, loops)
+
+            # Update that characteristic entry, or initialize it if not already present
             if key in vertexDict:
                 vertexDict[key].append(v)
             else:
                 vertexDict[key] = [v]
         return vertexDict
 
+    # Returns the number of edges whose endpoints are indistinct. Invariant under isomorphism
     def getNumSelfLoops(self):
         return sum(1 for e in self.edges if len(e.vertices) == 1)
 
-    @property
-    def vertexSelfLoopDict(self):
-        if not self._vertexSelfLoopsCacheValid:
-            self._vertexSelfLoopsCache = {}
-            for v in self.vertices:
-                numLoops = sum(1 for e in self.edges if e.vertices == {v})
-                if numLoops in self._vertexSelfLoopsCache:
-                    self._vertexSelfLoopsCache[numLoops] += 1
-                else:
-                    self._vertexSelfLoopsCache[numLoops] = 1
-            self._vertexSelfLoopsCacheValid = True
-        return self._vertexSelfLoopsCache
-
+    # Returns a list of all permutations of lst. A permutation of lst is itself a list.
     def getPermutations(self, lst):
-        # If lst is empty then there are no permutations
-        if len(lst) == 0:
-            return []
+        return GraphIsoHelper.getPermutations(lst)
 
-        # If there is only one element in lst then, only one permutation is possible
-        if len(lst) == 1:
-            return [lst]
-
-        # Find the permutations for lst if there are more than 1 characters
-
-        perms = []  # empty list that will store current permutation
-
-        # Iterate the input(lst) and calculate the permutation
-        for i in range(len(lst)):
-            m = lst[i]
-
-            # Extract lst[i] or m from the list.  remLst is
-            # remaining list
-            remLst = lst[:i] + lst[i + 1:]
-
-            # Generating all permutations where m is first
-            # element
-            for p in self.getPermutations(remLst):
-                perms.append([m] + p)
-        return perms
-
+    # Checks if the given data constitutes an isomorphism from self to other.
+    # domainOrderingDict and codomainOrderingDict should have the same keys, and their values should partition the
+    # vertices of self and other with all blocks of the partitions nonempty. The bijection f recovered from this data
+    # is as follows: for each key k, and each index of domainOrderingDict[k],
+    # f(domainOrderingDict[k][i]) = codomainOrderingDict[k][i].
     def checkIfBijectionIsIsomorphism(self, other, domainOrderingDict, codomainOrderingDict):
+        return GraphIsoHelper.checkIfBijectionIsIsomorphism(self, other, domainOrderingDict, codomainOrderingDict)
 
-        keyList = list(domainOrderingDict.keys())
-
-        inputList = []
-        outputList = []
-        for key in keyList:
-            inputList = inputList + domainOrderingDict[key]
-            outputList = outputList + codomainOrderingDict[key]
-
-        # print("Checking input list: ", [v.name for v in inputList])
-        # print("With corresponding output list: ", [v.name for v in outputList])
-
-        for i in range(len(inputList)):
-            for j in range(len(inputList)):
-                # Number of edges connecting inputList[i] and inputList[j]
-                numInputEdges = sum(1 for e in self.edges if e.vertices == {inputList[i], inputList[j]})
-                numOutputEdges = sum(1 for e in other.edges if e.vertices == {outputList[i], outputList[j]})
-                if numInputEdges != numOutputEdges:
-                    # print("Function does not preserve number of connecting edges")
-                    return False
-
-        for i in range(len(inputList)):
-            if inputList[i].genus != outputList[i].genus:
-                # print("Function does not preserve genus")
-                return False
-            numInputLegs = sum(1 for nextLeg in self.legs if nextLeg.root == inputList[i])
-            numOutputLegs = sum(1 for nextLeg in other.legs if nextLeg.root == outputList[i])
-            if numInputLegs != numOutputLegs:
-                # print("Function does not preserve number of legs")
-                return False
-
-        # print("This was an isomorphism!")
-        return True
-
+    # permDict should be of type Dict[Any, List[List[Vertex]]]. It should have the property that for any choice function
+    # f for the values of permDict, f(k_1) + ... + f(k_n) is a permutation of self.vertices, where k_1, ..., k_n are
+    # the keys of permDict. Moreover, every permutation of self.vertices should arise in this manner.
     def getBijections(self, permDict):
+        return GraphIsoHelper.getBijections(permDict)
 
-        if len(permDict) == 0:
-            return [{}]
-
-        nextKey = list(permDict.keys())[0]
-        permsOfThatKey = permDict.pop(nextKey)
-        remaining = self.getBijections(permDict)
-
-        perms = []
-
-        for perm in permsOfThatKey:
-            for subPerm in remaining:
-                # Taking the union of dictionaries in python is next to impossible to do nicely :(
-                newDict = {nextKey: perm}
-                for k in subPerm:
-                    newDict[k] = subPerm[k]
-                perms.append(newDict)
-        return perms
-
+    # Checks all bijections that preserve characteristic
     def isBruteForceIsomorphicTo(self, other):
-        selfEverythingVertexDict = self.getVerticesByEverything()
-        otherEverythingVertexDict = other.getVerticesByEverything()
+        return GraphIsoHelper.isBruteForceIsomorphicTo(self, other)
 
-        permDict = {}
-        for d in selfEverythingVertexDict:
-            permDict[d] = self.getPermutations(selfEverythingVertexDict[d])
-        domainOrderingDicts = self.getBijections(permDict)
-
-        for domainOrderingDict in domainOrderingDicts:
-            if self.checkIfBijectionIsIsomorphism(other, domainOrderingDict, otherEverythingVertexDict):
-                return True
-
-        return False
-
+    # Checks if some easy to check invariants are preserved, and then checks candidate bijections
     def isIsomorphicTo(self, other):
-        if self.edgeNumber != other.edgeNumber:
-            # print("Different Number of Edges")
-            return False
+        return GraphIsoHelper.isIsomorphicTo(self, other)
 
-        if self.vertexNumber != other.vertexNumber:
-            # print("Different Number of Vertices")
-            return False
-
-        if self.vertexEverythingDict != other.vertexEverythingDict:
-            # print("Different counts of vertices with a given number of legs, edges, and genus")
-            # print(self.getVerticesByEverything())
-            # print(other.getVerticesByEverything())
-            # print(self.vertexEverythingDict)
-            # print(other.vertexEverythingDict)
-            return False
-
-        loop1 = self.vertexSelfLoopDict
-        loop2 = other.vertexSelfLoopDict
-        if loop1 != loop2:
-            # print("Different Instances of Self Loops")
-            return False
-
-        # print("Easy tests were inconclusive - switching to brute force")
-        return self.isBruteForceIsomorphicTo(other)
-
+    # Simplifies names of vertices, edges, and legs in place.
     def simplifyNames(self):
         orderedVertices = list(self.vertices)
         for i in range(len(orderedVertices)):
@@ -456,11 +509,11 @@ class CombCurve(object):
             nextLeg.name = "leg(" + nextLeg.root.name + ")"
 
     def showNumbers(self):
-        print("Number of Vertices: ", self.vertexNumber, " Number of Edges: ", self.edgeNumber)
+        print("Number of Vertices: ", self.numVertices, " Number of Edges: ", self.numEdges)
 
     @staticmethod
     def printCurve(curve):
-        print("\n\nVertices:")
+        print("Vertices:")
         for v in curve.vertices:
             print(v.name, " with genus ", v.genus)
         print("Edges:")
@@ -489,7 +542,7 @@ class CombCurve(object):
     @property
     def isConnected(self):
 
-        A = np.zeros((self.vertexNumber, self.vertexNumber))
+        A = np.zeros((self.numVertices, self.numVertices))
         _vertices = list(self.vertices)
 
         for x in self.edges:
@@ -513,7 +566,7 @@ class CombCurve(object):
             numbers.extend(newNumbers)
             brandNewNumbers = []
             for i in newNumbers:
-                for k in range(self.vertexNumber):
+                for k in range(self.numVertices):
                     if A[i][k] == 1:
                         if k not in numbers:
                             brandNewNumbers.append(k)
@@ -523,7 +576,7 @@ class CombCurve(object):
             brandNewNumbers = []
             go = len(newNumbers) > 0
 
-        return len(numbers) == self.vertexNumber
+        return len(numbers) == self.numVertices
 
 
 
@@ -540,10 +593,9 @@ class CombCurve(object):
                 raise ValueError("The core is only defined for connected curves.")
 
             # In order to generate the core, we start with a copy of self and repeatedly prune off certain leaves
-            core = self.getFullyShallowCopy()
-
-            # The core is guaranteed to have no legs
-            core.legs = set()
+            core = CombCurve("(Core of " + self.name + ")")
+            core.addEdges(self.edges)
+            core.addVertices(self.vertices)
 
             # Flag to indicate whether new leaves were pruned
             keepChecking = True
@@ -554,21 +606,13 @@ class CombCurve(object):
                 keepChecking = False
 
                 # Search for leaves to prune
-                for nextVertex in core.vertices:
+                for nextVertex in copy.copy(core.vertices):
                     # A vertex is the endpoint of a leaf to prune if it is connected to exactly one edge and has
                     # genus zero
                     if nextVertex.genus == 0 and core.degree(nextVertex) < 2:
-                        # Find the unique edge that has this endpoint
-                        for x in core.edges:
-                            if nextVertex in x.vertices:
-                                # Prune the leaf
-                                core.edges = core.edges - {x}
-
-                                # Pruning this leaf may have revealed more, so we need to loop again.
-                                keepChecking = True
-
-                                # The degree of the vertex is less than 2, so this is the only possible edge to find
-                                break
+                        # Prune the leaf
+                        core.removeVertex(nextVertex)
+                        keepChecking = True
 
             # Save the new, valid, core and set the valid flag to true
             self._coreCache = core
@@ -576,3 +620,168 @@ class CombCurve(object):
 
         # Return the saved copy of the core (possibly just calculated)
         return self._coreCache
+
+    # Class to assist in reasoning about loops and spanning trees
+    class Tree:
+        def __init__(self):
+            # Tree Parent
+            self.parent = None
+            # Edge connecting self to parent
+            self.parentConnection = None
+            # Node holds a vertex value
+            self.value = None
+            # List of (Tree, Edge) children
+            self.children = []
+
+        def setValue(self, vert):
+            self.value = vert
+
+        def setParent(self, p):
+            self.parent = p
+
+        def addChild(self, vert, connectingEdge):
+            if (
+                    # Don't allow a self loop to be added
+                    (vert != self.value) and
+                    # Make sure connectingEdge is actually a connecting edge
+                    (connectingEdge.vertices == {self.value, vert}) and
+                    # Don't introduce any loops
+                    (vert not in self.getVertices())
+            ):
+                childTree = CombCurve.Tree()
+                childTree.setValue(vert)
+                childTree.setParent(self)
+                childTree.parentConnection = connectingEdge
+                self.children.append((childTree, connectingEdge))
+
+        def getEdgesOfChildren(self):
+            edges = []
+            for child in self.children:
+                childTree, connectingEdge = child
+                edges.append(connectingEdge)
+                edges += childTree.getEdgesOfChildren()
+            return edges
+
+        def getEdges(self):
+            # If we're actually the root of the whole tree, then descend recursively
+            if self.parent is None:
+                return self.getEdgesOfChildren()
+            else:
+                return self.parent.getEdges()
+
+        def getVerticesFromChildren(self):
+            vertices = {self.value}
+            for child in self.children:
+                childTree, connectingEdge = child
+                vertices = vertices | childTree.getVerticesFromChildren()
+            return vertices
+
+        def getVertices(self):
+            if self.parent is None:
+                return self.getVerticesFromChildren()
+            else:
+                return self.parent.getVertices()
+
+        def findVertexInChildren(self, vert):
+            if self.value == vert:
+                return self
+            else:
+                for child in self.children:
+                    childTree, connectingEdge = child
+                    possibleFind = childTree.findVertexInChildren(vert)
+                    if possibleFind is not None:
+                        return possibleFind
+                return None
+
+        def findVertex(self, vert):
+            if self.parent is None:
+                return self.findVertexInChildren(vert)
+            else:
+                return self.parent.findVertex(vert)
+
+        def getAncestorEdges(self, vert):
+            currentTree = self.findVertex(vert)
+            ancestorEdges = []
+
+            while currentTree.parent is not None:
+                ancestorEdges.append(currentTree.parentConnection)
+                currentTree = currentTree.parent
+
+            return ancestorEdges
+
+
+
+    @property
+    def spanningTree(self):
+        return self.getSpanningTree(list(self.vertices)[0])
+
+    # Will return a list of edges in a loop.
+    def getLoop(self, e):
+        spanningTree = self.spanningTree
+        if e in spanningTree.getEdges():
+            raise ValueError("Edge " + e.name + " must not belong to the spanning tree to determine a unique loop.")
+
+        anc1 = spanningTree.getAncestorEdges(e.vert1)
+        anc2 = spanningTree.getAncestorEdges(e.vert2)
+
+        leastAncestorIndex = 0
+        for i in range(min(len(anc1), len(anc2))):
+            leastAncestorIndex = i
+            if anc1[i] != anc2[i]:
+                break
+        else:
+            leastAncestorIndex = min(len(anc1), len(anc2))
+
+        anc1 = anc1[leastAncestorIndex:]
+        anc2 = anc2[leastAncestorIndex:]
+        anc1.reverse()
+
+        if anc1 == [None]:
+            anc1 = []
+
+        if anc2 == [None]:
+            anc2 = []
+
+        return anc1 + [e] + anc2
+
+    # Returns a list of lists of edges.
+    @property
+    def loops(self):
+        loopDeterminers = self.edges - set(self.spanningTree.getEdges())
+        _loops = []
+        for nextEdge in loopDeterminers:
+            _loops.append(self.getLoop(nextEdge))
+        return _loops
+
+    def getSpanningTree(self, vert):
+        
+        if not self.isConnected:
+            raise ValueError("A spanning tree is only defined for a connected graph")
+
+        tree = self.Tree()          
+        tree.setValue(vert)
+
+        verticesToCheck = {vert}
+
+        while len(verticesToCheck) > 0:
+
+            nextVertex = verticesToCheck.pop()
+
+            connectedEdges = {e for e in self.edges if (nextVertex == e.vert1 or nextVertex == e.vert2)} 
+
+            adjacentVertices = set()          
+
+            for e in connectedEdges:
+                adjacentVertices = adjacentVertices | e.vertices 
+
+            newAdjacentVertices = adjacentVertices - set(tree.getVertices())
+
+            nextTree = tree.findVertex(nextVertex)    
+
+            for v in newAdjacentVertices:
+                connectingEdge = {e for e in self.edges if e.vertices == {nextVertex, v}}.pop()
+                nextTree.addChild(v, connectingEdge)
+
+            verticesToCheck = verticesToCheck | newAdjacentVertices
+
+        return tree
