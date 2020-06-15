@@ -1,6 +1,7 @@
 import copy
 import numpy as np
 from GraphIsoHelper import *
+from RPC import *
 
 
 # A vertex has a name and non-negative genus
@@ -80,6 +81,7 @@ class CombCurve(object):
         self._vertices = set()
         self._edges = set()
         self._legs = set()
+        self.monoid = Monoid()
 
         # Variables for caching vertices
         self._vertexCacheValid = False
