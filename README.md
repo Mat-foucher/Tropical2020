@@ -1,6 +1,20 @@
 # Tropical2020
 Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 
+=====================================================================================================================================================================================================================
+Contents:
+=====================================================================================================================================================================================================================
+
+1: Introduction.
+2: Testing.
+3: Combinatorial Curves.
+4: Strict Piecewise Liner Functions.
+5: Monoids (mayhaps)
+
++ More, once the code is finalised.
+
+=====================================================================================================================================================================================================================
+
 ====================================
 What is the code, and how to use it:
 ====================================
@@ -73,7 +87,7 @@ Edge:
 
     NOTE: For "self - edges" on the curve, you can input the same vertex for both positions.
 
-    To declare an edge, one writes something like the following:
+    To create an edge, one writes something like the following:
 
         e1 = edge("e1", 1.0, v1, v2)
     
@@ -82,3 +96,4 @@ Edge:
     setting the length (length(length_)) and lastly returning the vertices.
     Since this is python 3, we have access to the set() object, an unindexed list. When the function vertices() in edges() is called, this will return a set with two elements:
     the vertices that the edge connects.
+
