@@ -88,6 +88,15 @@ class StrictPiecewiseLinearFunction(object):
 
         return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
 
+    def printSelf(self):
+        for v in self.domain.vertices:
+            print(v.name, self.functionValues[v])
+        for e in self.domain.edges:
+            print(e.name, self.functionValues[e])
+        
+        for l in self.domain.legs:
+            print(l.name, self.functionValues[l])
+
     def floodfillVertices(self, vert, S, T, allowedVertices=None):
 
         if allowedVertices is None:
@@ -121,20 +130,32 @@ class StrictPiecewiseLinearFunction(object):
         return False
 
     # Returns twice the integral of self over the supplied path
-    def doubleIntegrateOverPath(self, path):
-        if len(path) == 0:
+    def doubleIntegrateOverLoop(self, loop):
+        if len(loop) == 0:
             return 0
-        if len(path) == 1:
-            return self.functionValues[path[0]]
+        if len(loop) == 1:
+            if loop[0].vert1 != loop[0].vert2:
+                raise ValueError("The supplied list of edges is not a loop.")
+            return self.functionValues[loop[0]] * loop[0].length
+
+        # Loops of length 2 are weird...
+        if len(loop) == 2:
+            if loop[0].vertices != loop[1].vertices:
+                raise ValueError("The supplied list of edges is not a loop.")
+            # Orientation is regular
+            if loop[0].vert2 == loop[1].vert1:
+                return self.functionValues[loop[0]] * loop[0].length + self.functionValues[loop[1]] * loop[1].length
+            else:
+                return self.functionValues[loop[0]] * loop[0].length - self.functionValues[loop[1]] * loop[1].length
 
         integral = 0
 
         # Integrate over everything except for the very last edge of the path
-        for edgeIndex in range(len(path) - 1):
-            currentEdge = path[edgeIndex]
-            nextEdge = path[edgeIndex + 1]
+        for edgeIndex in range(len(loop) - 1):
+            currentEdge = loop[edgeIndex]
+            nextEdge = loop[edgeIndex + 1]
 
-            if (currentEdge.vertices.intersection(nextEdge.vertices)) == 0:
+            if len(currentEdge.vertices.intersection(nextEdge.vertices)) == 0:
                 raise ValueError("The supplied list of edges is not a path.")
             connectingVertex = currentEdge.vertices.intersection(nextEdge.vertices).pop()
 
@@ -145,14 +166,14 @@ class StrictPiecewiseLinearFunction(object):
                 integral += -1 * self.functionValues[currentEdge] * currentEdge.length
 
         # Integrate over the very last edge
-        secondToLastEdge = path[len(path) - 2]
-        lastEdge = path[len(path) - 1]
-        if (secondToLastEdge.vertices.intersection(lastEdge.vertices)) == 0:
+        secondToLastEdge = loop[len(loop) - 2]
+        lastEdge = loop[len(loop) - 1]
+        if len(secondToLastEdge.vertices.intersection(lastEdge.vertices)) == 0:
             raise ValueError("The supplied list of edges is not a path.")
         connectingVertex = secondToLastEdge.vertices.intersection(lastEdge.vertices).pop()
 
-        # Passing over currentEdge from vert1 to vert 2 <=> normal orientation
-        if connectingVertex == lastEdge.vert2:
+        # Passing over lastEdge from vert1 to vert 2 <=> normal orientation
+        if connectingVertex == lastEdge.vert1:
             integral += self.functionValues[lastEdge] * lastEdge.length
         else:
             integral += -1 * self.functionValues[lastEdge] * lastEdge.length
@@ -161,7 +182,8 @@ class StrictPiecewiseLinearFunction(object):
 
     def assertIsWellDefined(self):
         for l in self.domain.loops:
-            assert self.doubleIntegrateOverPath(l) == 0.0
+            print(self.doubleIntegrateOverLoop(l))
+            assert self.doubleIntegrateOverLoop(l) == 0.0
 
     # We probably will not need this.
     def getEdgeSlopesFrom(self, v1, v2):
@@ -344,24 +366,31 @@ class StrictPiecewiseLinearFunction(object):
 
     # functionContractions will return a dictionary of curves as keys with SPLFs as values.
     def functionContractions(self):
-        function = copy.copy(self)
 
         dictOfContractedFunctions = {}
 
-        for e in function.domain.edges:
+        for e in self.domain.edges:
             contraction, copyInfo = self.domain.getContraction(e, True)
 
-            for d in self.domain.edges:
-                if d not in contraction.edges:
-                    del function.functionValues[d]
-                
-            for l in self.domain.legs:
-                if l not in contraction.legs:
-                    del function.functionValues[l]
+            newFunctionValues = {}
 
-            if function.assertIsWellDefined():
-                dictOfContractedFunctions[copyInfo[e]] = function
-            else:
-                print("ERROR: SPLF Contraction from " + contraction.name + " is not well defined.")
+            for i in self.domain.edges:
+                if copyInfo[i] in contraction.edges:
+                    newFunctionValues[copyInfo[i]] = self.functionValues[i] 
+            
+            for l in self.domain.legs:
+                newFunctionValues[copyInfo[l]] = self.functionValues[l]
+
+            try:
+
+                #for f in newFunctionValues:
+                #    print(f.name, newFunctionValues[f])
+
+                #contraction.printSelf()
+                function = StrictPiecewiseLinearFunction(contraction, newFunctionValues)
+                function.assertIsWellDefined()
+                dictOfContractedFunctions[e] = function
+            except:
+                print("ERROR: In initializing function for " + contraction.name)    
 
         return dictOfContractedFunctions

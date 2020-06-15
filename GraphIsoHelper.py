@@ -90,8 +90,8 @@ class GraphIsoHelper(object):
 
     @staticmethod
     def isBruteForceIsomorphicTo(domain, codomain):
-        selfEverythingVertexDict = domain.getVerticesByEverything()
-        otherEverythingVertexDict = codomain.getVerticesByEverything()
+        selfEverythingVertexDict = domain.getVerticesByCharacteristic()
+        otherEverythingVertexDict = codomain.getVerticesByCharacteristic()
 
         permDict = {}
         for d in selfEverythingVertexDict:
@@ -106,26 +106,20 @@ class GraphIsoHelper(object):
 
     @staticmethod
     def isIsomorphicTo(domain, codomain):
-        if domain.edgeNumber != codomain.edgeNumber:
+        if domain.numEdges != codomain.numEdges:
             # print("Different Number of Edges")
             return False
 
-        if domain.vertexNumber != codomain.vertexNumber:
+        if domain.numVertices != codomain.numVertices:
             # print("Different Number of Vertices")
             return False
 
-        if domain.vertexEverythingDict != codomain.vertexEverythingDict:
+        if domain.vertexCharacteristicCounts != codomain.vertexCharacteristicCounts:
             # print("Different counts of vertices with a given number of legs, edges, and genus")
             # print(self.getVerticesByEverything())
             # print(other.getVerticesByEverything())
             # print(self.vertexEverythingDict)
             # print(other.vertexEverythingDict)
-            return False
-
-        loop1 = domain.vertexSelfLoopDict
-        loop2 = codomain.vertexSelfLoopDict
-        if loop1 != loop2:
-            # print("Different Instances of Self Loops")
             return False
 
         # print("Easy tests were inconclusive - switching to brute force")
