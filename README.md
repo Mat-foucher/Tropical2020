@@ -87,6 +87,14 @@ Edge:
 
 ### Moduli Spaces <a name="ModSpaces"></a>
 
+1. [Basic Usage](#modSpaceUsage)
+2. [Members of `TropicalModuliSpace`](#modSpaceMembers)
+3. [Generating the Strata](#modSpaceStrataGen)
+4. [Generating the Contraction Dictionary](#modSpaceContractionGen)
+5. [Saving and Loading Spaces](#modSpaceIO)
+
+#### Basic Usage <a name="modSpaceUsage"></a>
+
 The class `TropicalModuliSpace` found in `ModuliSpaces.py` is meant to represent the 
 tropical moduli spaces <img src="https://render.githubusercontent.com/render/math?math=\mathcal{M}_{g, n}^{trop}">.
 To initialize this class, an integer for the genus and marking of the moduli space must be provided. Since generating 
@@ -116,9 +124,15 @@ following three lines of code:
     m.generateSpaceDFS()
     m.generateContractionDictionary()
     
-#### Members of `TropicalModuliSpace`
+#### Members of `TropicalModuliSpace` <a name="modSpaceMembers"></a>
+
+- `curves`: A `Set[CombCurve]` to store the strata of the space.
+- `curvesDict`: A `Dictionary[Int, CombCurve]` organizing the strata by their number of edges.
+- `contractionDict`: A `Dictionary[CombCurve, List[(Edge, Int)]]` recording the contraction information of the
+space. Given a curve `C`, `contractionDict[C]` is a list of elements of the type `(Edge, Int)`. An element `(e, id)`
+belongs to `contractionDict[C]` if and only if contracting edge `e` of `C` produces the curve with I.D. `id`.
     
-#### Generating the strata
+#### Generating the Strata <a name="modSpaceStrataGen"></a>
 
 In order to generate the strata of the moduli space, use the function `generateSpaceDFS`. This function first adds the 
 unique `n`-marked stable curve of genus `g` with zero edges to the `curves` member. Then, the program examines which 
@@ -127,8 +141,16 @@ strata can be specialized, and adds these specializations to `curves` if they ar
 This process is performed in a depth-first manner: As soon as a curve `C` is specialized to another curve `C'`, the
 specializations of `C'` are generated.
 
-#### Generating the contraction information
+#### Generating the Contraction Information <a name="modSpaceContractionGen"></a>
 
 In order to generate the contraction dictionary of the moduli space, use the function `generateContractionDictionary`.
 For each curve `C` in the space, and for each edge `e` of `C`, this function identifies which curve of the space is
 isomorphic to the weighted edge contraction `C/{e}`.
+
+#### Saving and Loading Spaces <a name="modSpaceIO"></a>
+
+In order to load a moduli space from a file, initialize the space with proper genus and marking number, and then call 
+`loadModuliSpaceFromFile(filename)`. To save a space, call `saveModuliSpaceToFile`. Both functions accept delimiter
+and encoding information. By default, the curve entry delimiter is `=` and the encoding is `utf-8`. 
+`saveModuliSpaceToFile` accepts an optional filename to save to. If none is provided, a filename is automatically
+generated based on the genus and marking of the space.
