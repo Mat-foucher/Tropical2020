@@ -4,7 +4,7 @@ class Family(object):
         self.morphisms = set()
 
 
-class FamilyMorphism(object):
+class BasicFamilyMorphism(object):
     pass
 
 
