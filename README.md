@@ -56,6 +56,7 @@ most of the work will be done in tests.py
 
 1. [Vertices](#vertices)
 2. [Edges](#edges)
+3. [A Neat Example](#neatExample)
 
 The document `CombinatorialCurve.py` is for all specifications regarding the combinatorial tropical curves as seen in 
 the overleaf document.
@@ -106,33 +107,33 @@ Leg:
         l1 = leg("l1", v1)
         
 
-Neat Example:
-======================================================
+### A Neat Example <a name="neatExample"></a>
 Creating a Tropical Combinatorial Curve with the Code:
-    We are now ready to discuss how we may go about implementing a tropical curve in the code.
-    To begin, the CombCurve object is what will be the tropical curve.
-    As per the overleaf reference guide, the CombCurve class has the sufficent properties of behaving properly according to the definitions in the reference.
-    
-    To define a new tropical curve, we write the following:
 
-        TropicalCurve = CombCurve("TropicalCurve")
+We are now ready to discuss how we may go about implementing a tropical curve in the code.
+To begin, the CombCurve object is what will be the tropical curve.
+As per the overleaf reference guide, the CombCurve class has the sufficent properties of behaving properly according to the definitions in the reference.
 
-    The CombCurve object takes only one parameter in it's initializer, which is the name string.
-    We now want to add edges, vertices, and legs to our curve, which we do deine as:
+To define a new tropical curve, we write the following:
 
-        v1 = vertex("v1", 1)
-        v2 = vertex("v2", 0)
-        e1 = edge("e1", v1, v2)
-        l1 = leg("l1", v2)
-        l2 = leg("l2", v2)
+    TropicalCurve = CombCurve("TropicalCurve")
 
-        vertices = {v1, v2}
-        edges = {e1}
-        legs = {l1,l2}
+The CombCurve object takes only one parameter in it's initializer, which is the name string.
+We now want to add edges, vertices, and legs to our curve, which we do deine as:
 
-        TropicalCurve.addEgdes(edges)
-        TropicalCurve.addLegs(legs)
-        TropicalCurve.addVertices(vertices)
+    v1 = vertex("v1", 1)
+    v2 = vertex("v2", 0)
+    e1 = edge("e1", v1, v2)
+    l1 = leg("l1", v2)
+    l2 = leg("l2", v2)
+
+    vertices = {v1, v2}
+    edges = {e1}
+    legs = {l1,l2}
+
+    TropicalCurve.addEgdes(edges)
+    TropicalCurve.addLegs(legs)
+    TropicalCurve.addVertices(vertices)
 
 ## Strict Piecewise Linear Functions <a name="SPLFs"></a>
 
