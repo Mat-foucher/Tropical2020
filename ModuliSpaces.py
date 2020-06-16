@@ -65,36 +65,52 @@ class TropicalModuliSpace(object):
 
         return partition
 
-    # Reduces the given list of curves by isomorphism. If no curves are provided, then self.curves is modified in place.
+    # Reduces the given list of curves by isomorphism.
+    # If no curves are provided, then self.curves is modified in place,
+    # and nothing is returned. This is to bring attention to the fact that this code has side-effects when no curves
+    # are provided.
     # if returnReductionInformation is True, then some information about this reduction is returned. Specifically,
     # if P is a partition of curves into isotypes, then reductionDict is a right inverse (represented as a dictionary)
     # to some choice function over P.
-    # TODO - Re-examine the reduction info return.
     def reduceByIsomorphism(self, curves=None, returnReductionInformation=False):
 
+        # If no curves are provided, then modify in place
         modifySelf = (curves is None)
+
         if modifySelf:
+            # The curves are organized by their number of edges in curvesDict, so we can reduce each group
+            # individually (this reduces the number of isomorphisms to check for).
             for n in self.curvesDict:
                 self.curvesDict[n] = self.reduceByIsomorphism(self.curvesDict[n])
+
+            # Now that curvesDict has been reduced, get the correct curves in self.curves.
+            # Effectively, self.curves = union(self.curvesDict.values())
             self.curves = set()
             for n in self.curvesDict:
                 self.curves = self.curves | set(self.curvesDict[n])
-            return self.curves
         else:
+            # Since isomorphism is an equivalence relation, we might not have to check every pair of curves for iso.
+            # Our algorithm is to iterate over the given curves and check for isomorphism with a representative of each
+            # isotype.
             isotypes = []
             for curve in curves:
+                # Until we check, assume that "curve" will represent a new isotype
                 newIsotype = True
+
+                # Actually perform the check
                 for t in isotypes:
+                    # If the curve isn't new, then add it to its isotype and stop checking
                     if t[0].isIsomorphicTo(curve):
                         t.append(curve)
                         newIsotype = False
                         break
+
+                # If we made it here without unsetting the newIsotype flag, then the curve represents a new isotype.
                 if newIsotype:
                     isotypes.append([curve])
+
             if returnReductionInformation:
-                reductionDict = {}
-                for t in isotypes:
-                    reductionDict[t[0]] = t
+                reductionDict = {t[0]: t for t in isotypes}
                 return {t[0] for t in isotypes}, reductionDict
             else:
                 return {t[0] for t in isotypes}
