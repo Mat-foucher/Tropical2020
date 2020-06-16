@@ -253,7 +253,7 @@ class TropicalModuliSpace(object):
 
                 # This had better be true! Remember to generate the space...
                 assert containsAMatch
-                contractionPairs.append((match, nextEdge))
+                contractionPairs.append((nextEdge, match))
 
             self.contractionDict[curve] = contractionPairs
             it += 1
