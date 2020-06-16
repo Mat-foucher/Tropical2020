@@ -196,15 +196,31 @@ specializations of `C'` are generated.
 
 #### Splitting Specialization
 
-One way that curves are specialized is by splitting vertices. Before:
+One way that curves are specialized is by splitting vertices. Given a vertex `v` of curve `C`, a nonnegative
+ integer partition
+`(g1, g2)` of the genus of `v`, and a partition `(S, T)` of the
+endpoints of edges at `v`, a specialization of `C` can be constructed as follows. First, delete vertex `v` and 
+add two vertices `v1` and `v2`. Let the genus of `v1` be `g1` and let the genus of `v2` be `g2`. Connect each
+endpoint in `S` to `v1` and each endpoint in `T` to `v2`. Finally, add an edge from `v1` to `v2`.
+
+For example, consider the following portion of a tropical curve. A single genus-3 vertex and some connecting edges are
+displayed.
 
 ![Alt text](Images/pre-split.svg)
-<img src="./pre-split.svg">
 
-and after:
+In order to partition the genus of this vertex, let `g1=2`, `g2=1`. To partition the endpoints of edges, 
+let `S` contain
+the connected endpoint of `e2` and the first endpoint of `e1`. Accordingly, let `T` contain the connected endpoint of
+`e3`, the second endpoint of `e1`, and the root of `l`. The result is displayed below:
 
 ![Alt text](Images/post-split.svg)
-<img src="./post-split.svg">
+
+The idea behind this type of specialization is to split a vertex into two pieces and distribute its data among those
+pieces.
+
+In order to preserve stability, there are some restrictions on `g1`, `g2`, `S`, and `T`. If `g1=0`, then `S` must
+contain at least two elements. Otherwise, after splitting, a vertex of genus zero would only have degree two.
+Similarly, if `g2=0`, then `T` must have at least two elements.
 
 #### Genus Reduction Specialization
 
