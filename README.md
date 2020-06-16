@@ -81,7 +81,7 @@ Vertex:
     NOTE: The genus must always be non-negative, else an error is raised.
 
 Edge:
-    The edges are a bit spicier than the vertices, as you may have already guessed.
+    The edges are similar to the vertices, as you may have already guessed.
     For edge objects, each edge has a name in their definition, much like the vertices.
     The edge object also includes a float parameter called length (non-negative, of course), and inputs for TWO vertices.
 
@@ -97,3 +97,39 @@ Edge:
     Since this is python 3, we have access to the set() object, an unindexed list. When the function vertices() in edges() is called, this will return a set with two elements:
     the vertices that the edge connects.
 
+Leg:
+    The leg object is much like edge, except for the fact that the leg object can only be assigned a singe vertex that it is connected to.
+    Unlike the other graph objects too, the leg does not have any length or genus, making it the simplest class in the file.
+
+    To create a new leg, this can be done so by the following:
+
+        l1 = leg("l1", v1)
+        
+
+Neat Example:
+======================================================
+Creating a Tropical Combinatorial Curve with the Code:
+    We are now ready to discuss how we may go about implementing a tropical curve in the code.
+    To begin, the CombCurve object is what will be the tropical curve.
+    As per the overleaf reference guide, the CombCurve class has the sufficent properties of behaving properly according to the definitions in the reference.
+    
+    To define a new tropical curve, we write the following:
+
+        TropicalCurve = CombCurve("TropicalCurve")
+
+    The CombCurve object takes only one parameter in it's initializer, which is the name string.
+    We now want to add edges, vertices, and legs to our curve, which we do deine as:
+
+        v1 = vertex("v1", 1)
+        v2 = vertex("v2", 0)
+        e1 = edge("e1", v1, v2)
+        l1 = leg("l1", v2)
+        l2 = leg("l2", v2)
+
+        vertices = {v1, v2}
+        edges = {e1}
+        legs = {l1,l2}
+
+        TropicalCurve.addEgdes(edges)
+        TropicalCurve.addLegs(legs)
+        TropicalCurve.addVertices(vertices)
