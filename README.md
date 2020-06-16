@@ -180,10 +180,11 @@ following three lines of code:
 
 - `curves`: A `Set[CombCurve]` to store the strata of the space.
 - `curvesDict`: A `Dictionary[Int, CombCurve]` organizing the strata by their number of edges.
-- `contractionDict`: A `Dictionary[CombCurve, List[(Edge, Int)]]` recording the contraction information of the
-space. Given a curve `C`, `contractionDict[C]` is a list of elements of the type `(Edge, Int)`. An element `(e, id)`
-belongs to `contractionDict[C]` if and only if contracting edge `e` of `C` produces the curve with I.D. `id`.
-    
+- `contractionDict`: A `Dictionary[CombCurve, List[(Edge, CombCurve)]]` recording the contraction information of the
+space. Given a curve `C`, `contractionDict[C]` is a list of elements of the type `(Edge, CombCurve)`. 
+An element `(e, C')` belongs to `contractionDict[C]` if and only if the weighted edge contraction `C/{e}` is
+isomorphic to `C'` and `C'` belongs to the space.
+
 ### Generating the Strata <a name="modSpaceStrataGen"></a>
 
 In order to generate the strata of the moduli space, use the function `generateSpaceDFS`. This function first adds the 
