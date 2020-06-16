@@ -41,10 +41,16 @@ class StrictPiecewiseLinearFunction(object):
             return
 
         # Get any domain vertex
-        baseVert = list(self.domain.vertices)[0]
-        tree = self.domain.getSpanningTree(baseVert)
-        self.functionValues[tree.value] = self.domain.monoid.zero()
-        self.propogateVertexValues(tree)
+
+        if len(self.domain.vertices.intersection(self._functionValues.keys())) > 0:
+            baseVert = self.domain.vertices.intersection(self._functionValues.keys()).pop()
+            tree = self.domain.getSpanningTree(baseVert)
+            self.propogateVertexValues(tree)
+        else:
+            baseVert = list(self.domain.vertices)[0]
+            tree = self.domain.getSpanningTree(baseVert)
+            self.functionValues[tree.value] = self.domain.monoid.zero()
+            self.propogateVertexValues(tree)
 
     def assertIsAffineLinear(self):
         # Assert Non-Negativity at every iteration of the loop!
