@@ -194,6 +194,20 @@ strata can be specialized, and adds these specializations to `curves` if they ar
 This process is performed in a depth-first manner: As soon as a curve `C` is specialized to another curve `C'`, the
 specializations of `C'` are generated.
 
+#### Splitting Specialization
+
+One way that curves are specialized is by splitting vertices. Before:
+
+![Alt text](Images/pre-split.svg)
+<img src="./pre-split.svg">
+
+and after:
+
+![Alt text](Images/post-split.svg)
+<img src="./post-split.svg">
+
+#### Genus Reduction Specialization
+
 ### Generating the Contraction Information <a name="modSpaceContractionGen"></a>
 
 In order to generate the contraction dictionary of the moduli space, use the function `generateContractionDictionary`.
