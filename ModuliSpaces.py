@@ -116,14 +116,17 @@ class TropicalModuliSpace(object):
                 return {t[0] for t in isotypes}
 
     # Checks if curve is contained in self.curves up to isomorphism.
+    # Optionally, the user can ask for the match to be returned, if it exists.
     def containsUpToIsomorphism(self, curve, returnMatch=False):
 
+        # We only need to compare against curves with the same number of edges
         if curve.numEdges not in self.curvesDict:
             if returnMatch:
                 return False, None
             else:
                 return False
         else:
+            # Check for isomorphism with curves of the same number of edges
             for c in self.curvesDict[curve.numEdges]:
                 if c.isIsomorphicTo(curve):
                     if returnMatch:
@@ -131,15 +134,13 @@ class TropicalModuliSpace(object):
                     else:
                         return True
 
+        # If this code is reached, then no match was found
         if returnMatch:
             return False, None
         else:
             return False
 
     def addCurve(self, curve):
-        # if not self.containsUpToIsomorphism(curve):
-        #     self.curves = self.curves | {curve}
-
         numEdges = curve.numEdges
         if numEdges in self.curvesDict:
             curveIsNew = True
@@ -150,7 +151,6 @@ class TropicalModuliSpace(object):
             if curveIsNew:
                 self.curvesDict[numEdges] = self.curvesDict[numEdges] + [curve]
                 self.curves = self.curves | {curve}
-                #print("Currently at ", len(self.curves), " curves.")
         else:
             self.curvesDict[numEdges] = [curve]
             self.curves = self.curves | {curve}
