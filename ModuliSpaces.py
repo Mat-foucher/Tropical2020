@@ -140,19 +140,22 @@ class TropicalModuliSpace(object):
         else:
             return False
 
+    # Adds "curve" to self.curves and self.curvesDict if it is not already present up to isomorphism. If the curve is
+    # already present, then nothing is added.
     def addCurve(self, curve):
-        numEdges = curve.numEdges
-        if numEdges in self.curvesDict:
-            curveIsNew = True
-            for c in self.curvesDict[numEdges]:
-                if curve.isIsomorphicTo(c):
-                    curveIsNew = False
-                    break
-            if curveIsNew:
+
+        curveIsNew = self.containsUpToIsomorphism(curve)
+
+        if curveIsNew:
+            numEdges = curve.numEdges
+
+            # Decide whether we need to initialize or update self.curvesDict[numEdges]
+            if numEdges in self.curvesDict:
                 self.curvesDict[numEdges] = self.curvesDict[numEdges] + [curve]
-                self.curves = self.curves | {curve}
-        else:
-            self.curvesDict[numEdges] = [curve]
+            else:
+                self.curvesDict[numEdges] = [curve]
+
+            # Update self.curves
             self.curves = self.curves | {curve}
 
     # Adds the specializations of curve to self.curves
