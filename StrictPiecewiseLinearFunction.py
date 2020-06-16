@@ -32,7 +32,7 @@ class StrictPiecewiseLinearFunction(object):
                 orientation = -1
 
             self.functionValues[child.value] = self.functionValues[tree.value] + \
-                                               orientation * self.functionValues[connectingEdge] * connectingEdge.length
+                                               (orientation * self.functionValues[connectingEdge]) * connectingEdge.length
             self.propogateVertexValues(child)
 
     # Todo - Figure out how to handle a disconnected domain
@@ -41,15 +41,16 @@ class StrictPiecewiseLinearFunction(object):
             return
 
         # Get any domain vertex
-        baseVert = list(self.domain.vertices)[0]
-        tree = self.domain.getSpanningTree(baseVert)
-        self.functionValues[tree.value] = 0.0
-        self.propogateVertexValues(tree)
 
-        leastVertexValue = min(self.functionValues[v] for v in self.domain.vertices)
-
-        for v in self.domain.vertices:
-            self.functionValues[v] -= leastVertexValue
+        if len(self.domain.vertices.intersection(self._functionValues.keys())) > 0:
+            baseVert = self.domain.vertices.intersection(self._functionValues.keys()).pop()
+            tree = self.domain.getSpanningTree(baseVert)
+            self.propogateVertexValues(tree)
+        else:
+            baseVert = list(self.domain.vertices)[0]
+            tree = self.domain.getSpanningTree(baseVert)
+            self.functionValues[tree.value] = self.domain.monoid.zero()
+            self.propogateVertexValues(tree)
 
     def assertIsAffineLinear(self):
         # Assert Non-Negativity at every iteration of the loop!
@@ -90,7 +91,7 @@ class StrictPiecewiseLinearFunction(object):
 
     def printSelf(self):
         for v in self.domain.vertices:
-            print(v.name, self.functionValues[v])
+            print(v.name, self.functionValues[v].coeffs)
         for e in self.domain.edges:
             print(e.name, self.functionValues[e])
         
@@ -132,7 +133,7 @@ class StrictPiecewiseLinearFunction(object):
     # Returns twice the integral of self over the supplied path
     def doubleIntegrateOverLoop(self, loop):
         if len(loop) == 0:
-            return 0
+            return self.domain.monoid.zero()
         if len(loop) == 1:
             if loop[0].vert1 != loop[0].vert2:
                 raise ValueError("The supplied list of edges is not a loop.")
@@ -148,7 +149,7 @@ class StrictPiecewiseLinearFunction(object):
             else:
                 return self.functionValues[loop[0]] * loop[0].length - self.functionValues[loop[1]] * loop[1].length
 
-        integral = 0
+        integral = self.domain.monoid.zero()
 
         # Integrate over everything except for the very last edge of the path
         for edgeIndex in range(len(loop) - 1):
@@ -163,7 +164,7 @@ class StrictPiecewiseLinearFunction(object):
             if connectingVertex == currentEdge.vert2:
                 integral += self.functionValues[currentEdge] * currentEdge.length
             else:
-                integral += -1 * self.functionValues[currentEdge] * currentEdge.length
+                integral += (-1 * self.functionValues[currentEdge]) * currentEdge.length
 
         # Integrate over the very last edge
         secondToLastEdge = loop[len(loop) - 2]
@@ -176,14 +177,13 @@ class StrictPiecewiseLinearFunction(object):
         if connectingVertex == lastEdge.vert1:
             integral += self.functionValues[lastEdge] * lastEdge.length
         else:
-            integral += -1 * self.functionValues[lastEdge] * lastEdge.length
+            integral += (-1 * self.functionValues[lastEdge]) * lastEdge.length
 
         return integral
 
     def assertIsWellDefined(self):
         for l in self.domain.loops:
-            print(self.doubleIntegrateOverLoop(l))
-            assert self.doubleIntegrateOverLoop(l) == 0.0
+            assert self.doubleIntegrateOverLoop(l) == self.domain.monoid.zero()
 
     # We probably will not need this.
     def getEdgeSlopesFrom(self, v1, v2):
@@ -228,11 +228,11 @@ class StrictPiecewiseLinearFunction(object):
 
         for x in self.domain.edges:
             if x.vert1 != None and x.vert2 != None:
-                if self.functionValues[x.vert1] > 0 or self.functionValues[x.vert2] > 0:
+                if self.functionValues[x.vert1] != self.domain.monoid.zero() or self.functionValues[x.vert2] != self.domain.monoid.zero():
                     supportEdges = supportEdges | {x}
 
         for i in self.domain.vertices:
-            if self.functionValues[i] > 0:
+            if self.functionValues[i] != self.domain.monoid.zero():
                 supportVertices = supportVertices | {i}
 
         return (supportEdges, supportVertices)
@@ -273,7 +273,7 @@ class StrictPiecewiseLinearFunction(object):
             if self.functionValues[i] != 0.0:
                 return False
             # Check that the value is zero:
-            if self.functionValues[i.root] != 0.0:
+            if self.functionValues[i.root] != self.domain.monoid.zero():
                 return False
 
         # specialSupports contains a list of sets. Each set in the list contains the edges of one of the connected
@@ -310,7 +310,7 @@ class StrictPiecewiseLinearFunction(object):
 
             # Every vertex of the support must lie on a path from the core of the support component to a vertex outside
             # of the support
-            allSupportVertices = {v for v in self.domain.vertices if self.functionValues[v] > 0}
+            allSupportVertices = {v for v in self.domain.vertices if self.functionValues[v] != self.domain.monoid.zero()}
             thisComponentSupportVertices = allSupportVertices.intersection(support.vertices)
 
             S = supportCore.vertices
@@ -342,7 +342,7 @@ class StrictPiecewiseLinearFunction(object):
 
                 # The rise is 0.0 or nextEdge.length iff the slope of the function is 0 or 1 towards the cure.
                 # Both of these must hold
-                if not (rise == 0.0 or rise == nextEdge.length):
+                if not (rise == self.domain.monoid.zero() or rise == nextEdge.length):
                     return False
 
             # Next, search for an edge adjacent to the core that has nonzero slope.
@@ -391,6 +391,7 @@ class StrictPiecewiseLinearFunction(object):
                 function.assertIsWellDefined()
                 dictOfContractedFunctions[e] = function
             except:
-                print("ERROR: In initializing function for " + contraction.name)    
+                #print("ERROR: In initializing function for " + contraction.name)
+                pass
 
         return dictOfContractedFunctions

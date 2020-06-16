@@ -1,6 +1,7 @@
 import copy
 import numpy as np
 from GraphIsoHelper import *
+from RPC import *
 
 
 # A vertex has a name and non-negative genus
@@ -31,18 +32,14 @@ class vertex(object):
 # An edge has a name, non-negative length, and endpoints
 class edge(object):
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
-    # length_ should be a non-negative double
+    # length_ should be a monoid element
     # vert1_ should be a vertex
     # vert2_ should be a vertex
     def __init__(self, name_, length_, vert1_, vert2_):
         self.name = name_
-
-        # Don't allow negative lengths!
-        if length_ < 0.0:
-            raise ValueError("Length must be non-negative.")
         self._length = length_
 
-        # Distinguished endpoints to help identify self loops
+        # Distinguished endpoints to help identify self loops, and for other purposes
         self.vert1 = vert1_
         self.vert2 = vert2_
 
@@ -51,12 +48,9 @@ class edge(object):
         return self._length
 
     # Control how the length property is set
-    # length_ should be a non-negative double
+    # length_ should be a monoid element
     @length.setter
     def length(self, length_):
-        # Don't allow negative lengths!
-        if length_ < 0.0:
-            raise ValueError("Length must be non-negative.")
         self._length = length_
 
     # The set of vertices is a read only property computed upon access
@@ -87,6 +81,7 @@ class CombCurve(object):
         self._vertices = set()
         self._edges = set()
         self._legs = set()
+        self.monoid = Monoid()
 
         # Variables for caching vertices
         self._vertexCacheValid = False
@@ -96,11 +91,7 @@ class CombCurve(object):
         self._genusCacheValid = False
         self._genusCache = 0
 
-        # Variables for caching vertex self loop counts
-        self._vertexSelfLoopsCacheValid = False
-        self._vertexSelfLoopsCache = {}
-
-        # Variables for caching vertex everything couns
+        # Variables for caching vertex characteristic counts
         self._vertexCharacteristicCacheValid = False
         self._vertexCharacteristicCache = {}
 
@@ -111,7 +102,6 @@ class CombCurve(object):
     def invalidateCaches(self):
         self._vertexCacheValid = False
         self._genusCacheValid = False
-        self._vertexSelfLoopsCacheValid = False
         self._vertexCharacteristicCacheValid = False
         self._coreCacheValid = False
 
@@ -321,38 +311,6 @@ class CombCurve(object):
             return curveCopy, copyInfo
         else:
             return curveCopy
-
-    # Subdivide at edge e with a given length from e.vert1
-    def subdivide(self, e, length, genus=0):
-        # Don't force a negative length
-        assert 0.0 <= length <= e.length
-
-        # Don't split a nonexistent edge
-        assert e in self.edges
-
-        # Form the two new edges and one new vertex of the subdivision
-        v = vertex("(vertex splitting " + e.name + ")", genus)
-        e1 = edge("(subdivision 1 of " + e.name + ")", length, e.vert1, v)
-        e2 = edge("(subdivision 2 of " + e.name + ")", e.length - length, v, e.vert2)
-
-        # Apply the subdivision
-        self.removeEdge(e)
-        self.addEdges({e1, e2})
-
-    # e should be an edge and the length should be a double
-    # genus should be a non-negative integer
-    # returns a new CombCurve with edge e subdivided at the given length from e.vert1
-    def getSubdivision(self, e, length, returnCopyInfo=False, genus=0):
-        # To avoid accidentally modifying self, we work with a fully shallow copy
-        subdivision, copyInfoDict = self.getFullyShallowCopy(True)
-
-        # Safely subdivide the copy in place
-        subdivision.subdivide(copyInfoDict[e], length, genus)
-
-        if returnCopyInfo:
-            return subdivision, copyInfoDict
-        else:
-            return subdivision
 
     # Contract edge e in place
     def contract(self, e):
