@@ -258,7 +258,7 @@ class TropicalModuliSpace(object):
             self.contractionDict[curve] = contractionPairs
             it += 1
 
-    # Returns the specialization of 'curve' at 'vert' as determined by g1, g2, S, and T
+    # Specializes 'curve' at 'vert' as determined by g1, g2, S, and T
     # Specifically, 'vert' is split into two vertices, v1 and v2, of genuses g1 and g2 respectively,
     # where g1+g2 == vert.genus
     # S and T partition the endpoints of edges on vert, and we move the endpoints of edges in S to v1 and those
@@ -294,23 +294,20 @@ class TropicalModuliSpace(object):
         curve.addEdge(e)
         curve.removeVertex(vert)
 
+    # Returns the splitting specialization of curve as determined by the other inputs
     def getSplittingSpecialization(self, curve, vert, g1, g2, S, T):
         # copy the curve shallowly and keep track of how copying was performed
+        # This will allow us to split without worrying about affecting self
         c, copyInfo = curve.getFullyShallowCopy(True)
         c.name = "(Spec. of " + curve.name + " from splitting at " + vert.name
 
-        safeS = set()
-        safeT = set()
-        for p in S:
-            e, n = p
-            safeS.add((copyInfo[e], n))
-        for p in T:
-            e, n = p
-            safeT.add((copyInfo[e], n))
+        # Also grab a safe copy of S and T
+        safeS = {(copyInfo[e], n) for (e, n) in S}
+        safeT = {(copyInfo[e], n) for (e, n) in T}
 
-        # c.edges = {copy.copy(e) for e in curve.edges}
-        # c.legs = {copy.copy(l) for l in curve.legs}
+        # Specialize our copy in-place
         self.specializeBySplittingAtVertex(c, copyInfo[vert], g1, g2, safeS, safeT)
+
         return c
 
     @staticmethod
