@@ -85,7 +85,7 @@ class StrictPiecewiseLinearFunction(object):
 
     def printSelf(self):
         for v in self.domain.vertices:
-            print(v.name, self.functionValues[v])
+            print(v.name, self.functionValues[v].coeffs)
         for e in self.domain.edges:
             print(e.name, self.functionValues[e])
         
@@ -385,6 +385,7 @@ class StrictPiecewiseLinearFunction(object):
                 function.assertIsWellDefined()
                 dictOfContractedFunctions[e] = function
             except:
-                print("ERROR: In initializing function for " + contraction.name)    
+                #print("ERROR: In initializing function for " + contraction.name)
+                pass
 
         return dictOfContractedFunctions
