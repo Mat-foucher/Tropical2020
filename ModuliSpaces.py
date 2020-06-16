@@ -6,13 +6,22 @@ import re
 
 class TropicalModuliSpace(object):
     def __init__(self, g_, n_):
+        # Private copy of the genus and marking number of the space
         self._g = g_
         self._n = n_
+
+        # Holds the strata of the space
+        # Should not be set externally - the strata are generated based on _g and _n
+        # The strata are not generated here since this can be a time-consuming process. (Let the user choose when to
+        # take the time to do so...)
         self._curves = set()
+
         # Curves organized by number of edges
         self._curvesDict = {}
+
         # Dictionary tracking what each curve can contract to
-        # contractionDict[curve]: List[(contraction, number of ways the contraction can occur)]
+        # contractionDict[curve]: List[(edge, Int)]
+        # See the documentation for more explanation
         self.contractionDict = {}
 
     @property
@@ -27,27 +36,40 @@ class TropicalModuliSpace(object):
     def curvesDict(self):
         return self._curvesDict
 
+    # Given input s of type Set[A], returns a list of all partitions of s into two subsets.
+    # The return type of this function is List[(Set[A], Set[A]).
     def getPartitions(self, s):
 
+        # An empty set has exactly one partition into two subsets
         if len(s) == 0:
             return [(set(), set())]
+
+        # A singleton set has exactly two partitions into two subsets
         if len(s) == 1:
             elem = s.pop()
             s.add(elem)
             return [(set(), {elem}), ({elem}, set())]
 
+        # If s has more than one element, then choose an arbitrary elem in s. Use recursion to produce the partitions
+        # of s - {elem}, and then incorporate elem into these partitions.
         elem = s.pop()
         s.add(elem)
         p = self.getPartitions(s - {elem})
 
         partition = []
         for blockPair in p:
+            # In order to incorporate elem into a partition (S, T) of s - {elem}, we can add elem to either S or T.
             S, T = blockPair
             partition.append((S | {elem}, T))
             partition.append((S, T | {elem}))
 
         return partition
 
+    # Reduces the given list of curves by isomorphism. If no curves are provided, then self.curves is modified in place.
+    # if returnReductionInformation is True, then some information about this reduction is returned. Specifically,
+    # if P is a partition of curves into isotypes, then reductionDict is a right inverse (represented as a dictionary)
+    # to some choice function over P.
+    # TODO - Re-examine the reduction info return.
     def reduceByIsomorphism(self, curves=None, returnReductionInformation=False):
 
         modifySelf = (curves is None)
@@ -77,6 +99,7 @@ class TropicalModuliSpace(object):
             else:
                 return {t[0] for t in isotypes}
 
+    # Checks if curve is contained in self.curves up to isomorphism.
     def containsUpToIsomorphism(self, curve, returnMatch=False):
 
         if curve.numEdges not in self.curvesDict:
@@ -116,6 +139,7 @@ class TropicalModuliSpace(object):
             self.curvesDict[numEdges] = [curve]
             self.curves = self.curves | {curve}
 
+    # Adds the specializations of curve to self.curves
     def addSpecializationsDFS(self, curve):
         newCurves = []
 
@@ -158,6 +182,8 @@ class TropicalModuliSpace(object):
         for c in newCurves:
             self.addSpecializationsDFS(c)
 
+    # Generates M_{g, n}. To do so, start with the unique n-marked curve of genus g without any edges, and add its
+    # specializations.
     def generateSpaceDFS(self):
 
         # start_time = time.time()
@@ -177,6 +203,8 @@ class TropicalModuliSpace(object):
 
         # print("Generation time: ", generation_complete_time - start_time)
 
+    # For each curve in the space, and each edge of the curve, identify what curve in the space is isomorphic to the
+    # contraction by that edge.
     def generateContractionDictionary(self):
         numCurves = len(self.curves)
         it = 1
