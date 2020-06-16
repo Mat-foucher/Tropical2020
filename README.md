@@ -189,7 +189,9 @@ isomorphic to `C'` and `C'` belongs to the space.
 
 In order to generate the strata of the moduli space, use the function `generateSpaceDFS`. This function first adds the 
 unique `n`-marked stable curve of genus `g` with zero edges to the `curves` member. Then, the program examines which 
-strata can be specialized, and adds these specializations to `curves` if they are novel (up to isomorphism).
+strata can be specialized, and adds these specializations to `curves` if they are novel (up to isomorphism). The 
+specializations are produced in two ways: by splitting and genus-reducing vertices. These two processes are described
+below and together generate all specializations.
 
 This process is performed in a depth-first manner: As soon as a curve `C` is specialized to another curve `C'`, the
 specializations of `C'` are generated.
