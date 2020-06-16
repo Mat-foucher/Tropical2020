@@ -3,33 +3,25 @@ Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 
 ## Contents:
 
-1: [Introduction](#Introduction)
-2: [Testing](#Testing)
-3: [Combinatorial Curves](#CombCurves)
-4: [Strict Piecewise Linear Functions](#SPLFs)
-5: [Moduli Spaces](#ModSpaces)
+1. [Introduction](#Introduction)
+2. [Testing](#Testing)
+3. [Combinatorial Curves](#CombCurves)
+4. [Strict Piecewise Linear Functions](#SPLFs)
+5. [Moduli Spaces](#ModSpaces)
 
-+ More, once the code is finalised.
+### Introduction <a name="Introduction"></a>
 
-###Introduction <a name="Introduction"></a>
-
-====================================
-What is the code, and how to use it:
-====================================
+#### What is the code, and how to use it:
 
 The code for this project is divided into separate files, each for different classes that implement objects from the overleaf document.
 
-The different documents (currently) are:
+The different files are:
 
 - StrictPiecewiseLinearFunction.py
 - CombinatorialCurve.py
 - ModuliSpaces.py
 - RPC.py
 - tests.py
-
-(Depending on what branch you pulled the code from, there may be more)
-(Furthermore, you might not even be reading this if you pulled this from another branch than master)
-(In that case, have a nice day)
 
 ### Testing <a name="Testing"></a>
 
@@ -94,3 +86,49 @@ Edge:
 ### Strict Piecewise Linear Functions <a name="SPLFs"></a>
 
 ### Moduli Spaces <a name="ModSpaces"></a>
+
+The class `TropicalModuliSpace` found in `ModuliSpaces.py` is meant to represent the 
+tropical moduli spaces <img src="https://render.githubusercontent.com/render/math?math=\mathcal{M}_{g, n}^{trop}">.
+To initialize this class, an integer for the genus and marking of the moduli space must be provided. Since generating 
+certain moduli spaces is very time-consuming, the generation of the space does not occur at initialization. Instead, 
+a separate function call is used. For example, to generate 
+<img src="https://render.githubusercontent.com/render/math?math=\mathcal{M}_{1, 5}^{trop}"> and track the time to 
+generate the space, one could write the following code:
+
+    import time
+    
+    m = TropicalModuliSpace(1, 5)
+    
+    start_time = time.time()
+    m.generateSpaceDFS()
+    end_time = time.time()
+    
+    print("Generation time:", end_time - start_time)
+    
+Once the moduli space has been generated, one can call `m.generateContractionDictionary()` to find what curves are
+contractions of others.
+
+If execution time is not a concern, then the full generation of 
+<img src="https://render.githubusercontent.com/render/math?math=\mathcal{M}_{g, n}^{trop}"> consists of calling the
+following three lines of code:
+
+    m = TropicalModuliSpace(g, n)
+    m.generateSpaceDFS()
+    m.generateContractionDictionary()
+    
+#### Members of `TropicalModuliSpace`
+    
+#### Generating the strata
+
+In order to generate the strata of the moduli space, use the function `generateSpaceDFS`. This function first adds the 
+unique `n`-marked stable curve of genus `g` with zero edges to the `curves` member. Then, the program examines which 
+strata can be specialized, and adds these specializations to `curves` if they are novel (up to isomorphism).
+
+This process is performed in a depth-first manner: As soon as a curve `C` is specialized to another curve `C'`, the
+specializations of `C'` are generated.
+
+#### Generating the contraction information
+
+In order to generate the contraction dictionary of the moduli space, use the function `generateContractionDictionary`.
+For each curve `C` in the space, and for each edge `e` of `C`, this function identifies which curve of the space is
+isomorphic to the weighted edge contraction `C/{e}`.
