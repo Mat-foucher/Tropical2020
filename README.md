@@ -1,19 +1,17 @@
 # Tropical2020
 Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 
-=====================================================================================================================================================================================================================
-Contents:
-=====================================================================================================================================================================================================================
+## Contents:
 
-1: Introduction.
-2: Testing.
-3: Combinatorial Curves.
-4: Strict Piecewise Liner Functions.
-5: Monoids (mayhaps)
+1: [Introduction](#Introduction)
+2: [Testing](#Testing)
+3: [Combinatorial Curves](#CombCurves)
+4: [Strict Piecewise Linear Functions](#SPLFs)
+5: [Moduli Spaces](#ModSpaces)
 
 + More, once the code is finalised.
 
-=====================================================================================================================================================================================================================
+###Introduction <a name="Introduction"></a>
 
 ====================================
 What is the code, and how to use it:
@@ -33,9 +31,7 @@ The different documents (currently) are:
 (Furthermore, you might not even be reading this if you pulled this from another branch than master)
 (In that case, have a nice day)
 
-========
-tests.py
-========
+### Testing <a name="Testing"></a>
 
 The test document is where most of the actual code is used for purposes concerning the research project. 
 You may use the tests document for any test you would like to try, using the code from other documents.
@@ -61,9 +57,7 @@ The test doc is also a fabulous place to use assertions, such as:
 
 In conclusion, for those picking up this code to use for pioneering things on tropical geometry, most of the work will be done in tests.py
 
-=====================
-CombinatorialCurve.py
-=====================
+### Combinatorial Curves <a name="CombCurves"></a>
 
 The document CombinatorialCurve.py is for all specifications regarding the combinatorial tropical curves as seen in the overleaf.
 In the timeline of this project, the classes in this doc have been modified over and over and over and over again (lowkey kind of painful).
@@ -97,3 +91,6 @@ Edge:
     Since this is python 3, we have access to the set() object, an unindexed list. When the function vertices() in edges() is called, this will return a set with two elements:
     the vertices that the edge connects.
 
+### Strict Piecewise Linear Functions <a name="SPLFs"></a>
+
+### Moduli Spaces <a name="ModSpaces"></a>
