@@ -219,10 +219,25 @@ The idea behind this type of specialization is to split a vertex into two pieces
 pieces.
 
 In order to preserve stability, there are some restrictions on `g1`, `g2`, `S`, and `T`. If `g1=0`, then `S` must
-contain at least two elements. Otherwise, after splitting, a vertex of genus zero would only have degree two.
+contain at least two elements. Otherwise, after splitting, a vertex of genus zero would have degree less than three.
 Similarly, if `g2=0`, then `T` must have at least two elements.
 
 #### Genus Reduction Specialization
+
+Another way that curves are specialized is by reducing the genus of vertices. Given a vertex `v` of a curve `C`, a
+specialization of `C` can be produced in the following manner as long as `v` has genus at least one. To produce the
+specialization of `C`, simply reduce the genus of `v` and introduce a new edge connecting `v` to itself. Taking the 
+same example as was used for the splitting specialization, consider the following portion of a curve:
+
+![Alt text](Images/pre-split.svg)
+
+This vertex has positive genus, so we can reduce the genus and introduce a new loop:
+
+![Alt text](Images/post-genus-reduction.svg)
+
+As with splitting specialization, this type of specialization does not necessarily preserve stability. The one case 
+where stability is not preserved is when `v` is a vertex with genus one and degree zero. If this vertex were
+genus-reduced, it would become a vertex with genus zero and degree two.
 
 ### Generating the Contraction Information <a name="modSpaceContractionGen"></a>
 
