@@ -165,10 +165,12 @@ class TropicalModuliSpace(object):
         # Get the one-step specializations of the given curve
         for vert in curve.vertices:
 
-            # If the genus of vert is positive, then we can decrement its genus and add a self loop
+            # If the genus of vert is greater than 1, then we can decrement its genus and add a self loop
             if vert.genus > 1:
                 genusReducedCurve = self.getGenusReductionSpecialization(curve, vert)
                 newCurves.append(genusReducedCurve)
+            # If the genus of vert is exactly 1, we need to make sure that stability is preserved after genus reduction
+            # This case should only occur when g=1 and we process the seed curve
             elif vert.genus == 1 and curve.degree(vert) > 0:
                 genusReducedCurve = self.getGenusReductionSpecialization(curve, vert)
                 newCurves.append(genusReducedCurve)
@@ -176,17 +178,19 @@ class TropicalModuliSpace(object):
             # We can also split a vertex in two and pass around parts of its genus and endpoints to the new pieces
             endpointPartitions = self.getPartitions(curve.getEndpointsOfEdges(vert))
 
-            # Anticipate some isomorphic results
+            # Anticipate some isomorphic results - (S, T) and (T, S) produce the same splitting specialization
             endpointPartitions = [(S, T) for (S, T) in endpointPartitions if len(S) <= len(T)]
 
+            # Iterate over the possible genuses of the split vertices
             for g in range(vert.genus + 1):
                 for p in endpointPartitions:
                     S, T = p
+                    # Make sure that the splitting specialization will be stable
                     if not ((g == 0 and len(S) < 2) or (g == vert.genus and len(T) < 2)):
                         vertexSplitCurve = self.getSplittingSpecialization(curve, vert, g, vert.genus - g, S, T)
                         newCurves.append(vertexSplitCurve)
 
-        # Reduce before we go down a level
+        # Reduce newCurves before we go down a level - produce fewer curves to reduce in the future
         newCurvesBuffer = self.reduceByIsomorphism(newCurves)
         newCurves = []
         for c in newCurvesBuffer:
@@ -197,7 +201,7 @@ class TropicalModuliSpace(object):
         #print("Found ", len(newCurves), " new curves")
         #print("Currently have ", len(self.curves), " curves!")
 
-        # Specialize the specializations DFS
+        # Specialize the specializations DFS - Moduli Spaces have a wide DAG structure (under the contraction relation)
         for c in newCurves:
             self.addSpecializationsDFS(c)
 
@@ -207,14 +211,17 @@ class TropicalModuliSpace(object):
 
         # start_time = time.time()
 
+        # Manually check to see if the space is empty.
         if self._g == 0 and self._n < 3:
             return
 
+        # If the space is nonempty, then all of the curves are specializations of seedCurve
         seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
         v = vertex("v", self._g)
         seedCurve.addVertex(v)
         seedCurve.addLegs({leg("leg " + str(i), v) for i in range(self._n)})
 
+        # Let the seed grow!
         self.addCurve(seedCurve)
         self.addSpecializationsDFS(seedCurve)
 
@@ -225,18 +232,29 @@ class TropicalModuliSpace(object):
     # For each curve in the space, and each edge of the curve, identify what curve in the space is isomorphic to the
     # contraction by that edge.
     def generateContractionDictionary(self):
+        # At this point, the strata should have been generated, so we can nicely print out progress
         numCurves = len(self.curves)
         it = 1
+
+        # Find contraction info of every curve
         for curve in self.curves:
-            print("Working on getting contraction history of curve", str(it), "/", str(numCurves), "of M-" + str(self._g) + "-" + str(self._n))
+            print("Working on getting contraction history of curve", str(it) + "/" + str(numCurves),
+                  "of M-" + str(self._g) + "-" + str(self._n))
+
+            # Find each contraction pair (curve/{e}, e)
             contractionPairs = []
             for nextEdge in curve.edges:
                 contractionCurve = curve.getContraction(nextEdge)
+
+                # Find curve/{e} up to isomorphism
                 p = self.containsUpToIsomorphism(contractionCurve, returnMatch=True)
                 containsAMatch = p[0]
                 match = p[1]
+
+                # This had better be true! Remember to generate the space...
                 assert containsAMatch
                 contractionPairs.append((match, nextEdge))
+            
             self.contractionDict[curve] = contractionPairs
             it += 1
 
