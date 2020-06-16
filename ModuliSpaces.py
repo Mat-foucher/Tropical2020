@@ -144,7 +144,7 @@ class TropicalModuliSpace(object):
     # already present, then nothing is added.
     def addCurve(self, curve):
 
-        curveIsNew = self.containsUpToIsomorphism(curve)
+        curveIsNew = not self.containsUpToIsomorphism(curve)
 
         if curveIsNew:
             numEdges = curve.numEdges
@@ -254,7 +254,7 @@ class TropicalModuliSpace(object):
                 # This had better be true! Remember to generate the space...
                 assert containsAMatch
                 contractionPairs.append((match, nextEdge))
-            
+
             self.contractionDict[curve] = contractionPairs
             it += 1
 
