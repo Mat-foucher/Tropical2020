@@ -370,13 +370,17 @@ class StrictPiecewiseLinearFunction(object):
         assert morphism.domain == self.domain, "morphism and self should have the same domain."
 
         # The domain of the pushforward is the image of the morphism
-        pushforwardDomain = morphism.image
+        pushforwardDomain = morphism.image()
 
         pushforwardFunctionValues = {}
         for nextEdge in self.domain.edges:
             # If the edge does not collapse, then keep its slope.
             if morphism(nextEdge) in morphism.codomain.edges:
-                pushforwardFunctionValues[nextEdge] = self.functionValues[nextEdge]
+                pushforwardFunctionValues[morphism(nextEdge)] = self.functionValues[nextEdge]
+        for nextVert in self.domain.vertices:
+            pushforwardFunctionValues[morphism(nextVert)] = morphism(self.functionValues[nextVert])
+        for nextLeg in self.domain.legs:
+            pushforwardFunctionValues[morphism(nextLeg)] = self.functionValues[nextLeg]
 
         return StrictPiecewiseLinearFunction(pushforwardDomain, pushforwardFunctionValues)
 

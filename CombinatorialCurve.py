@@ -844,7 +844,7 @@ class BasicFamilyMorphism(object):
         elif isinstance(x, leg):
             assert x in self.domain.legs, "The given input must be a domain leg."
             return self.curveMorphismDict[x]
-        elif isinstance(x, domain.monoid.Element):
+        elif isinstance(x, self.domain.monoid.Element):
             return self.monoidMorphism(x)
         else:
             raise ValueError("Cannot call on the given input - not a reasonable type.")
