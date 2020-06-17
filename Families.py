@@ -2,6 +2,19 @@
 from CombinatorialCurve import *
 
 
+class BasicFamilyMorphism(object):
+    def __init__(self, domain, codomain):
+
+        # Type checking
+        if not isinstance(domain, CombCurve):
+            raise ValueError("The domain of a basic family morphism must be a CombCurve.")
+        if not isinstance(codomain, CombCurve):
+            raise ValueError("The codomain of a basic family morphism must be a CombCurve.")
+
+        self.domain = domain
+        self.codomain = codomain
+
+
 class Family(object):
     def __init__(self, basicFamilies, morphisms):
 
@@ -47,20 +60,6 @@ class Family(object):
             return True
 
         return filter(isMaximal, self.basicFamilies)
-
-
-class BasicFamilyMorphism(object):
-    def __init__(self, domain, codomain):
-
-        # Type checking
-        if not isinstance(domain, CombCurve):
-            raise ValueError("The domain of a basic family morphism must be a CombCurve.")
-        if not isinstance(codomain, CombCurve):
-            raise ValueError("The codomain of a basic family morphism must be a CombCurve.")
-
-        self.domain = domain
-        self.codomain = codomain
-
 
 
 class TropicalFamily(Family):
