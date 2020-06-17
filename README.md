@@ -16,149 +16,96 @@ Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 The code for this project is divided into separate files, each for different classes that implement objects from the 
 overleaf document.
 
-The different files and their associated classes/purposes are:
+The different files are:
 
-- `CombinatorialCurve.py`: Vertices, Edges, Legs, and Basic Families.
-- `GraphIsoHelper.py`: Provides convenience functions for testing if two graphs are isomorphic.
-- `StrictPiecewiseLinearFunction.py`: Piecewise Linear functions over Basic Families.
-- `ModuliSpaces.py`: Tropical Moduli spaces.
-- `RPC.py`: Abstract monoids.
-- `tests.py`: Tests for most things. This file is a good place to see how things are used.
-- `generateAndSaveModuliSpace.py`: A short script to generate and save a moduli space as specified by command line
-arguments.
+- StrictPiecewiseLinearFunction.py
+- CombinatorialCurve.py
+- ModuliSpaces.py
+- RPC.py
+- tests.py
 
 ## Testing <a name="Testing"></a>
 
-The `tests.py` file is where most of the actual code is used for purposes concerning the research project. 
-You may use the tests file for any test you would like to try, using the code from other files.
-In `tests.py` there is also a large collection of examples from the reference document, for example, 
+The test document is where most of the actual code is used for purposes concerning the research project. 
+You may use the tests document for any test you would like to try, using the code from other documents.
+In the tests file there is also a large collection of examples from the overleaf document, for example, 
 here is example 3.5:
 
-    C = CombCurve("Example 3.5")
-    
-    M = Monoid()
-    M.addgen("a")
-    alpha = M.Element({"a": 1})
+            C = CombCurve("Example 3.5")
 
-    v1 = vertex("v1", 0)
-    v2 = vertex("v2", 0)
-    v3 = vertex("v3", 1)
-    e1 = edge("e1", alpha, v1, v2)
-    e2 = edge("e2", alpha, v2, v3)
-    e3 = edge("e3", alpha, v1, v3)
-    e4 = edge("e4", alpha, v1, v1)
-    l = leg("l", v1)
+            v1 = vertex("v1", 0)
+            v2 = vertex("v2", 0)
+            v3 = vertex("v3", 1)
+            e1 = edge("e1", 1.0, v1, v2)
+            e2 = edge("e2", 1.0, v2, v3)
+            e3 = edge("e3", 1.0, v1, v3)
+            e4 = edge("e4", 1.0, v1, v1)
+            l = leg("l", v1)
 
-    C.monoid = M
-    C.addEdges({e1, e2, e3, e4})
-    C.addLeg(l)
+            C.addEdges({e1, e2, e3, e4})
+            C.addLeg(l)
 
-Most of the tests take the form of assertions, such as:
+The test doc is also a fabulous place to use assertions, such as:
 
-    assert C.isConnected()
-    assert C.genus == 3
+            assert C.isAffineLinear()
+
+In conclusion, for those picking up this code to use for pioneering things on tropical geometry, 
+most of the work will be done in tests.py
 
 ## Combinatorial Curves <a name="CombCurves"></a>
 
 1. [Vertices](#vertices)
 2. [Edges](#edges)
-3. [Legs](#legs)
-4. [CombCurves](#combCurves)
-5. [A Neat Example](#neatExample)
+3. [A Neat Example](#neatExample)
 
-Vertices, Edges, Legs, Combinatorial Tropical Curves, and Basic Families of curves are implemented in 
-`CombinatorialCurve.py`.
+The document `CombinatorialCurve.py` is for all specifications regarding the combinatorial tropical curves as seen in 
+the overleaf document.
+In the timeline of this project, the classes in this doc have been modified over and over and over and over again 
+(lowkey kind of painful).
+
+In this current version, the first two classes you will see in this document are the `vertex`, `edge`, and `leg` 
+classes.
 
 ### Vertices <a name="vertices"></a>
 
-The `vertex` class represents the vertices of a curve. Initializing a `vertex` requires a name (`string`) 
-and a genus (`int`). Initializing or setting negative genus will raise a `ValueError`.
+The `vertex` class specifies the vertex object, which will always need a name (`string`) and a genus (`int` value).
+In this class is a function to set the genus and a property to return the genus of the vertex.
+If we want to declare a nex vertex, we can do so like in this example:
 
-As an example, to initialize a vertex with name "v1" of genus one, one would write the following code:
+        v1 = vertex("v1", 1)
 
-    v1 = vertex("v1", 1)
+Where `"v1"` is the name of the vertex `v1`, and `v1` has a genus 1.
+NOTE: The genus must always be non-negative, else an error is raised.
 
 ### Edges <a name="edges"></a>
 
 The edges are similar to the vertices, as you may have already guessed.
-To initialize an `edge`, provide a `string` name, a `Monoid.Element`, a source `vertex`, and a target `vertex`.
-For self-edges on the curve, you can input the same vertex for both positions.
+For edge objects, each edge has a name in their definition, much like the vertices.
+The edge object also includes a `float` parameter called length (non-negative, of course), and inputs for TWO vertices.
 
-For example, suppose `alpha` is some monoid element and `v1` and `v2` are vertices. Then an edge of length `alpha` from
-`v1` to `v2` can be initialized as follows:
+NOTE: For "self - edges" on the curve, you can input the same vertex for both positions.
 
-    e1 = edge("e1", 1.0, v1, v2)
+To create an edge, one writes something like the following:
+
+        e1 = edge("e1", 1.0, v1, v2)
     
-The `edge` class also has the following members:
+This is an edge with name `"e1"` or edge one, and `e1` has length 1.0 and goes from vertex `v1` to vertex `v2` (assuming 
+these vertices were previously defined).
+Included in the class definition of edge(), there are a few functions that do what you'd pretty much expect like 
+in vertices, such as getting the length (`length()`),
+setting the length (`length(length_)`) and lastly returning the vertices.
+Since this is python 3, we have access to the `set()` object, an unindexed list. When the function `vertices()` in 
+`edge` is called, this will return a set with two elements:
+the vertices that the edge connects.
 
-- `length`: The length of the edge.
-- `vertices`: A set containing the vertices that the edge connects.
+Leg:
+    The leg object is much like edge, except for the fact that the leg object can only be assigned a singe vertex that it is connected to.
+    Unlike the other graph objects too, the leg does not have any length or genus, making it the simplest class in the file.
 
-### Legs <a name="legs"></a>
-A `leg` is initialized only with its name (`string`) and root (`vertex`), making it the simplest class in the file.
+    To create a new leg, this can be done so by the following:
 
-For example, to create a leg with name "l1" with root `v1`, one can write the following code:
-
-    l1 = leg("l1", v1)
-
-Like an `edge`, a `leg` has the `vertices` property. The `vertices` of a leg will be a singleton set containing its
-root.
-
-### CombCurves <a name="combCurves"></a>
-
-The `CombCurve` class (short for Combinatorial Tropical Curve) provides an implementation both for combinatorial
-tropical curves and basic families of tropical curves. The difference between these two interpretations is the monoid
-that one provides to the class. In order to use a `CombCurve` as a combinatorial tropical curve, use a free monoid with
-one generator. For example, to create a three-element chain `v1--v2--v3` with the left edge of length one and right edge
-of length two, one could write the following:
-
-    # Initialize vertices
-    v1 = vertex("v1", 0)
-    v2 = vertex("v2", 0)
-    v3 = vertex("v3", 0)
-    
-    # Set up a free monoid with one generator
-    M = Monoid()
-    M.addgen("a")
-    alpha = M.Element({"a": 1})
-    
-    # Edges whose lengths depend on the generator alpha
-    e1 = edge("e1", alpha, v1, v2)
-    e2 = edge("e2", 2 * alpha, v2, v3)
-    
-    # Initialize the curve
-    C = CombCurve("A particular chain with three elements")
-    C.addEdges({e1, e2})
-
-One can also use `CombCurve` to represent a basic family of curves. To represent the family of three-element chains
-whose edge lengths vary freely over 
-<img src="https://render.githubusercontent.com/render/math?math=\mathbb{R}_{\geq 0}">, we simply use a different monoid.
-Since we want two edge lengths to vary independently, we use a free monoid with two generators, and let the edge length
-of each each to be one of the generators. Here is the full example:
-
-    # Initialize vertices
-    v1 = vertex("v1", 0)
-    v2 = vertex("v2", 0)
-    v3 = vertex("v3", 0)
-    
-    # Set up a free monoid with one generator
-    M = Monoid()
-    M.addgen("a")
-    M.addgen("b")
-    alpha = M.Element({"a": 1})
-    beta = M.Element({"b": 1})
-    
-    # Edges whose lengths depend on the generator alpha
-    e1 = edge("e1", alpha, v1, v2)
-    e2 = edge("e2", beta, v2, v3)
-    
-    # Initialize the curve
-    C = CombCurve("Family of all chains with three elements")
-    C.addEdges({e1, e2})
-
-The difference between a `CombCurve` representing a particular curve or a basic family of curves is largely semantic.
-The first example also represents the family of all three-element chains where one edge is twice as long as the other.
-    
+        l1 = leg("l1", v1)
+        
 
 ### A Neat Example <a name="neatExample"></a>
 Creating a Tropical Combinatorial Curve with the Code:
@@ -172,15 +119,11 @@ To define a new tropical curve, we write the following:
     TropicalCurve = CombCurve("TropicalCurve")
 
 The CombCurve object takes only one parameter in it's initializer, which is the name string.
-We now want to add edges, vertices, and legs to our curve, which we do as follows:
+We now want to add edges, vertices, and legs to our curve, which we do deine as:
 
     v1 = vertex("v1", 1)
     v2 = vertex("v2", 0)
-    
-    M = Monoid()
-    M.addgen("a")
-    e1 = edge("e1", M.Element({"a": 1}), v1, v2)
-    
+    e1 = edge("e1", v1, v2)
     l1 = leg("l1", v2)
     l2 = leg("l2", v2)
 
@@ -188,11 +131,81 @@ We now want to add edges, vertices, and legs to our curve, which we do as follow
     edges = {e1}
     legs = {l1,l2}
 
-    TropicalCurve.addEdges(edges)
+    TropicalCurve.addEgdes(edges)
     TropicalCurve.addLegs(legs)
     TropicalCurve.addVertices(vertices)
 
 ## Strict Piecewise Linear Functions <a name="SPLFs"></a>
+
+1. [Creating a Function](#splfUsage)
+2. [Testing the Well - Definedness of Your SPLF](#splfDefined)
+3. [Checking if Your Function is a Mesa](#splfMesa)
+
+### Creating a Function <a name="splfUsage"></a>
+The class of strict piecewise linear functions (SPLF for short) serves as the main method of searching for mesas on the combinatorial tropical curves as previously introduced.
+
+The way that the class is implemented is by using a dictionary object, in which the values of the dictionary are the slopes of the edges of the cruve, and the keys are the edges of the curve.
+
+NOTE: There must be a defined tropical curve (`CombCurve()`) before an SPLF over the tropical curve is made.
+
+To make an SPLF over a tropical curve, we may specify the curve as such:
+
+```
+C = CombCurve("Example 3.5")
+
+v1 = vertex("v1", 0)
+v2 = vertex("v2", 0)
+v3 = vertex("v3", 1)
+
+e1 = edge("e1", freeElementA, v1, v2)
+e2 = edge("e2", freeElementA, v2, v3)
+e3 = edge("e3", freeElementA, v1, v3)
+e4 = edge("e4", freeElementA, v1, v1)
+l = leg("l", v1)
+
+C.addEdges({e1, e2, e3, e4})
+C.addLeg(l)
+
+#Here will be the SPLF:
+
+dict = {e1: 1, e2: 0, e3: 1, e4: 0}
+
+f = StrictPiecewiseLinearFunction(C, dict)
+
+```
+
+As can be seen in the block of code, the `StrictPiecewiseLinearFunction()` object takes in the first parameter which must be the associated `CombCurve()` object, and the dictionary of edge slopes as the second parameter. In the example we have just seen, `f` is perhaps not a mesa on `C`, and even more, is perhaps not even well defined!
+
+### Testing the Well - Definedness of Your SPLF <a name="splfDefined"></a>
+
+For the last two conundrums, included in the SPLF class are functions two verify well definedness and also a mesa test.
+
+The first we will discuss is the well definedness test, which is done by the function `assertIsWellDefined()`, which can be typed into your testing document in this manner below the definition and declaration of your function:
+
+```
+f.assertIsWellDefined()
+```
+
+If and when the function (`SPLF`) is not well defined, an error will be raised by the function in your terminal. The method by which `assertIsWellDefined()` checks for well definedness is by evaluating path integrals over the loops of the graph, as if the function is indeed well defined, each path integral over the loops in the graph will be zero.
+
+### Checking if Your Function is a Mesa <a name="splfMesa"></a>
+
+We now come to one of the most important parts of the SPLF class, which is an attempt to answer the age old question that has plagued thinkers from all tropics of tropical geometry, is this SPLF a mesa?
+
+In the class, we have the function `mesaTest` which will (try to) do exactly that.
+It is important to note that the SPLF must first be well defined before this test is run, fortunately I am glad to say that the `mesaTest` does check to see if the function in question is or is not well defined.
+
+The `mesaTest` is a property, so in this case we enter the function without parentheses:
+
+```
+f.mesaTest
+```
+
+Much like the previous well-definedness test, this function will raise a value error depending on which portion of the definition fails for your function if your function is not a mesa. Included in the function are specific numbers in the form of print statements to describe which part of the definition your function did not fare well on.
+
+```
+
+```
 
 ## Moduli Spaces <a name="ModSpaces"></a>
 
