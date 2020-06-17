@@ -760,14 +760,17 @@ class BasicFamilyMorphism(object):
             "The codomain of the monoid morphism does not match the given codomain."
 
         # Make sure that the given curveMorphismDict is actually a function from domain to codomain...
-        assert set(curveMorphismDict.keys()) == domain.vertices | domain.edges, \
-            "The keys of curveMorphismDict should be the vertices and edges of the domain curve."
+        assert set(curveMorphismDict.keys()) == domain.vertices | domain.edges | domain.legs, \
+            "The keys of curveMorphismDict should be the vertices, edges, and legs of the domain curve."
         for vert in domain.vertices:
             assert curveMorphismDict[vert] in codomain.vertices, \
                 "curveMorphismDict should map vertices to vertices of the codomain curve."
         for nextEdge in domain.edges:
             assert curveMorphismDict[nextEdge] in codomain.vertices | codomain.edges, \
                 "curveMorphismDict should map edges to vertices or edges of the codomain curve."
+        for nextLeg in domain.legs:
+            assert curveMorphismDict[nextLeg] in codomain.legs, \
+                "curveMorphismDict should map legs to legs of the codomain curve."
 
         self.domain = domain
         self.codomain = codomain
@@ -777,6 +780,12 @@ class BasicFamilyMorphism(object):
     def __call__(self, x):
         if isinstance(x, vertex):
             assert x in self.domain.vertices, "The given input must be a domain vertex."
+            return self.curveMorphismDict[x]
+        elif isinstance(x, edge):
+            assert x in self.domain.edges, "The given input must be a domain edge."
+            return self.curveMorphismDict[x]
+        elif isinstance(x, leg):
+            assert x in self.domain.legs, "The given input must be a domain leg."
             return self.curveMorphismDict[x]
         elif isinstance(x, domain.monoid.Element):
             return self.monoidMorphism(x)
