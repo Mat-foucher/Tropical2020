@@ -364,6 +364,22 @@ class StrictPiecewiseLinearFunction(object):
         # print("A Mesa I Am")
         return True
 
+    # Computes the pushforward of self along the given morphism
+    def getPushforward(self, morphism):
+        assert isinstance(morphism, BasicFamilyMorphism), "morphism should be a morphism of basic families."
+        assert morphism.domain == self.domain, "morphism and self should have the same domain."
+
+        # The domain of the pushforward is the codomain of the morphism
+        pushforwardDomain = morphism.codomain
+
+        pushforwardFunctionValues = {}
+        for nextEdge in self.domain.edges:
+            # If the edge does not collapse, then keep its slope.
+            if morphism(nextEdge) in morphism.codomain.edges:
+                pushforwardFunctionValues[nextEdge] = self.functionValues[nextEdge]
+        
+        return StrictPiecewiseLinearFunction(pushforwardDomain, pushforwardFunctionValues)
+
     # functionContractions will return a dictionary of curves as keys with SPLFs as values.
     def functionContractions(self):
 
