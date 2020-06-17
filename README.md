@@ -277,7 +277,7 @@ The classes are as follows:
 
 #### `Family` <a name="familyClass"></a>
 
-To do: Description
+A `Family` consists of a collection of basic families and a collection of morphisms between those basic families.
 
 To do: Example(s)
 
@@ -289,7 +289,8 @@ To do: Example(s)
 
 #### `BasicFamilyMorphism` <a name="famMorphClass"></a>
 
-To do: Description
+A `BasicFamilyMorphism` is a morphism of basic families. It has a domain and codomain, both of which are basic families
+(i.e., `CombCurve`s).
 
 To do: Example(s)
 

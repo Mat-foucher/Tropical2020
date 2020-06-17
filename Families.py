@@ -1,11 +1,37 @@
 
+from CombinatorialCurve import *
+
+
 class Family(object):
-    def __init__(self):
-        self.morphisms = set()
+    def __init__(self, basicFamilies, morphisms):
+
+        # Type checking
+        if not isinstance(basicFamilies, set):
+            raise ValueError("basicFamilies must be a Set[CombCurve]")
+        if not isinstance(morphisms, set):
+            raise ValueError("morphisms must be a Set[BasicFamilyMorphism]")
+
+        # Ensure that the morphisms actually belong in this family
+        for morphism in self.morphisms:
+            assert morphism.domain in self.basicFamilies
+            assert morphism.codomain in self.basicFamilies
+
+        self.basicFamilies = basicFamilies
+        self.morphisms = morphisms
 
 
 class BasicFamilyMorphism(object):
-    pass
+    def __init__(self, domain, codomain):
+
+        # Type checking
+        if not isinstance(domain, CombCurve):
+            raise ValueError("The domain of a basic family morphism must be a CombCurve.")
+        if not isinstance(codomain, CombCurve):
+            raise ValueError("The codomain of a basic family morphism must be a CombCurve.")
+
+        self.domain = domain
+        self.codomain = codomain
+
 
 
 class TropicalFamily(Family):
