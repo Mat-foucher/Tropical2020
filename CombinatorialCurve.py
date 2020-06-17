@@ -757,7 +757,17 @@ class BasicFamilyMorphism(object):
         assert monoidMorphism.domain == domain.monoid, \
             "The domain of the monoid morphism does not match the given domain."
         assert monoidMorphism.codomain == codomain.monoid, \
-            "The codomain of the monoid morphism does not match the given codomain"
+            "The codomain of the monoid morphism does not match the given codomain."
+
+        # Make sure that the given curveMorphismDict is actually a function from domain to codomain...
+        assert set(curveMorphismDict.keys()) == domain.vertices | domain.edges, \
+            "The keys of curveMorphismDict should be the vertices and edges of the domain curve."
+        for vert in domain.vertices:
+            assert curveMorphismDict[vert] in codomain.vertices, \
+                "curveMorphismDict should map vertices to vertices of the codomain curve."
+        for nextEdge in domain.edges:
+            assert curveMorphismDict[nextEdge] in codomain.vertices | codomain.edges, \
+                "curveMorphismDict should map edges to vertices or edges of the codomain curve."
 
         self.domain = domain
         self.codomain = codomain
