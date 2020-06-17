@@ -94,7 +94,14 @@ class PLFFamily(object):
             raise ValueError("The given functions are not compatible with each other.")
 
     def morphismPreservesFunctions(self, morphism):
-        pass
+
+        assert morphism in self.domain.morphisms, "The given morphism should belong to the domain family."
+
+        domainPLF = self.functions[morphism.domain]
+        pushforwardPLF = domainPLF.getPushforward(morphism)
+        codomainPLF = self.functions[morphism.codomain]
+
+        return pushforwardPLF == codomainPLF
 
     def isWellDefined(self):
         for morphism in self.domain.morphisms:
