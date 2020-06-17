@@ -65,7 +65,8 @@ Most of the tests take the form of assertions, such as:
 2. [Edges](#edges)
 3. [Legs](#legs)
 4. [CombCurves](#combCurves)
-5. [A Neat Example](#neatExample)
+5. [Morphisms of Basic Families](#famMorphClass)
+6. [A Neat Example](#neatExample)
 
 Vertices, Edges, Legs, Combinatorial Tropical Curves, and Basic Families of curves are implemented in 
 `CombinatorialCurve.py`.
@@ -160,6 +161,12 @@ of each each to be one of the generators. Here is the full example:
 The difference between a `CombCurve` representing a particular curve or a basic family of curves is largely semantic.
 The first example also represents the family of all three-element chains where one edge is twice as long as the other.
     
+### Morphisms of Basic Families <a name="famMorphClass"></a>
+
+A `BasicFamilyMorphism` is a morphism of basic families. It has a domain and codomain, both of which are basic families
+(i.e., `CombCurve`s). It also has a morphism of curves and a morphism of monoids.
+
+To do: Example(s)
 
 ### A Neat Example <a name="neatExample"></a>
 Creating a Tropical Combinatorial Curve with the Code:
@@ -405,17 +412,9 @@ generated based on the genus and marking of the space.
 ### Classes <a name="famClasses"></a>
 
 The classes are as follows:
-- [BasicFamilyMorphism](#famMorphClass): Represents a morphism of basic families.
 - [Family](#familyClass): Represents a family of tropical curves.
 - [TropicalFamily](#tropFamClass): A subclass of `Family` which represents the tropical moduli spaces.
 - [PLFFamily](#plfFamily): Represents a piecewise linear function over a family.
-
-#### `BasicFamilyMorphism` <a name="famMorphClass"></a>
-
-A `BasicFamilyMorphism` is a morphism of basic families. It has a domain and codomain, both of which are basic families
-(i.e., `CombCurve`s). It also has a morphism of curves and a morphism of monoids.
-
-To do: Example(s)
 
 #### `Family` <a name="familyClass"></a>
 
