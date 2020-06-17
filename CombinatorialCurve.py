@@ -744,6 +744,7 @@ class CombCurve(object):
 
         return tree
 
+
 class BasicFamilyMorphism(object):
     def __init__(self, domain, codomain, curveMorphismDict, monoidMorphism):
 
@@ -760,5 +761,14 @@ class BasicFamilyMorphism(object):
 
         self.domain = domain
         self.codomain = codomain
-        self.curveMorphism = curveMorphism
+        self.curveMorphismDict = curveMorphismDict
         self.monoidMorphism = monoidMorphism
+
+    def __call__(self, x):
+        if isinstance(x, vertex):
+            assert x in self.domain.vertices, "The given input must be a domain vertex."
+            return self.curveMorphismDict[x]
+        elif isinstance(x, domain.monoid.Element):
+            return self.monoidMorphism(x)
+        else:
+            raise ValueError("Cannot call on the given input - not a reasonable type.")
