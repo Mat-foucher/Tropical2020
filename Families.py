@@ -19,6 +19,21 @@ class Family(object):
         self.basicFamilies = basicFamilies
         self.morphisms = morphisms
 
+    # Returns an iterator of all basic families that are not contractions of any other family
+    def maximalCurvesIter(self):
+
+        def isMaximal(basicFam):
+
+            # A basic family is not maximal if it's the codomain of some proper morphism
+            for morphism in self.morphisms:
+                if morphism.codomain == basicFam and morphism.domain != basicFam:
+                    return False
+
+            # If this code is reached, then no proper morphism maps into basicFam, and so it's maximal.
+            return True
+
+        return filter(isMaximal, self.basicFamilies)
+
 
 class BasicFamilyMorphism(object):
     def __init__(self, domain, codomain):
