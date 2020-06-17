@@ -281,6 +281,8 @@ A `Family` consists of a collection of basic families and a collection of morphi
 
 Methods:
 
+- `getAncestors`: Given a basic family `C`, returns the set of all ancestors of `C`. A basic family `F` is an ancestor
+of `C` iff the class possesses a morphism from `F` to `C`. 
 - `getMaximalCurveIter`: Returns an iterator of all curves / basic families which are not a proper contraction of
 another curve in the family.
 

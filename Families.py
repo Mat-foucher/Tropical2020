@@ -19,6 +19,20 @@ class Family(object):
         self.basicFamilies = basicFamilies
         self.morphisms = morphisms
 
+    # Returns the set of ancestors of the given basic family
+    def getAncestors(self, basicFamily):
+
+        # Type checking
+        assert isinstance(basicFamily, CombCurve)
+
+        # Get the morphisms that map into the given basic family
+        def isIncoming(morphism):
+            return morphism.codomain == basicFamily
+        incomingArrows = filter(isIncoming, self.morphisms)
+
+        # Get the set of domains of the morphisms that map into the given basic family
+        return {arrow.domain for arrow in incomingArrows}
+
     # Returns an iterator of all basic families that are not contractions of any other family
     def maximalCurvesIter(self):
 
