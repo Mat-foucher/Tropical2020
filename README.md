@@ -95,12 +95,14 @@ The `edge` class also has the following members:
 - `vertices`: A set containing the vertices that the edge connects.
 
 ### Legs <a name="legs"></a>
-The leg object is much like edge, except for the fact that the leg object can only be assigned a singe vertex that it is connected to.
-Unlike the other graph objects too, the leg does not have any length or genus, making it the simplest class in the file.
+A `leg` is initialized only with its name (`string`) and root (`vertex`), making it the simplest class in the file.
 
-To create a new leg, this can be done so by the following:
+For example, to create a leg with name "l1" with root `v1`, one can write the following code:
 
     l1 = leg("l1", v1)
+
+Like an `edge`, a `leg` has the `vertices` property. The `vertices` of a leg will be a singleton set containing its
+root.
 
 ### CombCurves <a name="combCurves"></a>
 
