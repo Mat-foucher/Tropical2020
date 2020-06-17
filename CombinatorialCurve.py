@@ -810,6 +810,30 @@ class BasicFamilyMorphism(object):
 
         return preimage
 
+    # Returns the image of the morphism as a CombCurve
+    def image(self):
+
+        # Note that we don't need to worry about edges that collapse to a vertex - their endpoints go to the same place.
+        imageVertices = {self(v) for v in self.domain.vertices}
+
+        # Only take edges that are not collapsed
+        imageEdges = {self(e) for e in self.domain.edges if self(e) in self.codomain.edges}
+
+        imageLegs = {self(nextLeg) for nextLeg in self.domain.legs}
+
+        # Keep the whole codomain monoid. Another option is to take the image of self.monoidMorphism, but this has not
+        # yet been implemented.
+        imageMonoid = self.codomain.monoid
+
+        image = CombCurve("Image curve")
+
+        image.addVertices(imageVertices)
+        image.addEdges(imageEdges)
+        image.addLegs(imageLegs)
+        image.monoid = imageMonoid
+        
+        return image
+
     def __call__(self, x):
         if isinstance(x, vertex):
             assert x in self.domain.vertices, "The given input must be a domain vertex."
