@@ -28,8 +28,21 @@ class Family(object):
         # Get the morphisms that map into the given basic family
         def isIncoming(morphism):
             return morphism.codomain == basicFamily
-
         incomingArrows = filter(isIncoming, self.morphisms)
+
+        # Get the set of domains of the morphisms that map into the given basic family
+        return {arrow.domain for arrow in incomingArrows}
+
+    # Returns the maximal ancestors of the given basic family
+    def getMaximalAncestors(self, basicFamily):
+
+        # Type checking
+        assert isinstance(basicFamily, CombCurve)
+
+        # Get the morphisms that map into the given basic family from a maximal family
+        def isIncoming(morphism):
+            return morphism.codomain == basicFamily
+        incomingArrows = filter(isIncoming, self.maximalCurvesIter())
 
         # Get the set of domains of the morphisms that map into the given basic family
         return {arrow.domain for arrow in incomingArrows}
