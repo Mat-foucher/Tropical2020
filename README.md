@@ -81,23 +81,18 @@ As an example, to initialize a vertex with name "v1" of genus one, one would wri
 ### Edges <a name="edges"></a>
 
 The edges are similar to the vertices, as you may have already guessed.
-For edge objects, each edge has a name in their definition, much like the vertices.
-The edge object also includes a `float` parameter called length (non-negative, of course), and inputs for TWO vertices.
+To initialize an `edge`, provide a `string` name, a `Monoid.Element`, a source `vertex`, and a target `vertex`.
+For self-edges on the curve, you can input the same vertex for both positions.
 
-NOTE: For "self - edges" on the curve, you can input the same vertex for both positions.
-
-To create an edge, one writes something like the following:
+For example, suppose `alpha` is some monoid element and `v1` and `v2` are vertices. Then an edge of length `alpha` from
+`v1` to `v2` can be initialized as follows:
 
     e1 = edge("e1", 1.0, v1, v2)
     
-This is an edge with name `"e1"` or edge one, and `e1` has length 1.0 and goes from vertex `v1` to vertex `v2` (assuming 
-these vertices were previously defined).
-Included in the class definition of edge(), there are a few functions that do what you'd pretty much expect like 
-in vertices, such as getting the length (`length()`),
-setting the length (`length(length_)`) and lastly returning the vertices.
-Since this is python 3, we have access to the `set()` object, an unindexed list. When the function `vertices()` in 
-`edge` is called, this will return a set with two elements:
-the vertices that the edge connects.
+The `edge` class also has the following members:
+
+- `length`: The length of the edge.
+- `vertices`: A set containing the vertices that the edge connects.
 
 ### Legs <a name="legs"></a>
 The leg object is much like edge, except for the fact that the leg object can only be assigned a singe vertex that it is connected to.
