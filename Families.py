@@ -1,18 +1,26 @@
-
 from CombinatorialCurve import *
+from RPC import *
 
 
 class BasicFamilyMorphism(object):
-    def __init__(self, domain, codomain):
+    def __init__(self, domain, codomain, curveMorphism, monoidMorphism):
 
         # Type checking
         if not isinstance(domain, CombCurve):
             raise ValueError("The domain of a basic family morphism must be a CombCurve.")
         if not isinstance(codomain, CombCurve):
             raise ValueError("The codomain of a basic family morphism must be a CombCurve.")
+        if not isinstance(curveMorphism, dict):
+            raise ValueError("curveMorphism must be a Dictionary[domain.vertices, codomain.vertices]")
+        if (not isinstance(monoidMorphism, MonoidHomomorphism) or
+                monoidMorphism.domain != domain.monoid or
+                monoidMorphism.codomain != codomain.monoid):
+            raise ValueError("monoidMorphism must be a MonoidHomomorphism from domain.monoid to codomain.monoid")
 
         self.domain = domain
         self.codomain = codomain
+        self.curveMorphism = curveMorphism
+        self.monoidMorphism = monoidMorphism
 
 
 class Family(object):
@@ -41,6 +49,7 @@ class Family(object):
         # Get the morphisms that map into the given basic family
         def isIncoming(morphism):
             return morphism.codomain == basicFamily
+
         incomingArrows = filter(isIncoming, self.morphisms)
 
         # Get the set of domains of the morphisms that map into the given basic family
@@ -89,4 +98,3 @@ class PLFFamily(object):
             if not self.morphismPreservesFunctions(morphism):
                 return False
         return True
-

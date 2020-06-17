@@ -270,10 +270,17 @@ generated based on the genus and marking of the space.
 ### Classes <a name="famClasses"></a>
 
 The classes are as follows:
+- [BasicFamilyMorphism](#famMorphClass): Represents a morphism of basic families.
 - [Family](#familyClass): Represents a family of tropical curves.
 - [TropicalFamily](#tropFamClass): A subclass of `Family` which represents the tropical moduli spaces.
-- [BasicFamilyMorphism](#famMorphClass): Represents a morphism of basic families.
 - [PLFFamily](#plfFamily): Represents a piecewise linear function over a family.
+
+#### `BasicFamilyMorphism` <a name="famMorphClass"></a>
+
+A `BasicFamilyMorphism` is a morphism of basic families. It has a domain and codomain, both of which are basic families
+(i.e., `CombCurve`s). It also has a morphism of curves and a morphism of monoids.
+
+To do: Example(s)
 
 #### `Family` <a name="familyClass"></a>
 
@@ -291,13 +298,6 @@ To do: Example(s)
 #### `TropicalFamily` <a name="tropFamClass"></a>
 
 To do: Description
-
-To do: Example(s)
-
-#### `BasicFamilyMorphism` <a name="famMorphClass"></a>
-
-A `BasicFamilyMorphism` is a morphism of basic families. It has a domain and codomain, both of which are basic families
-(i.e., `CombCurve`s).
 
 To do: Example(s)
 
