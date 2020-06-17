@@ -772,6 +772,23 @@ class BasicFamilyMorphism(object):
             assert curveMorphismDict[nextLeg] in codomain.legs, \
                 "curveMorphismDict should map legs to legs of the codomain curve."
 
+        # Make sure that the given curveMorphismDict is actually a homomorphism...
+        for nextLeg in domain.legs:
+            assert curveMorphismDict[nextLeg.root] == curveMorphismDict[nextLeg].root, \
+                "curveMorphismDict should preserve leg roots."
+        for nextEdge in domain.edges:
+            if curveMorphismDict[nextEdge] in codomain.edges:
+                assert map(lambda v: curveMorphismDict[v], nextEdge.vertices) == curveMorphismDict[nextEdge].vertices, \
+                    "curveMorphismDict should preserve endpoints of non-collapsed edges."
+                assert monoidMorphism(nextEdge.length) == curveMorphismDict[nextEdge].length, \
+                    "curveMorphismDict and monoidMorphism should be compatible on edge lengths."
+            if curveMorphismDict[nextEdge] in codomain.vertices:
+                assert curveMorphismDict[nextEdge] == curveMorphismDict[nextEdge.vert1] and \
+                    curveMorphismDict[nextEdge] == curveMorphismDict[nextEdge.vert2], \
+                    "curveMorphismDict should preserve endpoints of collapsed edges."
+                assert monoidMorphism(nextEdge.length) == codomain.monoid.zero(), \
+                    "curveMorphismDict and monoidMorphism should be compatible on edge lengths."
+
         self.domain = domain
         self.codomain = codomain
         self.curveMorphismDict = curveMorphismDict
