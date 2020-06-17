@@ -71,10 +71,21 @@ class PLFFamily(object):
     # domain: Family
     # functions: Dictionary[BasicFamily, SPLF]
     def __init__(self, domain, functions):
+
+        # Type checking
         assert isinstance(domain, Family)
         assert isinstance(functions, dict)
+
+        # Make sure functions actually is an assignment of functions on the family
+        assert set(functions.keys()) == domain.basicFamilies, \
+            "'functions' should assign something to each basic family."
         for key in functions:
-            assert functions[key].domain == key
+            assert isinstance(functions[key], BasicFamilyMorphism), \
+                "functions[key] should be a morphism of basic families."
+            assert functions[key].codomain in self.domain.basicFamilies, \
+                "functions[key] should map into the family."
+            assert functions[key].domain == key, \
+                "functions[key] should have key as its domain."
 
         self.domain = domain
         self.functions = functions
