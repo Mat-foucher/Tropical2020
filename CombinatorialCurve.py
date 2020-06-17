@@ -759,6 +759,11 @@ class BasicFamilyMorphism(object):
         assert monoidMorphism.codomain == codomain.monoid, \
             "The codomain of the monoid morphism does not match the given codomain."
 
+        self.domain = domain
+        self.codomain = codomain
+        self.curveMorphismDict = curveMorphismDict
+        self.monoidMorphism = monoidMorphism
+
         # Make sure that the given curveMorphismDict is actually a function from domain to codomain...
         assert set(curveMorphismDict.keys()) == domain.vertices | domain.edges | domain.legs, \
             "The keys of curveMorphismDict should be the vertices, edges, and legs of the domain curve."
@@ -789,10 +794,18 @@ class BasicFamilyMorphism(object):
                 assert monoidMorphism(nextEdge.length) == codomain.monoid.zero(), \
                     "curveMorphismDict and monoidMorphism should be compatible on edge lengths."
 
-        self.domain = domain
-        self.codomain = codomain
-        self.curveMorphismDict = curveMorphismDict
-        self.monoidMorphism = monoidMorphism
+    # Returns the preimage of the given vertex as a CombCurve
+    def preimage(self, vert):
+        assert vert in self.codomain.vertices, "vert should be a codomain vertex"
+        
+        preimageVertices = {v for v in self.domain.vertices if self.curveMorphismDict[v] == vert}
+        preimageEdges = {e for e in self.domain.edges if self.curveMorphismDict[e] == vert}
+
+        preimage = CombCurve("Preimage of " + vert.name)
+        preimage.addEdges(preimageEdges)
+        preimage.addVertices(preimageVertices)
+
+        return preimage
 
     def __call__(self, x):
         if isinstance(x, vertex):
