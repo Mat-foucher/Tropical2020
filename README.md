@@ -16,55 +16,58 @@ Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 The code for this project is divided into separate files, each for different classes that implement objects from the 
 overleaf document.
 
-The different files are:
+The different files and their associated classes/purposes are:
 
-- StrictPiecewiseLinearFunction.py
-- CombinatorialCurve.py
-- ModuliSpaces.py
-- RPC.py
-- tests.py
+- `CombinatorialCurve.py`: Vertices, Edges, Legs, and Basic Families.
+- `GraphIsoHelper.py`: Provides convenience functions for testing if two graphs are isomorphic.
+- `StrictPiecewiseLinearFunction.py`: Piecewise Linear functions over Basic Families.
+- `ModuliSpaces.py`: Tropical Moduli spaces.
+- `RPC.py`: Abstract monoids.
+- `tests.py`: Tests for most things. This file is a good place to see how things are used.
+- `generateAndSaveModuliSpace.py`: A short script to generate and save a moduli space as specified by command line
+arguments.
 
 ## Testing <a name="Testing"></a>
 
-The test document is where most of the actual code is used for purposes concerning the research project. 
-You may use the tests document for any test you would like to try, using the code from other documents.
-In the tests file there is also a large collection of examples from the overleaf document, for example, 
+The `tests.py` file is where most of the actual code is used for purposes concerning the research project. 
+You may use the tests file for any test you would like to try, using the code from other files.
+In `tests.py` there is also a large collection of examples from the reference document, for example, 
 here is example 3.5:
 
-            C = CombCurve("Example 3.5")
+    C = CombCurve("Example 3.5")
+    
+    M = Monoid()
+    M.addgen("a")
+    alpha = M.Element({"a": 1})
 
-            v1 = vertex("v1", 0)
-            v2 = vertex("v2", 0)
-            v3 = vertex("v3", 1)
-            e1 = edge("e1", 1.0, v1, v2)
-            e2 = edge("e2", 1.0, v2, v3)
-            e3 = edge("e3", 1.0, v1, v3)
-            e4 = edge("e4", 1.0, v1, v1)
-            l = leg("l", v1)
+    v1 = vertex("v1", 0)
+    v2 = vertex("v2", 0)
+    v3 = vertex("v3", 1)
+    e1 = edge("e1", alpha, v1, v2)
+    e2 = edge("e2", alpha, v2, v3)
+    e3 = edge("e3", alpha, v1, v3)
+    e4 = edge("e4", alpha, v1, v1)
+    l = leg("l", v1)
 
-            C.addEdges({e1, e2, e3, e4})
-            C.addLeg(l)
+    C.monoid = M
+    C.addEdges({e1, e2, e3, e4})
+    C.addLeg(l)
 
-The test doc is also a fabulous place to use assertions, such as:
+Most of the tests take the form of assertions, such as:
 
-            assert C.isAffineLinear()
-
-In conclusion, for those picking up this code to use for pioneering things on tropical geometry, 
-most of the work will be done in tests.py
+    assert C.isConnected()
+    assert C.genus == 3
 
 ## Combinatorial Curves <a name="CombCurves"></a>
 
 1. [Vertices](#vertices)
 2. [Edges](#edges)
-3. [A Neat Example](#neatExample)
+3. [Legs](#legs)
+4. [CombCurves](#combCurves)
+5. [A Neat Example](#neatExample)
 
-The document `CombinatorialCurve.py` is for all specifications regarding the combinatorial tropical curves as seen in 
-the overleaf document.
-In the timeline of this project, the classes in this doc have been modified over and over and over and over again 
-(lowkey kind of painful).
-
-In this current version, the first two classes you will see in this document are the `vertex`, `edge`, and `leg` 
-classes.
+Vertices, Edges, Legs, Combinatorial Tropical Curves, and Basic Families of curves are implemented in 
+`CombinatorialCurve.py`.
 
 ### Vertices <a name="vertices"></a>
 
@@ -98,14 +101,69 @@ Since this is python 3, we have access to the `set()` object, an unindexed list.
 `edge` is called, this will return a set with two elements:
 the vertices that the edge connects.
 
-Leg:
-    The leg object is much like edge, except for the fact that the leg object can only be assigned a singe vertex that it is connected to.
-    Unlike the other graph objects too, the leg does not have any length or genus, making it the simplest class in the file.
+### Legs <a name="legs"></a>
+The leg object is much like edge, except for the fact that the leg object can only be assigned a singe vertex that it is connected to.
+Unlike the other graph objects too, the leg does not have any length or genus, making it the simplest class in the file.
 
-    To create a new leg, this can be done so by the following:
+To create a new leg, this can be done so by the following:
 
-        l1 = leg("l1", v1)
-        
+    l1 = leg("l1", v1)
+
+### CombCurves <a name="combCurves"></a>
+
+The `CombCurve` class (short for Combinatorial Tropical Curve) provides an implementation both for combinatorial
+tropical curves and basic families of tropical curves. The difference between these two interpretations is the monoid
+that one provides to the class. In order to use a `CombCurve` as a combinatorial tropical curve, use a free monoid with
+one generator. For example, to create a three-element chain `v1--v2--v3` with the left edge of length one and right edge
+of length two, one could write the following:
+
+    # Initialize vertices
+    v1 = vertex("v1", 0)
+    v2 = vertex("v2", 0)
+    v3 = vertex("v3", 0)
+    
+    # Set up a free monoid with one generator
+    M = Monoid()
+    M.addgen("a")
+    alpha = M.Element({"a": 1})
+    
+    # Edges whose lengths depend on the generator alpha
+    e1 = edge("e1", alpha, v1, v2)
+    e2 = edge("e2", 2 * alpha, v2, v3)
+    
+    # Initialize the curve
+    C = CombCurve("A particular chain with three elements")
+    C.addEdges({e1, e2})
+
+One can also use `CombCurve` to represent a basic family of curves. To represent the family of three-element chains
+whose edge lengths vary freely over 
+<img src="https://render.githubusercontent.com/render/math?math=\mathbb{R}_{\geq 0}">, we simply use a different monoid.
+Since we want two edge lengths to vary independently, we use a free monoid with two generators, and let the edge length
+of each each to be one of the generators. Here is the full example:
+
+    # Initialize vertices
+    v1 = vertex("v1", 0)
+    v2 = vertex("v2", 0)
+    v3 = vertex("v3", 0)
+    
+    # Set up a free monoid with one generator
+    M = Monoid()
+    M.addgen("a")
+    M.addgen("b")
+    alpha = M.Element({"a": 1})
+    beta = M.Element({"b": 1})
+    
+    # Edges whose lengths depend on the generator alpha
+    e1 = edge("e1", alpha, v1, v2)
+    e2 = edge("e2", beta, v2, v3)
+    
+    # Initialize the curve
+    C = CombCurve("Family of all chains with three elements")
+    C.addEdges({e1, e2})
+
+The difference between a `CombCurve` representing a particular curve or a basic family of curves is largely semantic.
+The first example also represents the family of all three-element chains where one edge is twice as long as the other.
+    
 
 ### A Neat Example <a name="neatExample"></a>
 Creating a Tropical Combinatorial Curve with the Code:
