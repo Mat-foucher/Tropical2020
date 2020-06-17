@@ -749,15 +749,15 @@ class BasicFamilyMorphism(object):
     def __init__(self, domain, codomain, curveMorphismDict, monoidMorphism):
 
         # Type checking
-        assert isinstance(domain, CombCurve), "The domain of a basic family morphism must be a CombCurve."
-        assert isinstance(codomain, CombCurve), "The codomain of a basic family morphism must be a CombCurve."
+        assert isinstance(domain, CombCurve), "The domain of a basic family morphism should be a CombCurve."
+        assert isinstance(codomain, CombCurve), "The codomain of a basic family morphism should be a CombCurve."
         assert isinstance(curveMorphismDict, dict), \
-            "curveMorphismDict must be a Dictionary[domain.vertices, codomain.vertices]."
-        assert isinstance(monoidMorphism, MonoidHomomorphism), "monoidMorphism must be a MonoidHomomorphism."
+            "curveMorphismDict should be a Dictionary[domain.vertices, codomain.vertices]."
+        assert isinstance(monoidMorphism, MonoidHomomorphism), "monoidMorphism should be a MonoidHomomorphism."
         assert monoidMorphism.domain == domain.monoid, \
-            "The domain of the monoid morphism does not match the given domain."
+            "The domain of the monoid morphism should match the given domain."
         assert monoidMorphism.codomain == codomain.monoid, \
-            "The codomain of the monoid morphism does not match the given codomain."
+            "The codomain of the monoid morphism should match the given codomain."
 
         self.domain = domain
         self.codomain = codomain
@@ -793,11 +793,14 @@ class BasicFamilyMorphism(object):
                     "curveMorphismDict should preserve endpoints of collapsed edges."
                 assert monoidMorphism(nextEdge.length) == codomain.monoid.zero(), \
                     "curveMorphismDict and monoidMorphism should be compatible on edge lengths."
+        for vert in codomain.vertices:
+            assert self.preimage(vert).genus == curveMorphismDict[vert].genus, \
+                "curveMorphismDict should preserve genus."
 
     # Returns the preimage of the given vertex as a CombCurve
     def preimage(self, vert):
         assert vert in self.codomain.vertices, "vert should be a codomain vertex"
-        
+
         preimageVertices = {v for v in self.domain.vertices if self.curveMorphismDict[v] == vert}
         preimageEdges = {e for e in self.domain.edges if self.curveMorphismDict[e] == vert}
 
