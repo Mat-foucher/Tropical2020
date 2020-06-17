@@ -743,3 +743,23 @@ class CombCurve(object):
             verticesToCheck = verticesToCheck | newAdjacentVertices
 
         return tree
+
+class BasicFamilyMorphism(object):
+    def __init__(self, domain, codomain, curveMorphism, monoidMorphism):
+
+        # Type checking
+        if not isinstance(domain, CombCurve):
+            raise ValueError("The domain of a basic family morphism must be a CombCurve.")
+        if not isinstance(codomain, CombCurve):
+            raise ValueError("The codomain of a basic family morphism must be a CombCurve.")
+        if not isinstance(curveMorphism, dict):
+            raise ValueError("curveMorphism must be a Dictionary[domain.vertices, codomain.vertices]")
+        if (not isinstance(monoidMorphism, MonoidHomomorphism) or
+                monoidMorphism.domain != domain.monoid or
+                monoidMorphism.codomain != codomain.monoid):
+            raise ValueError("monoidMorphism must be a MonoidHomomorphism from domain.monoid to codomain.monoid")
+
+        self.domain = domain
+        self.codomain = codomain
+        self.curveMorphism = curveMorphism
+        self.monoidMorphism = monoidMorphism
