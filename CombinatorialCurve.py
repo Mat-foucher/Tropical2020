@@ -783,7 +783,7 @@ class BasicFamilyMorphism(object):
                 "curveMorphismDict should preserve leg roots."
         for nextEdge in domain.edges:
             if curveMorphismDict[nextEdge] in codomain.edges:
-                assert map(lambda v: curveMorphismDict[v], nextEdge.vertices) == curveMorphismDict[nextEdge].vertices, \
+                assert set(map(lambda v: curveMorphismDict[v], nextEdge.vertices)) == curveMorphismDict[nextEdge].vertices, \
                     "curveMorphismDict should preserve endpoints of non-collapsed edges."
                 assert monoidMorphism(nextEdge.length) == curveMorphismDict[nextEdge].length, \
                     "curveMorphismDict and monoidMorphism should be compatible on edge lengths."
@@ -794,7 +794,7 @@ class BasicFamilyMorphism(object):
                 assert monoidMorphism(nextEdge.length) == codomain.monoid.zero(), \
                     "curveMorphismDict and monoidMorphism should be compatible on edge lengths."
         for vert in codomain.vertices:
-            assert self.preimage(vert).genus == curveMorphismDict[vert].genus, \
+            assert self.preimage(vert).genus == vert.genus, \
                 "curveMorphismDict should preserve genus."
 
     # Returns the preimage of the given vertex as a CombCurve
