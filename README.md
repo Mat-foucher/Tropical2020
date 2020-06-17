@@ -71,14 +71,12 @@ Vertices, Edges, Legs, Combinatorial Tropical Curves, and Basic Families of curv
 
 ### Vertices <a name="vertices"></a>
 
-The `vertex` class specifies the vertex object, which will always need a name (`string`) and a genus (`int` value).
-In this class is a function to set the genus and a property to return the genus of the vertex.
-If we want to declare a nex vertex, we can do so like in this example:
+The `vertex` class represents the vertices of a curve. Initializing a `vertex` requires a name (`string`) 
+and a genus (`int`). Initializing or setting negative genus will raise a `ValueError`.
 
-        v1 = vertex("v1", 1)
+As an example, to initialize a vertex with name "v1" of genus one, one would write the following code:
 
-Where `"v1"` is the name of the vertex `v1`, and `v1` has a genus 1.
-NOTE: The genus must always be non-negative, else an error is raised.
+    v1 = vertex("v1", 1)
 
 ### Edges <a name="edges"></a>
 
@@ -90,7 +88,7 @@ NOTE: For "self - edges" on the curve, you can input the same vertex for both po
 
 To create an edge, one writes something like the following:
 
-        e1 = edge("e1", 1.0, v1, v2)
+    e1 = edge("e1", 1.0, v1, v2)
     
 This is an edge with name `"e1"` or edge one, and `e1` has length 1.0 and goes from vertex `v1` to vertex `v2` (assuming 
 these vertices were previously defined).
