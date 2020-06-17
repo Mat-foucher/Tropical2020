@@ -8,6 +8,7 @@ Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 3. [Combinatorial Curves](#CombCurves)
 4. [Strict Piecewise Linear Functions](#SPLFs)
 5. [Moduli Spaces](#ModSpaces)
+6. [General Families](#Families)
 
 ## Introduction <a name="Introduction"></a>
 
@@ -254,3 +255,46 @@ In order to load a moduli space from a file, initialize the space with proper ge
 and encoding information. By default, the curve entry delimiter is `=` and the encoding is `utf-8`. 
 `saveModuliSpaceToFile` accepts an optional filename to save to. If none is provided, a filename is automatically
 generated based on the genus and marking of the space.
+
+
+
+
+
+## General Families <a name="Families"></a>
+
+1. [Basic Usage](#famBasicUsage)
+2. [Classes](#famClasses)
+
+### Basic Usage <a name="famBasicUsage"></a>
+
+### Classes <a name="famClasses"></a>
+
+The classes are as follows:
+- [Family](#familyClass): Represents a family of tropical curves.
+- [TropicalFamily](#tropFamClass): A subclass of `Family` which represents the tropical moduli spaces.
+- [BasicFamilyMorphism](#famMorphClass): Represents a morphism of basic families.
+- [PLFFamily](#plfFamily): Represents a piecewise linear function over a family.
+
+#### `Family` <a name="familyClass"></a>
+
+To do: Description
+
+To do: Example(s)
+
+#### `TropicalFamily` <a name="tropFamClass"></a>
+
+To do: Description
+
+To do: Example(s)
+
+#### `BasicFamilyMorphism` <a name="famMorphClass"></a>
+
+To do: Description
+
+To do: Example(s)
+
+#### `PLFFamily` <a name="plfFamily"></a>
+
+To do: Description
+
+To do: Example(s)
