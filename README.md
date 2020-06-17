@@ -166,7 +166,9 @@ The first example also represents the family of all three-element chains where o
 A `BasicFamilyMorphism` is a morphism of basic families. It has a domain and codomain, both of which are basic families
 (i.e., `CombCurve`s). It also has a morphism of curves and a morphism of monoids.
 
-To do: Example(s)
+There are many restrictions on the values used to initialize a `BasicFamilyMorphism`. These restrictions are in place to
+ensure that an instance of `BasicFamilyMorphism` actually is a morphism of the given basic families. The restrictions
+can be found in the reference sheet.
 
 ### A Neat Example <a name="neatExample"></a>
 Creating a Tropical Combinatorial Curve with the Code:
