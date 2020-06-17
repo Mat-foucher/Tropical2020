@@ -177,11 +177,15 @@ To define a new tropical curve, we write the following:
     TropicalCurve = CombCurve("TropicalCurve")
 
 The CombCurve object takes only one parameter in it's initializer, which is the name string.
-We now want to add edges, vertices, and legs to our curve, which we do deine as:
+We now want to add edges, vertices, and legs to our curve, which we do as follows:
 
     v1 = vertex("v1", 1)
     v2 = vertex("v2", 0)
-    e1 = edge("e1", v1, v2)
+    
+    M = Monoid()
+    M.addgen("a")
+    e1 = edge("e1", M.Element({"a": 1}), v1, v2)
+    
     l1 = leg("l1", v2)
     l2 = leg("l2", v2)
 
@@ -189,7 +193,7 @@ We now want to add edges, vertices, and legs to our curve, which we do deine as:
     edges = {e1}
     legs = {l1,l2}
 
-    TropicalCurve.addEgdes(edges)
+    TropicalCurve.addEdges(edges)
     TropicalCurve.addLegs(legs)
     TropicalCurve.addVertices(vertices)
 
