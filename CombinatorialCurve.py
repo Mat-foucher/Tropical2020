@@ -745,19 +745,18 @@ class CombCurve(object):
         return tree
 
 class BasicFamilyMorphism(object):
-    def __init__(self, domain, codomain, curveMorphism, monoidMorphism):
+    def __init__(self, domain, codomain, curveMorphismDict, monoidMorphism):
 
         # Type checking
-        if not isinstance(domain, CombCurve):
-            raise ValueError("The domain of a basic family morphism must be a CombCurve.")
-        if not isinstance(codomain, CombCurve):
-            raise ValueError("The codomain of a basic family morphism must be a CombCurve.")
-        if not isinstance(curveMorphism, dict):
-            raise ValueError("curveMorphism must be a Dictionary[domain.vertices, codomain.vertices]")
-        if (not isinstance(monoidMorphism, MonoidHomomorphism) or
-                monoidMorphism.domain != domain.monoid or
-                monoidMorphism.codomain != codomain.monoid):
-            raise ValueError("monoidMorphism must be a MonoidHomomorphism from domain.monoid to codomain.monoid")
+        assert isinstance(domain, CombCurve), "The domain of a basic family morphism must be a CombCurve."
+        assert isinstance(codomain, CombCurve), "The codomain of a basic family morphism must be a CombCurve."
+        assert isinstance(curveMorphismDict, dict), \
+            "curveMorphismDict must be a Dictionary[domain.vertices, codomain.vertices]."
+        assert isinstance(monoidMorphism, MonoidHomomorphism), "monoidMorphism must be a MonoidHomomorphism."
+        assert monoidMorphism.domain == domain.monoid, \
+            "The domain of the monoid morphism does not match the given domain."
+        assert monoidMorphism.codomain == codomain.monoid, \
+            "The codomain of the monoid morphism does not match the given codomain"
 
         self.domain = domain
         self.codomain = codomain
