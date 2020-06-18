@@ -89,6 +89,22 @@ class StrictPiecewiseLinearFunction(object):
 
         return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
 
+    def __eq__(self, other):
+        if not isinstance(other, StrictPiecewiseLinearFunction):
+            print("Wrong types")
+            return False
+
+        if not self.domain != other.domain:
+            print("Different domains")
+            return False
+
+        for nextVertex in self.domain.vertices:
+            if self.functionValues[nextVertex] != other.functionValues[nextVertex]:
+                print("Different function values!")
+                return False
+
+        return True
+
     def printSelf(self):
         for v in self.domain.vertices:
             print(v.name, self.functionValues[v].coeffs)
