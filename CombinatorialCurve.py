@@ -14,6 +14,9 @@ class vertex(object):
             raise ValueError("Genus must be non-negative")
         self.name = name_
         self._genus = genus_
+    
+    def __str__(self):
+        return self.name + ", " + str(self._genus)
 
     @property
     def genus(self):
