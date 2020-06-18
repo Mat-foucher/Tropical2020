@@ -1,5 +1,6 @@
 from CombinatorialCurve import *
 from RPC import *
+from StrictPiecewiseLinearFunction import *
 
 
 class Family(object):
@@ -12,9 +13,9 @@ class Family(object):
             raise ValueError("morphisms must be a Set[BasicFamilyMorphism]")
 
         # Ensure that the morphisms actually belong in this family
-        for morphism in self.morphisms:
-            assert morphism.domain in self.basicFamilies
-            assert morphism.codomain in self.basicFamilies
+        for morphism in morphisms:
+            assert morphism.domain in basicFamilies
+            assert morphism.codomain in basicFamilies
 
         self.basicFamilies = basicFamilies
         self.morphisms = morphisms
@@ -80,10 +81,8 @@ class PLFFamily(object):
         assert set(functions.keys()) == domain.basicFamilies, \
             "'functions' should assign something to each basic family."
         for key in functions:
-            assert isinstance(functions[key], BasicFamilyMorphism), \
-                "functions[key] should be a morphism of basic families."
-            assert functions[key].codomain in self.domain.basicFamilies, \
-                "functions[key] should map into the family."
+            assert isinstance(functions[key], StrictPiecewiseLinearFunction), \
+                "functions[key] should be a piecewise linear function."
             assert functions[key].domain == key, \
                 "functions[key] should have key as its domain."
 
