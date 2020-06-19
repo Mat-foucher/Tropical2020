@@ -406,7 +406,6 @@ generated based on the genus and marking of the space.
 
 The classes are as follows:
 - [Family](#familyClass): Represents a family of tropical curves.
-- [TropicalFamily](#tropFamClass): A subclass of `Family` which represents the tropical moduli spaces.
 - [PLFFamily](#plfFamily): Represents a piecewise linear function over a family.
 
 #### `Family` <a name="familyClass"></a>
@@ -419,12 +418,6 @@ Methods:
 of `C` iff the class possesses a morphism from `F` to `C`. 
 - `getMaximalCurveIter`: Returns an iterator of all curves / basic families which are not a proper contraction of
 another curve in the family.
-
-To do: Example(s)
-
-#### `TropicalFamily` <a name="tropFamClass"></a>
-
-To do: Description
 
 To do: Example(s)
 

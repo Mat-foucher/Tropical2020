@@ -64,10 +64,6 @@ class Family(object):
         return filter(isMaximal, self.basicFamilies)
 
 
-class TropicalFamily(Family):
-    pass
-
-
 class PLFFamily(object):
     # domain: Family
     # functions: Dictionary[BasicFamily, SPLF]
