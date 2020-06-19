@@ -182,7 +182,7 @@ A `BasicFamilyMorphism` takes a domain `BasicFamily`, codomain `BasicFamily`, a 
 morphism on the domain family, and a `MonoidHomomorphism`. The dictionary should have the vertices, edges, and legs
 of the domain curve as its keys, and their images under the morphism as its values.
 
-#### Example
+#### Example <a name="basicFamilyMorphismExample"></a>
 
 As an example, we will build a particular contraction. For our domain curve, we will use the basic family of all
 chains with two edges, and for our codomain curve, we will use the basic family of all chains with a single edge. The
@@ -419,10 +419,38 @@ of `C` iff the class possesses a morphism from `F` to `C`.
 - `getMaximalCurveIter`: Returns an iterator of all curves / basic families which are not a proper contraction of
 another curve in the family.
 
-To do: Example(s)
+##### Example <a name="familyExample"></a>
+
+Consider the morphism and basic families defined in [this example](#basicFamilyMorphismExample). This example already
+has the structure of an abstract family. To collect the structure into a single class, we can write the following:
+
+    myFamily = Family({domainFamily, codomainFamily}, {basicFamilyMorphism})
+
+This family consists of two basic families and a single morphism between them.
 
 #### `PLFFamily` <a name="plfFamily"></a>
 
-To do: Description
+A `PLFFamily` represents a piecewise linear function over a family. To initialize a `PLFFamily`, provide a `Family` and
+a dictionary whose keys are the basic families of the given family, and whose values are PLFs on those basic families.
 
-To do: Example(s)
+Not every assignment of a PLF on the basic families determines a PLF over the entire family. The issue is that the
+basic PLFs must be preserved under pushforwards by morphisms of the family. During initialization, it is checked that
+this condition (and others) are met. If they are not met, then an error is thrown.
+
+##### Example
+
+Let's define a `PLFFamily` over the `Family` defined [here](#familyExample) with basic families and morphisms coming
+from [here](#basicFamilyMorphismExample). Recall that the basic families consist of the family of all chains with 2
+edges and the family of all chains with a single edge. Only one morphism of basic families is included, and that is
+the morphism from the 2-edge chains into the 1-edge chains which contracts the second edge.
+
+We are free to define any PLFs which are preserved under this contraction. For example, consider the following:
+
+    domainPLF = PiecewiseLinearFunction(domainFamily, {e1: 1, e2: -1, v1: m.zero()})
+    codomainPLF = domainPLF.getPushforward(basicFamilyMorphism)
+
+Here, we define a simple PLF on the 2-edge chains, and then push it forward along the only morphism of the family. This
+will guarantee that our choices of PLFs are consistent with each other. To define the PLF over the family, we simply
+execute:
+
+    myPLFFamily = PLFFamily(myFamily, {domainFamily: domainPLF, codomainFamily: codomainPLF})
