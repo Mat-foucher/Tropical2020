@@ -4,6 +4,7 @@ import time
 
 import re
 
+
 class TropicalModuliSpace(object):
     def __init__(self, g_, n_):
         # Private copy of the genus and marking number of the space
@@ -220,6 +221,7 @@ class TropicalModuliSpace(object):
         v = vertex("v", self._g)
         seedCurve.addVertex(v)
         seedCurve.addLegs({leg("leg " + str(i), v) for i in range(self._n)})
+        seedCurve.monoid = Monoid()
 
         # Let the seed grow!
         self.addCurve(seedCurve)
@@ -289,7 +291,9 @@ class TropicalModuliSpace(object):
             else:
                 e.root = v2
 
-        e = edge("(Edge splitting " + vert.name + ")", 1.0, v1, v2)
+        curve.monoid.addgen("(Edge splitting " + vert.name + ")")
+        newLength = curve.monoid.Element({"(Edge splitting " + vert.name + ")": 1})
+        e = edge("(Edge splitting " + vert.name + ")", newLength, v1, v2)
 
         curve.addEdge(e)
         curve.removeVertex(vert)
@@ -328,7 +332,9 @@ class TropicalModuliSpace(object):
             else:
                 e.root = v
 
-        e = edge("(Genus reduction loop for " + vert.name + ")", 1.0, v, v)
+        curve.monoid.addgen("(Genus reduction loop for " + vert.name + ")")
+        newLength = curve.monoid.Element({"(Genus reduction loop for " + vert.name + ")": 1})
+        e = edge("(Genus reduction loop for " + vert.name + ")", newLength, v, v)
 
         curve.addEdge(e)
         curve.removeVertex(vert)
@@ -386,8 +392,7 @@ class TropicalModuliSpace(object):
                     if m:
                         lName = m.group(0)
                         lRootName = m.group(1)
-                        l = leg(lName, vertices[lRootName])
-                        legs.add(l)
+                        legs.add(leg(lName, vertices[lRootName]))
 
                 c = BasicFamily("")
                 c.addEdges(edges)
