@@ -6,7 +6,7 @@ Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 1. [Introduction](#Introduction)
 2. [Testing](#Testing)
 3. [Basic Families](#BasicFamilies)
-4. [Strict Piecewise Linear Functions](#SPLFs)
+4. [Piecewise Linear Functions](#SPLFs)
 5. [Moduli Spaces](#ModSpaces)
 6. [General Families](#Families)
 
@@ -23,16 +23,17 @@ The different files and their associated classes/purposes are:
 - `GraphIsoHelper.py`: Provides convenience functions for testing if two graphs are isomorphic.
 - `StrictPiecewiseLinearFunction.py`: Piecewise Linear functions over Basic Families.
 - `ModuliSpaces.py`: Tropical Moduli spaces.
-- `RPC.py`: Abstract monoids.
+- `RPC.py`: Abstract Monoids.
+- `Families.py`: Arbitrary Families and Piecewise Linear functions over a Family.
 - `tests.py`: Tests for most things. This file is a good place to see how things are used.
-- `generateAndSaveModuliSpace.py`: A short script to generate and save a moduli space as specified by command line
+- `generateAndSaveModuliSpace.py`: A short script to generate and save a Moduli Space as specified by command line
 arguments.
 
 ## Testing <a name="Testing"></a>
 
-The `tests.py` file is where most of the actual code is used for purposes concerning the research project. 
-You may use the tests file for any test you would like to try, using the code from other files.
-In `tests.py` there is also a large collection of examples from the reference document, for example, 
+The `tests.py` file contains tests that give strong evidence to the correctness of the rest of the program. This is
+accomplished in two ways. First, several testing classes have been written (e.g., `CurveTests` and `TreeTests`). Next,
+these tests are applied to various examples, most of which come from the reference document. For example, 
 here is example 3.5:
 
     C = BasicFamily("Example 3.5")
@@ -54,19 +55,17 @@ here is example 3.5:
     C.addEdges({e1, e2, e3, e4})
     C.addLeg(l)
 
-Most of the tests take the form of assertions, such as:
-
-    assert C.isConnected()
-    assert C.genus == 3
+For an example test, one can execute `CurveTests.testCore(C)` to ensure that the core of `C` is connected and has the
+same genus. One can also verify a basis of loops of `C` with 
+`TreeTests.verifyLoops(C, {frozenset({e4}), frozenset({e1, e2, e3})})`.
 
 ## Basic Families <a name="BasicFamilies"></a>
 
 1. [Vertices](#vertices)
 2. [Edges](#edges)
 3. [Legs](#legs)
-4. [BasicFamily](#basFam)
+4. [Combinatorial Curves and Basic Families](#basFam)
 5. [Morphisms of Basic Families](#famMorphClass)
-6. [A Neat Example](#neatExample)
 
 Vertices, Edges, Legs, Combinatorial Tropical Curves, and Basic Families of curves are implemented in 
 `CombinatorialCurve.py`.
@@ -99,14 +98,14 @@ The `edge` class also has the following members:
 ### Legs <a name="legs"></a>
 A `leg` is initialized only with its name (`string`) and root (`vertex`), making it the simplest class in the file.
 
-For example, to create a leg with name "l1" with root `v1`, one can write the following code:
+For example, to create a leg with name `"l1"` with root `v1`, one can write the following code:
 
     l1 = leg("l1", v1)
 
-Like an `edge`, a `leg` has the `vertices` property. The `vertices` of a leg will be a singleton set containing its
+Like an `edge`, a `leg` has the `vertices` property. The `vertices` of a leg consist of the singleton set containing its
 root.
 
-### BasicFamily <a name="basFam"></a>
+### Combinatorial Curves and Basic Families <a name="basFam"></a>
 
 The `BasicFamily` class provides an implementation both for combinatorial
 tropical curves and basic families of tropical curves. The difference between these two interpretations is the monoid
@@ -134,7 +133,7 @@ of length two, one could write the following:
 
 One can also use `BasicFamily` to represent a basic family of curves. To represent the family of three-element chains
 whose edge lengths vary freely over 
-<img src="https://render.githubusercontent.com/render/math?math=\mathbb{R}_{\geq 0}">, we simply use a different monoid.
+the nonnegative real numbers, we simply use a different monoid.
 Since we want two edge lengths to vary independently, we use a free monoid with two generators, and let the edge length
 of each each to be one of the generators. Here is the full example:
 
@@ -143,14 +142,14 @@ of each each to be one of the generators. Here is the full example:
     v2 = vertex("v2", 0)
     v3 = vertex("v3", 0)
     
-    # Set up a free monoid with one generator
+    # Set up a free monoid with two generators
     M = Monoid()
     M.addgen("a")
     M.addgen("b")
     alpha = M.Element({"a": 1})
     beta = M.Element({"b": 1})
     
-    # Edges whose lengths depend on the generator alpha
+    # Edges whose lengths are one of the generators
     e1 = edge("e1", alpha, v1, v2)
     e2 = edge("e2", beta, v2, v3)
     
@@ -160,6 +159,15 @@ of each each to be one of the generators. Here is the full example:
 
 The difference between a `BasicFamily` representing a particular curve or a basic family of curves is largely semantic.
 The first example also represents the family of all three-element chains where one edge is twice as long as the other.
+That being said, there are some members of the `BasicFamily` class which may only make sense when using the curve
+interpretation. These members may not be preserved under setting an edge length to zero:
+
+- `bettiNumber` (but not `genus`)
+- `degree`, `edgeDegree`, and `legDegree`
+- `getEndpointsOfEdges`
+- `vertexCharacteristicCounts` and other characteristic functions.
+- `checkIfBijectionIsIsomorphism` and other isomorphism functions.
+- `spanningTree` and loop functions.
     
 ### Morphisms of Basic Families <a name="famMorphClass"></a>
 
@@ -170,40 +178,51 @@ There are many restrictions on the values used to initialize a `BasicFamilyMorph
 ensure that an instance of `BasicFamilyMorphism` actually is a morphism of the given basic families. The restrictions
 can be found in the reference sheet.
 
-### A Neat Example <a name="neatExample"></a>
-Creating a Tropical Combinatorial Curve with the Code:
+A `BasicFamilyMorphism` takes a domain `BasicFamily`, codomain `BasicFamily`, a dictionary that determines the 
+morphism on the domain family, and a `MonoidHomomorphism`. The dictionary should have the vertices, edges, and legs
+of the domain curve as its keys, and their images under the morphism as its values.
 
-We are now ready to discuss how we may go about implementing a tropical curve in the code.
-To begin, the BasicFamily object is what will be the tropical curve.
-As per the overleaf reference guide, the BasicFamily class has the sufficent properties of behaving properly according to 
-the definitions in the reference.
+#### Example
 
-To define a new tropical curve, we write the following:
+As an example, we will build a particular contraction. For our domain curve, we will use the basic family of all
+chains with two edges, and for our codomain curve, we will use the basic family of all chains with a single edge. The
+morphism will be the contraction of the second edge of the domain curve.
 
-    TropicalCurve = BasicFamily("TropicalCurve")
+First, we define our families:
 
-The BasicFamily object takes only one parameter in it's initializer, which is the name string.
-We now want to add edges, vertices, and legs to our curve, which we do as follows:
-
-    v1 = vertex("v1", 1)
-    v2 = vertex("v2", 0)
+    # Free monoid on 2 generators
+    m = Monoid()
+    m.addgen("a")
+    m.addgen("b")
+    alpha = m.Element({"a": 1})
+    beta = m.Element({"b": 1})
     
-    M = Monoid()
-    M.addgen("a")
-    e1 = edge("e1", M.Element({"a": 1}), v1, v2)
+    # Basic family of all chains with two edges
+    v1, v2, v3 = vertex("v1", 0), vertex("v2", 0), vertex("v3", 0)
+    e1, e2 = edge("e1", alpha, v1, v2), edge("e2", beta, v2, v3)
+    domainFamily = BasicFamily("domain")
+    domainFamily.addEdges({e1, e2})
     
-    l1 = leg("l1", v2)
-    l2 = leg("l2", v2)
+    # Basic family of all chains with a single edge
+    w1, w2 = vertex("w1", 0), vertex("w2", 0)
+    f = edge("f", alpha, w1, w2)
+    codomainFamily = BasicFamily("codomain")
+    codomainFamily.addEdge(f)
 
-    vertices = {v1, v2}
-    edges = {e1}
-    legs = {l1,l2}
+Next, we can define the morphism dictionary. We will contract `e2` to `w2` and map `e1` to `f`:
 
-    TropicalCurve.addEdges(edges)
-    TropicalCurve.addLegs(legs)
-    TropicalCurve.addVertices(vertices)
+    morphismDictionary = {e1: f, e2: w2, v1: w1, v2: w2, v3: w2}
 
-## Strict Piecewise Linear Functions <a name="SPLFs"></a>
+Then we define the corresponding monoid homomorphism. We should fix the first generator of the monoid and contract the
+second:
+    
+    monoidHom = MonoidHomomorphism(m, m, {"a": alpha, "b": m.zero()})
+
+Finally, we can define the morphism of basic families:
+
+    basicFamilyMorphism = BasicFamilyMorphism(domainFamily, codomainFamily, morphismDictionary, monoidHom)
+
+## Piecewise Linear Functions <a name="SPLFs"></a>
 
 1. [Creating a Function](#splfUsage)
 2. [Testing the Well - Definedness of Your SPLF](#splfDefined)
