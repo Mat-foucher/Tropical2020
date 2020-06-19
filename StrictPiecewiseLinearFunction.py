@@ -2,7 +2,7 @@ from CombinatorialCurve import *
 from ModuliSpaces import *
 
 
-class StrictPiecewiseLinearFunction(object):
+class PiecewiseLinearFunction(object):
     # domain_ should be a CombCurve representing the domain of the function
     # functionValues_ should be a dictionary with vertex/leg keys and non-negative double values
     def __init__(self, domain_, functionValues_):
@@ -76,7 +76,7 @@ class StrictPiecewiseLinearFunction(object):
         for leg in self.domain.legs:
             newFunctionValues[leg] = self.functionValues[leg] + other.functionValues[leg]
 
-        return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
+        return PiecewiseLinearFunction(self.domain, newFunctionValues)
 
     def __sub__(self, other):
         assert other.domain == self.domain
@@ -87,10 +87,10 @@ class StrictPiecewiseLinearFunction(object):
         for leg in self.domain.legs:
             newFunctionValues[leg] = self.functionValues[leg] - other.functionValues[leg]
 
-        return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
+        return PiecewiseLinearFunction(self.domain, newFunctionValues)
 
     def __eq__(self, other):
-        if not isinstance(other, StrictPiecewiseLinearFunction):
+        if not isinstance(other, PiecewiseLinearFunction):
             print("Wrong types")
             return False
 
@@ -398,7 +398,7 @@ class StrictPiecewiseLinearFunction(object):
         for nextLeg in self.domain.legs:
             pushforwardFunctionValues[morphism(nextLeg)] = self.functionValues[nextLeg]
 
-        return StrictPiecewiseLinearFunction(pushforwardDomain, pushforwardFunctionValues)
+        return PiecewiseLinearFunction(pushforwardDomain, pushforwardFunctionValues)
 
     # functionContractions will return a dictionary of curves as keys with SPLFs as values.
     def functionContractions(self):
@@ -423,7 +423,7 @@ class StrictPiecewiseLinearFunction(object):
                 #    print(f.name, newFunctionValues[f])
 
                 #contraction.printSelf()
-                function = StrictPiecewiseLinearFunction(contraction, newFunctionValues)
+                function = PiecewiseLinearFunction(contraction, newFunctionValues)
                 function.assertIsWellDefined()
                 dictOfContractedFunctions[e] = function
             except:

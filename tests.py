@@ -190,13 +190,13 @@ TreeTests.verifyLoops(C, {frozenset({e4}), frozenset({e1, e2, e3})})
 zeroDict = {e1: 0, e2: 0, e3: 0, e4: 0,
             l: 0,
             v1: freeMonoid.zero()}
-f = StrictPiecewiseLinearFunction(C, zeroDict)
+f = PiecewiseLinearFunction(C, zeroDict)
 SPLFTests.verifyMesa(f)
 
 nonMesaDict = {e1: -1, e2: 0, e3: -1, e4: 0,
                l: 0,
                v2: freeMonoid.zero()}
-f = StrictPiecewiseLinearFunction(C, nonMesaDict)
+f = PiecewiseLinearFunction(C, nonMesaDict)
 
 contractions = f.functionContractions()
 
@@ -351,8 +351,8 @@ e8 = edge("e8", freeElementA, v8, v9)
 C.addEdges({e1, e2, e3, e4, e5, e6, e7, e8})
 C.monoid = freeMonoid
 
-f = StrictPiecewiseLinearFunction(C, {e1: 1, e2: -1, e3: 1, e4: -1, e5: 0, e6: 1, e7: 0, e8: -1,
-                                      v1: freeMonoid.zero()})
+f = PiecewiseLinearFunction(C, {e1: 1, e2: -1, e3: 1, e4: -1, e5: 0, e6: 1, e7: 0, e8: -1,
+                                v1: freeMonoid.zero()})
 
 s = f.getSpecialSupportPartition()
 
@@ -395,9 +395,9 @@ Ex44.addEdges({e1, e2, e3, e4, e5})
 Ex44.addLegs({l1, l2, l3, l4, l5, l6})
 Ex44.monoid = freeMonoid
 
-g = StrictPiecewiseLinearFunction(Ex44, {e1: 1, e2: 0, e3: -1, e4: -1, e5: -1, e6: 0,
-                                         l1: 0.0, l2: 0.0, l3: 0.0, l4: 0.0, l5: 0.0, l6: 0.0,
-                                         v1: freeMonoid.zero()})
+g = PiecewiseLinearFunction(Ex44, {e1: 1, e2: 0, e3: -1, e4: -1, e5: -1, e6: 0,
+                                   l1: 0.0, l2: 0.0, l3: 0.0, l4: 0.0, l5: 0.0, l6: 0.0,
+                                   v1: freeMonoid.zero()})
 
 SPLFTests.verifyMesa(g)
 
@@ -414,8 +414,8 @@ e3 = edge("e3", 2 * freeElementA, v1, v4)
 Ex28May.addEdges({e1, e2, e3})
 Ex28May.monoid = freeMonoid
 
-h = StrictPiecewiseLinearFunction(Ex28May, {e1: -1, e2: -1, e3: -1,
-                                            v3: freeMonoid.zero()})
+h = PiecewiseLinearFunction(Ex28May, {e1: -1, e2: -1, e3: -1,
+                                      v3: freeMonoid.zero()})
 
 SPLFTests.verifyMesa(h)
 

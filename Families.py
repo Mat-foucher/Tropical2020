@@ -81,7 +81,7 @@ class PLFFamily(object):
         assert set(functions.keys()) == domain.basicFamilies, \
             "'functions' should assign something to each basic family."
         for key in functions:
-            assert isinstance(functions[key], StrictPiecewiseLinearFunction), \
+            assert isinstance(functions[key], PiecewiseLinearFunction), \
                 "functions[key] should be a piecewise linear function."
             assert functions[key].domain == key, \
                 "functions[key] should have key as its domain."
