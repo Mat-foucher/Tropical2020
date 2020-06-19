@@ -71,10 +71,8 @@ class PiecewiseLinearFunction(object):
         assert other.domain == self.domain
 
         newFunctionValues = {}
-        for e in self.domain.edges:
-            newFunctionValues[e] = self.functionValues[e] + other.functionValues[e]
-        for leg in self.domain.legs:
-            newFunctionValues[leg] = self.functionValues[leg] + other.functionValues[leg]
+        for key in self.functionValues.keys():
+            newFunctionValues[key] = self.functionValues[key] + other.functionValues[key]
 
         return PiecewiseLinearFunction(self.domain, newFunctionValues)
 
@@ -82,10 +80,8 @@ class PiecewiseLinearFunction(object):
         assert other.domain == self.domain
 
         newFunctionValues = {}
-        for e in self.domain.edges:
-            newFunctionValues[e] = self.functionValues[e] - other.functionValues[e]
-        for leg in self.domain.legs:
-            newFunctionValues[leg] = self.functionValues[leg] - other.functionValues[leg]
+        for key in self.functionValues.keys():
+            newFunctionValues[key] = self.functionValues[key] + other.functionValues[key]
 
         return PiecewiseLinearFunction(self.domain, newFunctionValues)
 
