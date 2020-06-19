@@ -81,7 +81,7 @@ class PiecewiseLinearFunction(object):
 
         newFunctionValues = {}
         for key in self.functionValues.keys():
-            newFunctionValues[key] = self.functionValues[key] + other.functionValues[key]
+            newFunctionValues[key] = self.functionValues[key] - other.functionValues[key]
 
         return PiecewiseLinearFunction(self.domain, newFunctionValues)
 
