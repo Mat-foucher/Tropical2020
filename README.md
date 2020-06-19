@@ -225,81 +225,53 @@ Finally, we can define the morphism of basic families:
 ## Piecewise Linear Functions <a name="SPLFs"></a>
 
 1. [Creating a Function](#splfUsage)
-2. [Testing the Well - Definedness of Your SPLF](#splfDefined)
+2. [Well - Definedness](#splfDefined)
 3. [Checking if Your Function is a Mesa](#splfMesa)
 
 ### Creating a Function <a name="splfUsage"></a>
-The class of strict piecewise linear functions (SPLF for short) serves as the main method of searching for mesas on 
-the combinatorial tropical curves as previously introduced.
 
-The way that the class is implemented is by using a dictionary object, in which the values of the dictionary are the 
-slopes of the edges of the cruve, and the keys are the edges of the curve.
+A `PiecewiseLinearFunction` is initialized with its domain (`BasicFamily`) and its slope information (and optional
+value information). The slope information is a dictionary whose keys consist of all of the edges and legs of the domain
+as well as some number of vertices of the domain. The values of this dictionary at a particular key
+are interpreted as follows:
 
-NOTE: There must be a defined tropical curve (`BasicFamily()`) before an SPLF over the tropical curve is made.
+- If the key is an edge, then the value is the slope of the function from the first vertex of the edge to the second.
+- If the key is a leg, then the value is the slope of the function away from the root of the leg.
+- If the key is a vertex, then the value is the actual value of the function at that vertex.
 
-To make an SPLF over a tropical curve, we may specify the curve as such:
+If no vertices are provided, then the initialized function may not be what is expected. It will, however, be a function
+with the correct potential.
+
+Let `C` be the curve from example 3.5 of the reference document (shown [here](#Testing)).
 
 ```
-C = BasicFamily("Example 3.5")
-
-v1 = vertex("v1", 0)
-v2 = vertex("v2", 0)
-v3 = vertex("v3", 1)
-
-e1 = edge("e1", freeElementA, v1, v2)
-e2 = edge("e2", freeElementA, v2, v3)
-e3 = edge("e3", freeElementA, v1, v3)
-e4 = edge("e4", freeElementA, v1, v1)
-l = leg("l", v1)
-
-C.addEdges({e1, e2, e3, e4})
-C.addLeg(l)
-
-#Here will be the SPLF:
-
-dict = {e1: 1, e2: 0, e3: 1, e4: 0}
+dict = {e1: 1, e2: 0, e3: 1, e4: 0, l: 0, v1: M.zero()}
 
 f = StrictPiecewiseLinearFunction(C, dict)
-
 ```
 
-As can be seen in the block of code, the `StrictPiecewiseLinearFunction()` object takes in the first parameter which 
-must be the associated `BasicFamily()` object, and the dictionary of edge slopes as the second parameter. In the example 
-we have just seen, `f` is perhaps not a mesa on `C`, and even more, is perhaps not even well defined!
+The function `f` will have value `M.zero()` at vertex `v1`, and value `alpha` at both `v2` and `v3`.
 
-### Testing the Well - Definedness of Your SPLF <a name="splfDefined"></a>
+If the given dictionary of slopes and values does not yield any well defined function, then an error will be thrown
+during initialization.
 
-For the last two conundrums, included in the SPLF class are functions two verify well definedness and also a mesa test.
+### Well - Definedness <a name="splfDefined"></a>
 
-The first we will discuss is the well definedness test, which is done by the function `assertIsWellDefined()`, which 
-can be typed into your testing document in this manner below the definition and declaration of your function:
+An assignment of slopes to edges does not necessarily yield a well-defined function. This is because there may be
+multiple paths between two vertices, so different values may be attained at the same vertex. In fact, an assignment
+of slopes will define a function if and only if the path integral of the slopes over every loop is zero.
 
-```
-f.assertIsWellDefined()
-```
-
-If and when the function (`SPLF`) is not well defined, an error will be raised by the function in your terminal. The 
-method by which `assertIsWellDefined()` checks for well definedness is by evaluating path integrals over the loops of 
-the graph, as if the function is indeed well defined, each path integral over the loops in the graph will be zero.
+To test well definedness, we integrate the slopes over a basis of loops of the space. If any of these integrals is
+nonzero, then an error is thrown. The function in which this calculation takes place is `assertIsWellDefined`.
 
 ### Checking if Your Function is a Mesa <a name="splfMesa"></a>
 
-We now come to one of the most important parts of the SPLF class, which is an attempt to answer the age old question 
-that has plagued thinkers from all tropics of tropical geometry, is this SPLF a mesa?
+We now come to one of the most important parts of the PLF class, which is an attempt to answer the age old question 
+that has plagued thinkers from all tropics of tropical geometry, is this PLF a mesa?
 
-In the class, we have the function `mesaTest` which will (try to) do exactly that.
-It is important to note that the SPLF must first be well defined before this test is run, fortunately I am glad to say 
-that the `mesaTest` does check to see if the function in question is or is not well defined.
-
-The `mesaTest` is a property, so in this case we enter the function without parentheses:
-
-```
-f.mesaTest
-```
-
-Much like the previous well-definedness test, this function will raise a value error depending on which portion of the 
-definition fails for your function if your function is not a mesa. Included in the function are specific numbers in the
-form of print statements to describe which part of the definition your function did not fare well on.
+In the class, we have the property `mesaTest` which will do exactly that. Calling `f.mesaTest` will test the mesa
+conditions (as defined in the reference sheet) and return `True` or `False` depending on whether or not the conditions
+are met.
 
 ## Moduli Spaces <a name="ModSpaces"></a>
 
