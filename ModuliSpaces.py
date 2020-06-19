@@ -216,7 +216,7 @@ class TropicalModuliSpace(object):
             return
 
         # If the space is nonempty, then all of the curves are specializations of seedCurve
-        seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
+        seedCurve = BasicFamily("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
         v = vertex("v", self._g)
         seedCurve.addVertex(v)
         seedCurve.addLegs({leg("leg " + str(i), v) for i in range(self._n)})
@@ -389,7 +389,7 @@ class TropicalModuliSpace(object):
                         l = leg(lName, vertices[lRootName])
                         legs.add(l)
 
-                c = CombCurve("")
+                c = BasicFamily("")
                 c.addEdges(edges)
                 c.addLegs(legs)
                 for vName in vertices:

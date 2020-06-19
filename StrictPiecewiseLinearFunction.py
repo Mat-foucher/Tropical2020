@@ -300,7 +300,7 @@ class StrictPiecewiseLinearFunction(object):
         for j in specialSupports:
 
             # Support component realized as a Combinatorial Curve
-            support = CombCurve("support")
+            support = BasicFamily("support")
             support.addEdges(j)
 
             # Core of the support realized as a Combinatorial Curve

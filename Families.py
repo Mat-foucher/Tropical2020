@@ -24,7 +24,7 @@ class Family(object):
     def getAncestors(self, basicFamily):
 
         # Type checking
-        assert isinstance(basicFamily, CombCurve)
+        assert isinstance(basicFamily, BasicFamily)
 
         # Get the morphisms that map into the given basic family
         def isIncoming(morphism):
@@ -38,7 +38,7 @@ class Family(object):
     def getMaximalAncestors(self, basicFamily):
 
         # Type checking
-        assert isinstance(basicFamily, CombCurve)
+        assert isinstance(basicFamily, BasicFamily)
 
         # Get the morphisms that map into the given basic family from a maximal family
         def isIncoming(morphism):

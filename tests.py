@@ -154,7 +154,7 @@ freeElementH = freeMonoid.Element({"h": 1})
 
 
 
-C = CombCurve("Example 3.5")
+C = BasicFamily("Example 3.5")
 
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
@@ -245,7 +245,7 @@ CurveTests.verifyBettiNumber(C, 2)
 
 
 
-C = CombCurve("Exercise 3.15 part 1")
+C = BasicFamily("Exercise 3.15 part 1")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
 v3 = vertex("v3", 0)
@@ -275,7 +275,7 @@ CurveTests.verifyBettiNumber(C, 5)
 
 
 
-C = CombCurve("Exercise 3.15 parts 2 and 3")
+C = BasicFamily("Exercise 3.15 parts 2 and 3")
 v1 = vertex("v1", 1)
 v2 = vertex("v2", 1)
 v3 = vertex("v3", 1)
@@ -310,7 +310,7 @@ TreeTests.verifyLoops(C, set())
 
 
 # Test the core property
-C = CombCurve("Example 3.5")
+C = BasicFamily("Example 3.5")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
 v3 = vertex("v3", 1)
@@ -329,7 +329,7 @@ CurveTests.verifyStructure(C.core, {v1, v3}, {e3, e4}, set())
 
 
 
-C = CombCurve("Chain of 9 vertices")
+C = BasicFamily("Chain of 9 vertices")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
 v3 = vertex("v3", 0)
@@ -371,7 +371,7 @@ except:
 
 
 # Example 4.4
-Ex44 = CombCurve("Example 4.4")
+Ex44 = BasicFamily("Example 4.4")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 1)
 v3 = vertex("v3", 0)
@@ -402,7 +402,7 @@ g = StrictPiecewiseLinearFunction(Ex44, {e1: 1, e2: 0, e3: -1, e4: -1, e5: -1, e
 SPLFTests.verifyMesa(g)
 
 
-Ex28May = CombCurve("28")
+Ex28May = BasicFamily("28")
 v1 = vertex("v1", 1)
 v2 = vertex("v2", 0)
 v3 = vertex("v3", 0)
@@ -502,8 +502,8 @@ for l in C.legs:
 
 
 
-C = CombCurve("Isomorphism Domain")
-D = CombCurve("Isomorphism Codomain")
+C = BasicFamily("Isomorphism Domain")
+D = BasicFamily("Isomorphism Codomain")
 
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 1)

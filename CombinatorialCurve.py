@@ -74,7 +74,7 @@ class leg(object):
 
 
 # A Combinatorial Tropical Curve has a name, set of edges, and set of legs
-class CombCurve(object):
+class BasicFamily(object):
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
     def __init__(self, name_):
         self.name = name_
@@ -303,7 +303,7 @@ class CombCurve(object):
                 copyInfo[nextLeg] = nextLegCopy
 
         # Build the copy
-        curveCopy = CombCurve(self.name)
+        curveCopy = BasicFamily(self.name)
         curveCopy.addEdges(edgeCopies)
         curveCopy.addLegs(legCopies)
 
@@ -482,7 +482,7 @@ class CombCurve(object):
             print(nextLeg.name)
 
     def printSelf(self):
-        CombCurve.printCurve(self)
+        BasicFamily.printCurve(self)
 
     # Prints the names of vertices
     def showVertices(self):
@@ -551,7 +551,7 @@ class CombCurve(object):
                 raise ValueError("The core is only defined for connected curves.")
 
             # In order to generate the core, we start with a copy of self and repeatedly prune off certain leaves
-            core = CombCurve("(Core of " + self.name + ")")
+            core = BasicFamily("(Core of " + self.name + ")")
             core.addEdges(self.edges)
             core.addVertices(self.vertices)
 
@@ -606,7 +606,7 @@ class CombCurve(object):
                     # Don't introduce any loops
                     (vert not in self.getVertices())
             ):
-                childTree = CombCurve.Tree()
+                childTree = BasicFamily.Tree()
                 childTree.setValue(vert)
                 childTree.setParent(self)
                 childTree.parentConnection = connectingEdge
@@ -749,8 +749,8 @@ class BasicFamilyMorphism(object):
     def __init__(self, domain, codomain, curveMorphismDict, monoidMorphism):
 
         # Type checking
-        assert isinstance(domain, CombCurve), "The domain of a basic family morphism should be a CombCurve."
-        assert isinstance(codomain, CombCurve), "The codomain of a basic family morphism should be a CombCurve."
+        assert isinstance(domain, BasicFamily), "The domain of a basic family morphism should be a CombCurve."
+        assert isinstance(codomain, BasicFamily), "The codomain of a basic family morphism should be a CombCurve."
         assert isinstance(curveMorphismDict, dict), \
             "curveMorphismDict should be a Dictionary[domain.vertices, codomain.vertices]."
         assert isinstance(monoidMorphism, MonoidHomomorphism), "monoidMorphism should be a MonoidHomomorphism."
@@ -804,7 +804,7 @@ class BasicFamilyMorphism(object):
         preimageVertices = {v for v in self.domain.vertices if self.curveMorphismDict[v] == vert}
         preimageEdges = {e for e in self.domain.edges if self.curveMorphismDict[e] == vert}
 
-        preimage = CombCurve("Preimage of " + vert.name)
+        preimage = BasicFamily("Preimage of " + vert.name)
         preimage.addEdges(preimageEdges)
         preimage.addVertices(preimageVertices)
 
@@ -825,7 +825,7 @@ class BasicFamilyMorphism(object):
         # yet been implemented.
         imageMonoid = self.codomain.monoid
 
-        image = CombCurve("Image curve")
+        image = BasicFamily("Image curve")
 
         image.addVertices(imageVertices)
         image.addEdges(imageEdges)
