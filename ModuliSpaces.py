@@ -370,6 +370,9 @@ class TropicalModuliSpace(object):
                 contractionInfo = curveInfo[4]
                 contractionInfoFinder = re.compile("\(edge\((v\d*), (v\d*)\), curve (\d*)\)")
 
+                c = BasicFamily("")
+                c.monoid = Monoid()
+
                 vertices = {}
                 for m in vertexInfoFinder.finditer(vertexInfo):
                     if m:
@@ -384,7 +387,11 @@ class TropicalModuliSpace(object):
                         eName = m.group(0)
                         eVert1Name = m.group(1)
                         eVert2Name = m.group(2)
-                        e = edge(eName, 1.0, vertices[eVert1Name], vertices[eVert2Name])
+
+                        c.monoid.addgen(eName)
+                        eLength = c.monoid.Element({eName: 1})
+
+                        e = edge(eName, eLength, vertices[eVert1Name], vertices[eVert2Name])
                         edges.add(e)
 
                 legs = set()
@@ -394,7 +401,6 @@ class TropicalModuliSpace(object):
                         lRootName = m.group(1)
                         legs.add(leg(lName, vertices[lRootName]))
 
-                c = BasicFamily("")
                 c.addEdges(edges)
                 c.addLegs(legs)
                 for vName in vertices:
