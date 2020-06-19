@@ -4,6 +4,7 @@ import time
 
 import re
 
+
 class TropicalModuliSpace(object):
     def __init__(self, g_, n_):
         # Private copy of the genus and marking number of the space
@@ -216,10 +217,11 @@ class TropicalModuliSpace(object):
             return
 
         # If the space is nonempty, then all of the curves are specializations of seedCurve
-        seedCurve = CombCurve("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
+        seedCurve = BasicFamily("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
         v = vertex("v", self._g)
         seedCurve.addVertex(v)
         seedCurve.addLegs({leg("leg " + str(i), v) for i in range(self._n)})
+        seedCurve.monoid = Monoid()
 
         # Let the seed grow!
         self.addCurve(seedCurve)
@@ -289,7 +291,9 @@ class TropicalModuliSpace(object):
             else:
                 e.root = v2
 
-        e = edge("(Edge splitting " + vert.name + ")", 1.0, v1, v2)
+        curve.monoid.addgen("(Edge splitting " + vert.name + ")")
+        newLength = curve.monoid.Element({"(Edge splitting " + vert.name + ")": 1})
+        e = edge("(Edge splitting " + vert.name + ")", newLength, v1, v2)
 
         curve.addEdge(e)
         curve.removeVertex(vert)
@@ -328,7 +332,9 @@ class TropicalModuliSpace(object):
             else:
                 e.root = v
 
-        e = edge("(Genus reduction loop for " + vert.name + ")", 1.0, v, v)
+        curve.monoid.addgen("(Genus reduction loop for " + vert.name + ")")
+        newLength = curve.monoid.Element({"(Genus reduction loop for " + vert.name + ")": 1})
+        e = edge("(Genus reduction loop for " + vert.name + ")", newLength, v, v)
 
         curve.addEdge(e)
         curve.removeVertex(vert)
@@ -364,6 +370,9 @@ class TropicalModuliSpace(object):
                 contractionInfo = curveInfo[4]
                 contractionInfoFinder = re.compile("\(edge\((v\d*), (v\d*)\), curve (\d*)\)")
 
+                c = BasicFamily("")
+                c.monoid = Monoid()
+
                 vertices = {}
                 for m in vertexInfoFinder.finditer(vertexInfo):
                     if m:
@@ -378,7 +387,11 @@ class TropicalModuliSpace(object):
                         eName = m.group(0)
                         eVert1Name = m.group(1)
                         eVert2Name = m.group(2)
-                        e = edge(eName, 1.0, vertices[eVert1Name], vertices[eVert2Name])
+
+                        c.monoid.addgen(eName)
+                        eLength = c.monoid.Element({eName: 1})
+
+                        e = edge(eName, eLength, vertices[eVert1Name], vertices[eVert2Name])
                         edges.add(e)
 
                 legs = set()
@@ -386,10 +399,8 @@ class TropicalModuliSpace(object):
                     if m:
                         lName = m.group(0)
                         lRootName = m.group(1)
-                        l = leg(lName, vertices[lRootName])
-                        legs.add(l)
+                        legs.add(leg(lName, vertices[lRootName]))
 
-                c = CombCurve("")
                 c.addEdges(edges)
                 c.addLegs(legs)
                 for vName in vertices:

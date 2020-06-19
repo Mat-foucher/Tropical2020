@@ -2,8 +2,8 @@ from CombinatorialCurve import *
 from ModuliSpaces import *
 
 
-class StrictPiecewiseLinearFunction(object):
-    # domain_ should be a CombCurve representing the domain of the function
+class PiecewiseLinearFunction(object):
+    # domain_ should be a BasicFamily representing the domain of the function
     # functionValues_ should be a dictionary with vertex/leg keys and non-negative double values
     def __init__(self, domain_, functionValues_):
         self._domain = domain_
@@ -71,23 +71,35 @@ class StrictPiecewiseLinearFunction(object):
         assert other.domain == self.domain
 
         newFunctionValues = {}
-        for e in self.domain.edges:
-            newFunctionValues[e] = self.functionValues[e] + other.functionValues[e]
-        for leg in self.domain.legs:
-            newFunctionValues[leg] = self.functionValues[leg] + other.functionValues[leg]
+        for key in self.functionValues.keys():
+            newFunctionValues[key] = self.functionValues[key] + other.functionValues[key]
 
-        return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
+        return PiecewiseLinearFunction(self.domain, newFunctionValues)
 
     def __sub__(self, other):
         assert other.domain == self.domain
 
         newFunctionValues = {}
-        for e in self.domain.edges:
-            newFunctionValues[e] = self.functionValues[e] - other.functionValues[e]
-        for leg in self.domain.legs:
-            newFunctionValues[leg] = self.functionValues[leg] - other.functionValues[leg]
+        for key in self.functionValues.keys():
+            newFunctionValues[key] = self.functionValues[key] - other.functionValues[key]
 
-        return StrictPiecewiseLinearFunction(self.domain, newFunctionValues)
+        return PiecewiseLinearFunction(self.domain, newFunctionValues)
+
+    def __eq__(self, other):
+        if not isinstance(other, PiecewiseLinearFunction):
+            print("Wrong types")
+            return False
+
+        if not self.domain != other.domain:
+            print("Different domains")
+            return False
+
+        for nextVertex in self.domain.vertices:
+            if self.functionValues[nextVertex] != other.functionValues[nextVertex]:
+                print("Different function values!")
+                return False
+
+        return True
 
     def printSelf(self):
         for v in self.domain.vertices:
@@ -284,7 +296,7 @@ class StrictPiecewiseLinearFunction(object):
         for j in specialSupports:
 
             # Support component realized as a Combinatorial Curve
-            support = CombCurve("support")
+            support = BasicFamily("support")
             support.addEdges(j)
 
             # Core of the support realized as a Combinatorial Curve
@@ -364,6 +376,26 @@ class StrictPiecewiseLinearFunction(object):
         # print("A Mesa I Am")
         return True
 
+    # Computes the pushforward of self along the given morphism
+    def getPushforward(self, morphism):
+        assert isinstance(morphism, BasicFamilyMorphism), "morphism should be a morphism of basic families."
+        assert morphism.domain == self.domain, "morphism and self should have the same domain."
+
+        # The domain of the pushforward is the image of the morphism
+        pushforwardDomain = morphism.image()
+
+        pushforwardFunctionValues = {}
+        for nextEdge in self.domain.edges:
+            # If the edge does not collapse, then keep its slope.
+            if morphism(nextEdge) in morphism.codomain.edges:
+                pushforwardFunctionValues[morphism(nextEdge)] = self.functionValues[nextEdge]
+        for nextVert in self.domain.vertices:
+            pushforwardFunctionValues[morphism(nextVert)] = morphism(self.functionValues[nextVert])
+        for nextLeg in self.domain.legs:
+            pushforwardFunctionValues[morphism(nextLeg)] = self.functionValues[nextLeg]
+
+        return PiecewiseLinearFunction(pushforwardDomain, pushforwardFunctionValues)
+
     # functionContractions will return a dictionary of curves as keys with SPLFs as values.
     def functionContractions(self):
 
@@ -387,7 +419,7 @@ class StrictPiecewiseLinearFunction(object):
                 #    print(f.name, newFunctionValues[f])
 
                 #contraction.printSelf()
-                function = StrictPiecewiseLinearFunction(contraction, newFunctionValues)
+                function = PiecewiseLinearFunction(contraction, newFunctionValues)
                 function.assertIsWellDefined()
                 dictOfContractedFunctions[e] = function
             except:

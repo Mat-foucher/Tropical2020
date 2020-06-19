@@ -5,9 +5,10 @@ Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 
 1. [Introduction](#Introduction)
 2. [Testing](#Testing)
-3. [Combinatorial Curves](#CombCurves)
-4. [Strict Piecewise Linear Functions](#SPLFs)
+3. [Basic Families](#BasicFamilies)
+4. [Piecewise Linear Functions](#SPLFs)
 5. [Moduli Spaces](#ModSpaces)
+6. [General Families](#Families)
 
 ## Introduction <a name="Introduction"></a>
 
@@ -22,19 +23,20 @@ The different files and their associated classes/purposes are:
 - `GraphIsoHelper.py`: Provides convenience functions for testing if two graphs are isomorphic.
 - `StrictPiecewiseLinearFunction.py`: Piecewise Linear functions over Basic Families.
 - `ModuliSpaces.py`: Tropical Moduli spaces.
-- `RPC.py`: Abstract monoids.
+- `RPC.py`: Abstract Monoids.
+- `Families.py`: Arbitrary Families and Piecewise Linear functions over a Family.
 - `tests.py`: Tests for most things. This file is a good place to see how things are used.
-- `generateAndSaveModuliSpace.py`: A short script to generate and save a moduli space as specified by command line
+- `generateAndSaveModuliSpace.py`: A short script to generate and save a Moduli Space as specified by command line
 arguments.
 
 ## Testing <a name="Testing"></a>
 
-The `tests.py` file is where most of the actual code is used for purposes concerning the research project. 
-You may use the tests file for any test you would like to try, using the code from other files.
-In `tests.py` there is also a large collection of examples from the reference document, for example, 
+The `tests.py` file contains tests that give strong evidence to the correctness of the rest of the program. This is
+accomplished in two ways. First, several testing classes have been written (e.g., `CurveTests` and `TreeTests`). Next,
+these tests are applied to various examples, most of which come from the reference document. For example, 
 here is example 3.5:
 
-    C = CombCurve("Example 3.5")
+    C = BasicFamily("Example 3.5")
     
     M = Monoid()
     M.addgen("a")
@@ -53,18 +55,17 @@ here is example 3.5:
     C.addEdges({e1, e2, e3, e4})
     C.addLeg(l)
 
-Most of the tests take the form of assertions, such as:
+For an example test, one can execute `CurveTests.testCore(C)` to ensure that the core of `C` is connected and has the
+same genus. One can also verify a basis of loops of `C` with 
+`TreeTests.verifyLoops(C, {frozenset({e4}), frozenset({e1, e2, e3})})`.
 
-    assert C.isConnected()
-    assert C.genus == 3
-
-## Combinatorial Curves <a name="CombCurves"></a>
+## Basic Families <a name="BasicFamilies"></a>
 
 1. [Vertices](#vertices)
 2. [Edges](#edges)
 3. [Legs](#legs)
-4. [CombCurves](#combCurves)
-5. [A Neat Example](#neatExample)
+4. [Combinatorial Curves and Basic Families](#basFam)
+5. [Morphisms of Basic Families](#famMorphClass)
 
 Vertices, Edges, Legs, Combinatorial Tropical Curves, and Basic Families of curves are implemented in 
 `CombinatorialCurve.py`.
@@ -97,18 +98,18 @@ The `edge` class also has the following members:
 ### Legs <a name="legs"></a>
 A `leg` is initialized only with its name (`string`) and root (`vertex`), making it the simplest class in the file.
 
-For example, to create a leg with name "l1" with root `v1`, one can write the following code:
+For example, to create a leg with name `"l1"` with root `v1`, one can write the following code:
 
     l1 = leg("l1", v1)
 
-Like an `edge`, a `leg` has the `vertices` property. The `vertices` of a leg will be a singleton set containing its
+Like an `edge`, a `leg` has the `vertices` property. The `vertices` of a leg consist of the singleton set containing its
 root.
 
-### CombCurves <a name="combCurves"></a>
+### Combinatorial Curves and Basic Families <a name="basFam"></a>
 
-The `CombCurve` class (short for Combinatorial Tropical Curve) provides an implementation both for combinatorial
+The `BasicFamily` class provides an implementation both for combinatorial
 tropical curves and basic families of tropical curves. The difference between these two interpretations is the monoid
-that one provides to the class. In order to use a `CombCurve` as a combinatorial tropical curve, use a free monoid with
+that one provides to the class. In order to use a `BasicFamily` as a combinatorial tropical curve, use a free monoid with
 one generator. For example, to create a three-element chain `v1--v2--v3` with the left edge of length one and right edge
 of length two, one could write the following:
 
@@ -127,12 +128,12 @@ of length two, one could write the following:
     e2 = edge("e2", 2 * alpha, v2, v3)
     
     # Initialize the curve
-    C = CombCurve("A particular chain with three elements")
+    C = BasicFamily("A particular chain with three elements")
     C.addEdges({e1, e2})
 
-One can also use `CombCurve` to represent a basic family of curves. To represent the family of three-element chains
+One can also use `BasicFamily` to represent a basic family of curves. To represent the family of three-element chains
 whose edge lengths vary freely over 
-<img src="https://render.githubusercontent.com/render/math?math=\mathbb{R}_{\geq 0}">, we simply use a different monoid.
+the nonnegative real numbers, we simply use a different monoid.
 Since we want two edge lengths to vary independently, we use a free monoid with two generators, and let the edge length
 of each each to be one of the generators. Here is the full example:
 
@@ -141,136 +142,136 @@ of each each to be one of the generators. Here is the full example:
     v2 = vertex("v2", 0)
     v3 = vertex("v3", 0)
     
-    # Set up a free monoid with one generator
+    # Set up a free monoid with two generators
     M = Monoid()
     M.addgen("a")
     M.addgen("b")
     alpha = M.Element({"a": 1})
     beta = M.Element({"b": 1})
     
-    # Edges whose lengths depend on the generator alpha
+    # Edges whose lengths are one of the generators
     e1 = edge("e1", alpha, v1, v2)
     e2 = edge("e2", beta, v2, v3)
     
     # Initialize the curve
-    C = CombCurve("Family of all chains with three elements")
+    C = BasicFamily("Family of all chains with three elements")
     C.addEdges({e1, e2})
 
-The difference between a `CombCurve` representing a particular curve or a basic family of curves is largely semantic.
+The difference between a `BasicFamily` representing a particular curve or a basic family of curves is largely semantic.
 The first example also represents the family of all three-element chains where one edge is twice as long as the other.
+That being said, there are some members of the `BasicFamily` class which may only make sense when using the curve
+interpretation. These members may not be preserved under setting an edge length to zero:
+
+- `bettiNumber` (but not `genus`)
+- `degree`, `edgeDegree`, and `legDegree`
+- `getEndpointsOfEdges`
+- `vertexCharacteristicCounts` and other characteristic functions.
+- `checkIfBijectionIsIsomorphism` and other isomorphism functions.
+- `spanningTree` and loop functions.
     
+### Morphisms of Basic Families <a name="famMorphClass"></a>
 
-### A Neat Example <a name="neatExample"></a>
-Creating a Tropical Combinatorial Curve with the Code:
+A `BasicFamilyMorphism` is a morphism of basic families. It has a domain and codomain, both of which are basic families.
+It also has a morphism of curves and a morphism of monoids.
 
-We are now ready to discuss how we may go about implementing a tropical curve in the code.
-To begin, the CombCurve object is what will be the tropical curve.
-As per the overleaf reference guide, the CombCurve class has the sufficent properties of behaving properly according to 
-the definitions in the reference.
+There are many restrictions on the values used to initialize a `BasicFamilyMorphism`. These restrictions are in place to
+ensure that an instance of `BasicFamilyMorphism` actually is a morphism of the given basic families. The restrictions
+can be found in the reference sheet.
 
-To define a new tropical curve, we write the following:
+A `BasicFamilyMorphism` takes a domain `BasicFamily`, codomain `BasicFamily`, a dictionary that determines the 
+morphism on the domain family, and a `MonoidHomomorphism`. The dictionary should have the vertices, edges, and legs
+of the domain curve as its keys, and their images under the morphism as its values.
 
-    TropicalCurve = CombCurve("TropicalCurve")
+#### Example <a name="basicFamilyMorphismExample"></a>
 
-The CombCurve object takes only one parameter in it's initializer, which is the name string.
-We now want to add edges, vertices, and legs to our curve, which we do as follows:
+As an example, we will build a particular contraction. For our domain curve, we will use the basic family of all
+chains with two edges, and for our codomain curve, we will use the basic family of all chains with a single edge. The
+morphism will be the contraction of the second edge of the domain curve.
 
-    v1 = vertex("v1", 1)
-    v2 = vertex("v2", 0)
+First, we define our families:
+
+    # Free monoid on 2 generators
+    m = Monoid()
+    m.addgen("a")
+    m.addgen("b")
+    alpha = m.Element({"a": 1})
+    beta = m.Element({"b": 1})
     
-    M = Monoid()
-    M.addgen("a")
-    e1 = edge("e1", M.Element({"a": 1}), v1, v2)
+    # Basic family of all chains with two edges
+    v1, v2, v3 = vertex("v1", 0), vertex("v2", 0), vertex("v3", 0)
+    e1, e2 = edge("e1", alpha, v1, v2), edge("e2", beta, v2, v3)
+    domainFamily = BasicFamily("domain")
+    domainFamily.addEdges({e1, e2})
     
-    l1 = leg("l1", v2)
-    l2 = leg("l2", v2)
+    # Basic family of all chains with a single edge
+    w1, w2 = vertex("w1", 0), vertex("w2", 0)
+    f = edge("f", alpha, w1, w2)
+    codomainFamily = BasicFamily("codomain")
+    codomainFamily.addEdge(f)
 
-    vertices = {v1, v2}
-    edges = {e1}
-    legs = {l1,l2}
+Next, we can define the morphism dictionary. We will contract `e2` to `w2` and map `e1` to `f`:
 
-    TropicalCurve.addEdges(edges)
-    TropicalCurve.addLegs(legs)
-    TropicalCurve.addVertices(vertices)
+    morphismDictionary = {e1: f, e2: w2, v1: w1, v2: w2, v3: w2}
 
-## Strict Piecewise Linear Functions <a name="SPLFs"></a>
+Then we define the corresponding monoid homomorphism. We should fix the first generator of the monoid and contract the
+second:
+    
+    monoidHom = MonoidHomomorphism(m, m, {"a": alpha, "b": m.zero()})
+
+Finally, we can define the morphism of basic families:
+
+    basicFamilyMorphism = BasicFamilyMorphism(domainFamily, codomainFamily, morphismDictionary, monoidHom)
+
+## Piecewise Linear Functions <a name="SPLFs"></a>
 
 1. [Creating a Function](#splfUsage)
-2. [Testing the Well - Definedness of Your SPLF](#splfDefined)
+2. [Well - Definedness](#splfDefined)
 3. [Checking if Your Function is a Mesa](#splfMesa)
 
 ### Creating a Function <a name="splfUsage"></a>
-The class of strict piecewise linear functions (SPLF for short) serves as the main method of searching for mesas on 
-the combinatorial tropical curves as previously introduced.
 
-The way that the class is implemented is by using a dictionary object, in which the values of the dictionary are the 
-slopes of the edges of the cruve, and the keys are the edges of the curve.
+A `PiecewiseLinearFunction` is initialized with its domain (`BasicFamily`) and its slope information (and optional
+value information). The slope information is a dictionary whose keys consist of all of the edges and legs of the domain
+as well as some number of vertices of the domain. The values of this dictionary at a particular key
+are interpreted as follows:
 
-NOTE: There must be a defined tropical curve (`CombCurve()`) before an SPLF over the tropical curve is made.
+- If the key is an edge, then the value is the slope of the function from the first vertex of the edge to the second.
+- If the key is a leg, then the value is the slope of the function away from the root of the leg.
+- If the key is a vertex, then the value is the actual value of the function at that vertex.
 
-To make an SPLF over a tropical curve, we may specify the curve as such:
+If no vertices are provided, then the initialized function may not be what is expected. It will, however, be a function
+with the correct potential.
+
+Let `C` be the curve from example 3.5 of the reference document (shown [here](#Testing)).
 
 ```
-C = CombCurve("Example 3.5")
-
-v1 = vertex("v1", 0)
-v2 = vertex("v2", 0)
-v3 = vertex("v3", 1)
-
-e1 = edge("e1", freeElementA, v1, v2)
-e2 = edge("e2", freeElementA, v2, v3)
-e3 = edge("e3", freeElementA, v1, v3)
-e4 = edge("e4", freeElementA, v1, v1)
-l = leg("l", v1)
-
-C.addEdges({e1, e2, e3, e4})
-C.addLeg(l)
-
-#Here will be the SPLF:
-
-dict = {e1: 1, e2: 0, e3: 1, e4: 0}
+dict = {e1: 1, e2: 0, e3: 1, e4: 0, l: 0, v1: M.zero()}
 
 f = StrictPiecewiseLinearFunction(C, dict)
-
 ```
 
-As can be seen in the block of code, the `StrictPiecewiseLinearFunction()` object takes in the first parameter which 
-must be the associated `CombCurve()` object, and the dictionary of edge slopes as the second parameter. In the example 
-we have just seen, `f` is perhaps not a mesa on `C`, and even more, is perhaps not even well defined!
+The function `f` will have value `M.zero()` at vertex `v1`, and value `alpha` at both `v2` and `v3`.
 
-### Testing the Well - Definedness of Your SPLF <a name="splfDefined"></a>
+If the given dictionary of slopes and values does not yield any well defined function, then an error will be thrown
+during initialization.
 
-For the last two conundrums, included in the SPLF class are functions two verify well definedness and also a mesa test.
+### Well - Definedness <a name="splfDefined"></a>
 
-The first we will discuss is the well definedness test, which is done by the function `assertIsWellDefined()`, which 
-can be typed into your testing document in this manner below the definition and declaration of your function:
+An assignment of slopes to edges does not necessarily yield a well-defined function. This is because there may be
+multiple paths between two vertices, so different values may be attained at the same vertex. In fact, an assignment
+of slopes will define a function if and only if the path integral of the slopes over every loop is zero.
 
-```
-f.assertIsWellDefined()
-```
-
-If and when the function (`SPLF`) is not well defined, an error will be raised by the function in your terminal. The 
-method by which `assertIsWellDefined()` checks for well definedness is by evaluating path integrals over the loops of 
-the graph, as if the function is indeed well defined, each path integral over the loops in the graph will be zero.
+To test well definedness, we integrate the slopes over a basis of loops of the space. If any of these integrals is
+nonzero, then an error is thrown. The function in which this calculation takes place is `assertIsWellDefined`.
 
 ### Checking if Your Function is a Mesa <a name="splfMesa"></a>
 
-We now come to one of the most important parts of the SPLF class, which is an attempt to answer the age old question 
-that has plagued thinkers from all tropics of tropical geometry, is this SPLF a mesa?
+We now come to one of the most important parts of the PLF class, which is an attempt to answer the age old question 
+that has plagued thinkers from all tropics of tropical geometry, is this PLF a mesa?
 
-In the class, we have the function `mesaTest` which will (try to) do exactly that.
-It is important to note that the SPLF must first be well defined before this test is run, fortunately I am glad to say 
-that the `mesaTest` does check to see if the function in question is or is not well defined.
-
-The `mesaTest` is a property, so in this case we enter the function without parentheses:
-
-```
-f.mesaTest
-```
-
-Much like the previous well-definedness test, this function will raise a value error depending on which portion of the 
-definition fails for your function if your function is not a mesa. Included in the function are specific numbers in the
-form of print statements to describe which part of the definition your function did not fare well on.
+In the class, we have the property `mesaTest` which will do exactly that. Calling `f.mesaTest` will test the mesa
+conditions (as defined in the reference sheet) and return `True` or `False` depending on whether or not the conditions
+are met.
 
 ## Moduli Spaces <a name="ModSpaces"></a>
 
@@ -313,10 +314,10 @@ following three lines of code:
     
 ### Members of `TropicalModuliSpace` <a name="modSpaceMembers"></a>
 
-- `curves`: A `Set[CombCurve]` to store the strata of the space.
-- `curvesDict`: A `Dictionary[Int, CombCurve]` organizing the strata by their number of edges.
-- `contractionDict`: A `Dictionary[CombCurve, List[(Edge, CombCurve)]]` recording the contraction information of the
-space. Given a curve `C`, `contractionDict[C]` is a list of elements of the type `(Edge, CombCurve)`. 
+- `curves`: A `Set[BasicFamily]` to store the strata of the space.
+- `curvesDict`: A `Dictionary[Int, BasicFamily]` organizing the strata by their number of edges.
+- `contractionDict`: A `Dictionary[BasicFamily, List[(Edge, BasicFamily)]]` recording the contraction information of the
+space. Given a curve `C`, `contractionDict[C]` is a list of elements of the type `(Edge, BasicFamily)`. 
 An element `(e, C')` belongs to `contractionDict[C]` if and only if the weighted edge contraction `C/{e}` is
 isomorphic to `C'` and `C'` belongs to the space.
 
@@ -389,3 +390,67 @@ In order to load a moduli space from a file, initialize the space with proper ge
 and encoding information. By default, the curve entry delimiter is `=` and the encoding is `utf-8`. 
 `saveModuliSpaceToFile` accepts an optional filename to save to. If none is provided, a filename is automatically
 generated based on the genus and marking of the space.
+
+
+
+
+
+## General Families <a name="Families"></a>
+
+1. [Basic Usage](#famBasicUsage)
+2. [Classes](#famClasses)
+
+### Basic Usage <a name="famBasicUsage"></a>
+
+### Classes <a name="famClasses"></a>
+
+The classes are as follows:
+- [Family](#familyClass): Represents a family of tropical curves.
+- [PLFFamily](#plfFamily): Represents a piecewise linear function over a family.
+
+#### `Family` <a name="familyClass"></a>
+
+A `Family` consists of a collection of basic families and a collection of morphisms between those basic families.
+
+Methods:
+
+- `getAncestors`: Given a basic family `C`, returns the set of all ancestors of `C`. A basic family `F` is an ancestor
+of `C` iff the class possesses a morphism from `F` to `C`. 
+- `getMaximalCurveIter`: Returns an iterator of all curves / basic families which are not a proper contraction of
+another curve in the family.
+
+##### Example <a name="familyExample"></a>
+
+Consider the morphism and basic families defined in [this example](#basicFamilyMorphismExample). This example already
+has the structure of an abstract family. To collect the structure into a single class, we can write the following:
+
+    myFamily = Family({domainFamily, codomainFamily}, {basicFamilyMorphism})
+
+This family consists of two basic families and a single morphism between them.
+
+#### `PLFFamily` <a name="plfFamily"></a>
+
+A `PLFFamily` represents a piecewise linear function over a family. To initialize a `PLFFamily`, provide a `Family` and
+a dictionary whose keys are the basic families of the given family, and whose values are PLFs on those basic families.
+
+Not every assignment of a PLF on the basic families determines a PLF over the entire family. The issue is that the
+basic PLFs must be preserved under pushforwards by morphisms of the family. During initialization, it is checked that
+this condition (and others) are met. If they are not met, then an error is thrown.
+
+##### Example
+
+Let's define a `PLFFamily` over the `Family` defined [here](#familyExample) with basic families and morphisms coming
+from [here](#basicFamilyMorphismExample). Recall that the basic families consist of the family of all chains with 2
+edges and the family of all chains with a single edge. Only one morphism of basic families is included, and that is
+the morphism from the 2-edge chains into the 1-edge chains which contracts the second edge.
+
+We are free to define any PLFs which are preserved under this contraction. For example, consider the following:
+
+    domainPLF = PiecewiseLinearFunction(domainFamily, {e1: 1, e2: -1, v1: m.zero()})
+    codomainPLF = domainPLF.getPushforward(basicFamilyMorphism)
+
+Here, we define a simple PLF on the 2-edge chains, and then push it forward along the only morphism of the family. This
+will guarantee that our choices of PLFs are consistent with each other. To define the PLF over the family, we simply
+execute:
+
+    myPLFFamily = PLFFamily(myFamily, {domainFamily: domainPLF, codomainFamily: codomainPLF})

@@ -154,7 +154,7 @@ freeElementH = freeMonoid.Element({"h": 1})
 
 
 
-C = CombCurve("Example 3.5")
+C = BasicFamily("Example 3.5")
 
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
@@ -190,20 +190,20 @@ TreeTests.verifyLoops(C, {frozenset({e4}), frozenset({e1, e2, e3})})
 zeroDict = {e1: 0, e2: 0, e3: 0, e4: 0,
             l: 0,
             v1: freeMonoid.zero()}
-f = StrictPiecewiseLinearFunction(C, zeroDict)
+f = PiecewiseLinearFunction(C, zeroDict)
 SPLFTests.verifyMesa(f)
 
 nonMesaDict = {e1: -1, e2: 0, e3: -1, e4: 0,
                l: 0,
                v2: freeMonoid.zero()}
-f = StrictPiecewiseLinearFunction(C, nonMesaDict)
+f = PiecewiseLinearFunction(C, nonMesaDict)
 
-contractions = f.functionContractions()
+#contractions = f.functionContractions()
 
-for e in contractions:
-    print(" ")
-    print(e.name, "Contractions:")
-    contractions[e].printSelf()
+#for e in contractions:
+#    print(" ")
+#    print(e.name, "Contractions:")
+#    contractions[e].printSelf()
 
 SPLFTests.verifyMesa(f, isMesa=False)
 try:
@@ -245,7 +245,7 @@ CurveTests.verifyBettiNumber(C, 2)
 
 
 
-C = CombCurve("Exercise 3.15 part 1")
+C = BasicFamily("Exercise 3.15 part 1")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
 v3 = vertex("v3", 0)
@@ -275,7 +275,7 @@ CurveTests.verifyBettiNumber(C, 5)
 
 
 
-C = CombCurve("Exercise 3.15 parts 2 and 3")
+C = BasicFamily("Exercise 3.15 parts 2 and 3")
 v1 = vertex("v1", 1)
 v2 = vertex("v2", 1)
 v3 = vertex("v3", 1)
@@ -294,7 +294,7 @@ TreeTests.verifyLoops(C, set())
 
 
 
-#C = CombCurve("Curve with some vertices missing")
+#C = BasicFamily("Curve with some vertices missing")
 #v1 = vertex("v1", 1)
 #e1 = edge("e1", 1.0, v1, v1)
 #e2 = edge("e2", 1.0, v1, None)
@@ -310,7 +310,7 @@ TreeTests.verifyLoops(C, set())
 
 
 # Test the core property
-C = CombCurve("Example 3.5")
+C = BasicFamily("Example 3.5")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
 v3 = vertex("v3", 1)
@@ -329,7 +329,7 @@ CurveTests.verifyStructure(C.core, {v1, v3}, {e3, e4}, set())
 
 
 
-C = CombCurve("Chain of 9 vertices")
+C = BasicFamily("Chain of 9 vertices")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
 v3 = vertex("v3", 0)
@@ -351,8 +351,8 @@ e8 = edge("e8", freeElementA, v8, v9)
 C.addEdges({e1, e2, e3, e4, e5, e6, e7, e8})
 C.monoid = freeMonoid
 
-f = StrictPiecewiseLinearFunction(C, {e1: 1, e2: -1, e3: 1, e4: -1, e5: 0, e6: 1, e7: 0, e8: -1,
-                                      v1: freeMonoid.zero()})
+f = PiecewiseLinearFunction(C, {e1: 1, e2: -1, e3: 1, e4: -1, e5: 0, e6: 1, e7: 0, e8: -1,
+                                v1: freeMonoid.zero()})
 
 s = f.getSpecialSupportPartition()
 
@@ -371,7 +371,7 @@ except:
 
 
 # Example 4.4
-Ex44 = CombCurve("Example 4.4")
+Ex44 = BasicFamily("Example 4.4")
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 1)
 v3 = vertex("v3", 0)
@@ -395,14 +395,14 @@ Ex44.addEdges({e1, e2, e3, e4, e5})
 Ex44.addLegs({l1, l2, l3, l4, l5, l6})
 Ex44.monoid = freeMonoid
 
-g = StrictPiecewiseLinearFunction(Ex44, {e1: 1, e2: 0, e3: -1, e4: -1, e5: -1, e6: 0,
-                                         l1: 0.0, l2: 0.0, l3: 0.0, l4: 0.0, l5: 0.0, l6: 0.0,
-                                         v1: freeMonoid.zero()})
+g = PiecewiseLinearFunction(Ex44, {e1: 1, e2: 0, e3: -1, e4: -1, e5: -1, e6: 0,
+                                   l1: 0.0, l2: 0.0, l3: 0.0, l4: 0.0, l5: 0.0, l6: 0.0,
+                                   v1: freeMonoid.zero()})
 
 SPLFTests.verifyMesa(g)
 
 
-Ex28May = CombCurve("28")
+Ex28May = BasicFamily("28")
 v1 = vertex("v1", 1)
 v2 = vertex("v2", 0)
 v3 = vertex("v3", 0)
@@ -414,8 +414,8 @@ e3 = edge("e3", 2 * freeElementA, v1, v4)
 Ex28May.addEdges({e1, e2, e3})
 Ex28May.monoid = freeMonoid
 
-h = StrictPiecewiseLinearFunction(Ex28May, {e1: -1, e2: -1, e3: -1,
-                                            v3: freeMonoid.zero()})
+h = PiecewiseLinearFunction(Ex28May, {e1: -1, e2: -1, e3: -1,
+                                      v3: freeMonoid.zero()})
 
 SPLFTests.verifyMesa(h)
 
@@ -431,7 +431,7 @@ SPLFTests.verifyMesa(h)
 """
 # Test out some specialization code
 m = TropicalModuliSpace(1, 3)
-C = CombCurve("Specialization Test Curve")
+C = BasicFamily("Specialization Test Curve")
 v = vertex("v", 2)
 leg1 = leg("leg1", v)
 leg2 = leg("leg2", v)
@@ -465,7 +465,7 @@ for l in C.legs:
 
 
 m = TropicalModuliSpace(1, 3)
-C = CombCurve("Specialization Test Curve")
+C = BasicFamily("Specialization Test Curve")
 v = vertex("v", 2)
 leg1 = leg("leg1", v)
 leg2 = leg("leg2", v)
@@ -502,8 +502,8 @@ for l in C.legs:
 
 
 
-C = CombCurve("Isomorphism Domain")
-D = CombCurve("Isomorphism Codomain")
+C = BasicFamily("Isomorphism Domain")
+D = BasicFamily("Isomorphism Codomain")
 
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 1)
