@@ -294,7 +294,7 @@ TreeTests.verifyLoops(C, set())
 
 
 
-#C = CombCurve("Curve with some vertices missing")
+#C = BasicFamily("Curve with some vertices missing")
 #v1 = vertex("v1", 1)
 #e1 = edge("e1", 1.0, v1, v1)
 #e2 = edge("e2", 1.0, v1, None)
@@ -431,7 +431,7 @@ SPLFTests.verifyMesa(h)
 """
 # Test out some specialization code
 m = TropicalModuliSpace(1, 3)
-C = CombCurve("Specialization Test Curve")
+C = BasicFamily("Specialization Test Curve")
 v = vertex("v", 2)
 leg1 = leg("leg1", v)
 leg2 = leg("leg2", v)
@@ -465,7 +465,7 @@ for l in C.legs:
 
 
 m = TropicalModuliSpace(1, 3)
-C = CombCurve("Specialization Test Curve")
+C = BasicFamily("Specialization Test Curve")
 v = vertex("v", 2)
 leg1 = leg("leg1", v)
 leg2 = leg("leg2", v)

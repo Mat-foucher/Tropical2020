@@ -3,7 +3,7 @@ from ModuliSpaces import *
 
 
 class PiecewiseLinearFunction(object):
-    # domain_ should be a CombCurve representing the domain of the function
+    # domain_ should be a BasicFamily representing the domain of the function
     # functionValues_ should be a dictionary with vertex/leg keys and non-negative double values
     def __init__(self, domain_, functionValues_):
         self._domain = domain_

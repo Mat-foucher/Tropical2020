@@ -341,7 +341,7 @@ class BasicFamily(object):
         self.addVertex(v)
         self.removeEdge(e)
 
-    # Returns a new CombCurve with edge e contracted
+    # Returns a new BasicFamily with edge e contracted
     def getContraction(self, e, returnCopyInfo=False):
         # To avoid accidentally modifying self, we work with a fully shallow copy
         contraction, copyInfoDict = self.getFullyShallowCopy(True)
@@ -749,8 +749,8 @@ class BasicFamilyMorphism(object):
     def __init__(self, domain, codomain, curveMorphismDict, monoidMorphism):
 
         # Type checking
-        assert isinstance(domain, BasicFamily), "The domain of a basic family morphism should be a CombCurve."
-        assert isinstance(codomain, BasicFamily), "The codomain of a basic family morphism should be a CombCurve."
+        assert isinstance(domain, BasicFamily), "The domain of a basic family morphism should be a BasicFamily."
+        assert isinstance(codomain, BasicFamily), "The codomain of a basic family morphism should be a BasicFamily."
         assert isinstance(curveMorphismDict, dict), \
             "curveMorphismDict should be a Dictionary[domain.vertices, codomain.vertices]."
         assert isinstance(monoidMorphism, MonoidHomomorphism), "monoidMorphism should be a MonoidHomomorphism."
@@ -797,7 +797,7 @@ class BasicFamilyMorphism(object):
             assert self.preimage(vert).genus == vert.genus, \
                 "curveMorphismDict should preserve genus."
 
-    # Returns the preimage of the given vertex as a CombCurve
+    # Returns the preimage of the given vertex as a BasicFamily
     def preimage(self, vert):
         assert vert in self.codomain.vertices, "vert should be a codomain vertex"
 
@@ -810,7 +810,7 @@ class BasicFamilyMorphism(object):
 
         return preimage
 
-    # Returns the image of the morphism as a CombCurve
+    # Returns the image of the morphism as a BasicFamily
     def image(self):
 
         # Note that we don't need to worry about edges that collapse to a vertex - their endpoints go to the same place.

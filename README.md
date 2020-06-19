@@ -5,7 +5,7 @@ Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 
 1. [Introduction](#Introduction)
 2. [Testing](#Testing)
-3. [Combinatorial Curves](#CombCurves)
+3. [Basic Families](#BasicFamilies)
 4. [Strict Piecewise Linear Functions](#SPLFs)
 5. [Moduli Spaces](#ModSpaces)
 6. [General Families](#Families)
@@ -35,7 +35,7 @@ You may use the tests file for any test you would like to try, using the code fr
 In `tests.py` there is also a large collection of examples from the reference document, for example, 
 here is example 3.5:
 
-    C = CombCurve("Example 3.5")
+    C = BasicFamily("Example 3.5")
     
     M = Monoid()
     M.addgen("a")
@@ -59,12 +59,12 @@ Most of the tests take the form of assertions, such as:
     assert C.isConnected()
     assert C.genus == 3
 
-## Combinatorial Curves <a name="CombCurves"></a>
+## Basic Families <a name="BasicFamilies"></a>
 
 1. [Vertices](#vertices)
 2. [Edges](#edges)
 3. [Legs](#legs)
-4. [CombCurves](#combCurves)
+4. [BasicFamily](#basFam)
 5. [Morphisms of Basic Families](#famMorphClass)
 6. [A Neat Example](#neatExample)
 
@@ -106,11 +106,11 @@ For example, to create a leg with name "l1" with root `v1`, one can write the fo
 Like an `edge`, a `leg` has the `vertices` property. The `vertices` of a leg will be a singleton set containing its
 root.
 
-### CombCurves <a name="combCurves"></a>
+### BasicFamily <a name="basFam"></a>
 
-The `CombCurve` class (short for Combinatorial Tropical Curve) provides an implementation both for combinatorial
+The `BasicFamily` class provides an implementation both for combinatorial
 tropical curves and basic families of tropical curves. The difference between these two interpretations is the monoid
-that one provides to the class. In order to use a `CombCurve` as a combinatorial tropical curve, use a free monoid with
+that one provides to the class. In order to use a `BasicFamily` as a combinatorial tropical curve, use a free monoid with
 one generator. For example, to create a three-element chain `v1--v2--v3` with the left edge of length one and right edge
 of length two, one could write the following:
 
@@ -129,10 +129,10 @@ of length two, one could write the following:
     e2 = edge("e2", 2 * alpha, v2, v3)
     
     # Initialize the curve
-    C = CombCurve("A particular chain with three elements")
+    C = BasicFamily("A particular chain with three elements")
     C.addEdges({e1, e2})
 
-One can also use `CombCurve` to represent a basic family of curves. To represent the family of three-element chains
+One can also use `BasicFamily` to represent a basic family of curves. To represent the family of three-element chains
 whose edge lengths vary freely over 
 <img src="https://render.githubusercontent.com/render/math?math=\mathbb{R}_{\geq 0}">, we simply use a different monoid.
 Since we want two edge lengths to vary independently, we use a free monoid with two generators, and let the edge length
@@ -155,16 +155,16 @@ of each each to be one of the generators. Here is the full example:
     e2 = edge("e2", beta, v2, v3)
     
     # Initialize the curve
-    C = CombCurve("Family of all chains with three elements")
+    C = BasicFamily("Family of all chains with three elements")
     C.addEdges({e1, e2})
 
-The difference between a `CombCurve` representing a particular curve or a basic family of curves is largely semantic.
+The difference between a `BasicFamily` representing a particular curve or a basic family of curves is largely semantic.
 The first example also represents the family of all three-element chains where one edge is twice as long as the other.
     
 ### Morphisms of Basic Families <a name="famMorphClass"></a>
 
-A `BasicFamilyMorphism` is a morphism of basic families. It has a domain and codomain, both of which are basic families
-(i.e., `CombCurve`s). It also has a morphism of curves and a morphism of monoids.
+A `BasicFamilyMorphism` is a morphism of basic families. It has a domain and codomain, both of which are basic families.
+It also has a morphism of curves and a morphism of monoids.
 
 There are many restrictions on the values used to initialize a `BasicFamilyMorphism`. These restrictions are in place to
 ensure that an instance of `BasicFamilyMorphism` actually is a morphism of the given basic families. The restrictions
@@ -174,15 +174,15 @@ can be found in the reference sheet.
 Creating a Tropical Combinatorial Curve with the Code:
 
 We are now ready to discuss how we may go about implementing a tropical curve in the code.
-To begin, the CombCurve object is what will be the tropical curve.
-As per the overleaf reference guide, the CombCurve class has the sufficent properties of behaving properly according to 
+To begin, the BasicFamily object is what will be the tropical curve.
+As per the overleaf reference guide, the BasicFamily class has the sufficent properties of behaving properly according to 
 the definitions in the reference.
 
 To define a new tropical curve, we write the following:
 
-    TropicalCurve = CombCurve("TropicalCurve")
+    TropicalCurve = BasicFamily("TropicalCurve")
 
-The CombCurve object takes only one parameter in it's initializer, which is the name string.
+The BasicFamily object takes only one parameter in it's initializer, which is the name string.
 We now want to add edges, vertices, and legs to our curve, which we do as follows:
 
     v1 = vertex("v1", 1)
@@ -216,12 +216,12 @@ the combinatorial tropical curves as previously introduced.
 The way that the class is implemented is by using a dictionary object, in which the values of the dictionary are the 
 slopes of the edges of the cruve, and the keys are the edges of the curve.
 
-NOTE: There must be a defined tropical curve (`CombCurve()`) before an SPLF over the tropical curve is made.
+NOTE: There must be a defined tropical curve (`BasicFamily()`) before an SPLF over the tropical curve is made.
 
 To make an SPLF over a tropical curve, we may specify the curve as such:
 
 ```
-C = CombCurve("Example 3.5")
+C = BasicFamily("Example 3.5")
 
 v1 = vertex("v1", 0)
 v2 = vertex("v2", 0)
@@ -245,7 +245,7 @@ f = StrictPiecewiseLinearFunction(C, dict)
 ```
 
 As can be seen in the block of code, the `StrictPiecewiseLinearFunction()` object takes in the first parameter which 
-must be the associated `CombCurve()` object, and the dictionary of edge slopes as the second parameter. In the example 
+must be the associated `BasicFamily()` object, and the dictionary of edge slopes as the second parameter. In the example 
 we have just seen, `f` is perhaps not a mesa on `C`, and even more, is perhaps not even well defined!
 
 ### Testing the Well - Definedness of Your SPLF <a name="splfDefined"></a>
@@ -323,10 +323,10 @@ following three lines of code:
     
 ### Members of `TropicalModuliSpace` <a name="modSpaceMembers"></a>
 
-- `curves`: A `Set[CombCurve]` to store the strata of the space.
-- `curvesDict`: A `Dictionary[Int, CombCurve]` organizing the strata by their number of edges.
-- `contractionDict`: A `Dictionary[CombCurve, List[(Edge, CombCurve)]]` recording the contraction information of the
-space. Given a curve `C`, `contractionDict[C]` is a list of elements of the type `(Edge, CombCurve)`. 
+- `curves`: A `Set[BasicFamily]` to store the strata of the space.
+- `curvesDict`: A `Dictionary[Int, BasicFamily]` organizing the strata by their number of edges.
+- `contractionDict`: A `Dictionary[BasicFamily, List[(Edge, BasicFamily)]]` recording the contraction information of the
+space. Given a curve `C`, `contractionDict[C]` is a list of elements of the type `(Edge, BasicFamily)`. 
 An element `(e, C')` belongs to `contractionDict[C]` if and only if the weighted edge contraction `C/{e}` is
 isomorphic to `C'` and `C'` belongs to the space.
 

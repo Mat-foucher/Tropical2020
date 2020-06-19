@@ -8,7 +8,7 @@ class Family(object):
 
         # Type checking
         if not isinstance(basicFamilies, set):
-            raise ValueError("basicFamilies must be a Set[CombCurve]")
+            raise ValueError("basicFamilies must be a Set[BasicFamily]")
         if not isinstance(morphisms, set):
             raise ValueError("morphisms must be a Set[BasicFamilyMorphism]")
 
