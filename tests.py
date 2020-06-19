@@ -198,12 +198,12 @@ nonMesaDict = {e1: -1, e2: 0, e3: -1, e4: 0,
                v2: freeMonoid.zero()}
 f = PiecewiseLinearFunction(C, nonMesaDict)
 
-contractions = f.functionContractions()
+#contractions = f.functionContractions()
 
-for e in contractions:
-    print(" ")
-    print(e.name, "Contractions:")
-    contractions[e].printSelf()
+#for e in contractions:
+#    print(" ")
+#    print(e.name, "Contractions:")
+#    contractions[e].printSelf()
 
 SPLFTests.verifyMesa(f, isMesa=False)
 try:
