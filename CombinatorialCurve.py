@@ -306,6 +306,7 @@ class BasicFamily(object):
         curveCopy = BasicFamily(self.name)
         curveCopy.addEdges(edgeCopies)
         curveCopy.addLegs(legCopies)
+        curveCopy.monoid = copy.copy(self.monoid)
 
         if returnCopyInfo:
             return curveCopy, copyInfo
