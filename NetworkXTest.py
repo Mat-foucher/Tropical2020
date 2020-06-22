@@ -49,7 +49,7 @@ C.addEdges({e1, e2, e3, e4})
 C.addLeg(l)
 
 displayCurve = DisplayCurve(C)
-displayCurve.display("Example3Point5.png")
+#displayCurve.display("Example3Point5.png")
 
 C = CombCurve("Chain of 9 vertices")
 v1 = vertex("v1", 0)
@@ -73,5 +73,12 @@ e8 = edge("e8", freeElementA, v8, v9)
 C.addEdges({e1, e2, e3, e4, e5, e6, e7, e8})
 C.monoid = freeMonoid
 
-#display2 = DisplayCurve(C)
+display2 = DisplayCurve(C)
 #display2.display("Chain of 9 Vertices.png")
+
+bigDisplayTest = set()
+bigDisplayTest.add(displayCurve)
+bigDisplayTest.add(display2)
+
+bigTest = Display("3.5 and the chain of 9 verts.png", bigDisplayTest)
+bigTest.showAllDisplays(bigTest.name)

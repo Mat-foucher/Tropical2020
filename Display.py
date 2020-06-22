@@ -1,4 +1,5 @@
 import networkx as nx 
+from numpy import *
 from networkx.drawing.nx_agraph import to_agraph
 import matplotlib.pyplot as plt
 from CombinatorialCurve import *
@@ -14,6 +15,8 @@ class DisplayCurve(object):
         self.curveDisplay.add_nodes_from(C.vertices)
 
         self.curveDisplay.add_edges_from([(e.vert1, e.vert2) for e in C.edges])
+
+        self.name = C.name
         
     @property
     def getEdges(self):
@@ -42,4 +45,27 @@ class Display(object):
         self.name = name_
         self.displays = displays_
     
-    
+    def addDisplay(self, displayCurve):
+        self.displays.add(displayCurve)
+        print("Display", displayCurve.name, "has been added to", self.name)
+
+    def showAllDisplays(self, name_):
+        
+        displaysToShow = set()
+
+        for i in self.displays:
+            displaysToShow.add(i)
+        
+        plot = to_agraph()
+
+        plot.add_nodes_from(displaysToShow)
+
+        plot.layout('neato')
+
+        plot.draw(name_)
+            
+        
+        
+        
+
+        
