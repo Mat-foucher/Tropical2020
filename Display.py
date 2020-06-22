@@ -1,4 +1,5 @@
 import networkx as nx 
+from ModuliSpaces import *
 from numpy import *
 from networkx.drawing.nx_agraph import to_agraph
 import matplotlib.pyplot as plt
@@ -64,7 +65,38 @@ class Display(object):
 
         plot.draw(name_)
             
+    def loadSpaceFromFile(self, filename_):
         
+        M = TropicalModuliSpace(0,0)
+        M.loadModuliSpaceFromFile(filename_)
+
+        modSpaceDisplay = nx.MultiDiGraph()
+
+        counter = 0
+
+        for c in M.curves:
+            newDisplayCurve = DisplayCurve(c)
+            newDisplayCurve.display("moduliSpaceCurves/Curve" + str(counter) + ".png")
+            c.name = counter
+            modSpaceDisplay.add_node(c.name, image="moduliSpaceCurves/Curve" + str(counter) + ".png")
+            counter = counter + 1 
+        
+        for key in M.contractionDict:
+            for pair in M.contractionDict[key]:
+                modSpaceDisplay.add_edge(key.name, pair[1].name)
+        
+        graph = to_agraph(modSpaceDisplay)
+        graph.layout('dot')
+        graph.draw("renderedModSpaces/example.png")
+        
+        
+        
+
+
+        
+
+
+
         
         
 
