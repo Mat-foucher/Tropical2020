@@ -75,6 +75,3 @@ C.monoid = freeMonoid
 
 display2 = DisplayCurve(C)
 #display2.display("Chain of 9 Vertices.png")
-
-S = Display("M 1 5", set())
-S.loadSpaceFromFile("SavedModuliSpaces/M-1-5.txt")

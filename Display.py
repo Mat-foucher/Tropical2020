@@ -88,7 +88,7 @@ class Display(object):
 
         plot.draw(name_)
             
-    def loadSpaceFromFile(self, filename_):
+    def loadSpaceFromFile(self, filename_, saveFilename):
         
         M = TropicalModuliSpace(0,0)
         M.loadModuliSpaceFromFile(filename_)
@@ -110,7 +110,7 @@ class Display(object):
         
         graph = to_agraph(modSpaceDisplay)
         graph.layout('dot')
-        graph.draw("renderedModSpaces/example2.png")
+        graph.draw(saveFilename)
         
         
         
