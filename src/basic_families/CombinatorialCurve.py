@@ -3,74 +3,9 @@ import numpy as np
 from GraphIsoHelper import *
 from RPC import *
 
-
-# A vertex has a name and non-negative genus
-class vertex(object):
-    # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
-    # genus_ should be a non-negative integer
-    def __init__(self, name_, genus_):
-        # Don't allow negative genus!
-        if genus_ < 0:
-            raise ValueError("Genus must be non-negative")
-        self.name = name_
-        self._genus = genus_
-
-    @property
-    def genus(self):
-        return self._genus
-
-    # Control how the genus property is set
-    # genus_ should be a non-negative integer
-    @genus.setter
-    def genus(self, genus_):
-        # Don't allow negative genus!
-        if genus_ < 0:
-            raise ValueError("Genus must be non-negative.")
-        self._genus = genus_
-
-
-# An edge has a name, non-negative length, and endpoints
-class edge(object):
-    # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
-    # length_ should be a monoid element
-    # vert1_ should be a vertex
-    # vert2_ should be a vertex
-    def __init__(self, name_, length_, vert1_, vert2_):
-        self.name = name_
-        self._length = length_
-
-        # Distinguished endpoints to help identify self loops, and for other purposes
-        self.vert1 = vert1_
-        self.vert2 = vert2_
-
-    @property
-    def length(self):
-        return self._length
-
-    # Control how the length property is set
-    # length_ should be a monoid element
-    @length.setter
-    def length(self, length_):
-        self._length = length_
-
-    # The set of vertices is a read only property computed upon access
-    @property
-    def vertices(self):
-        return {self.vert1, self.vert2}
-
-
-# A leg has a name and root
-class leg(object):
-    # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
-    # root_ should be a vertex
-    def __init__(self, name_, root_):
-        self.name = name_
-        self.root = root_
-
-    # The set of vertices is a read only property computed upon access
-    @property
-    def vertices(self):
-        return {self.root}
+from Tropical2020.src.basic_families.Edge import Edge
+from Tropical2020.src.basic_families.Leg import Leg
+from Tropical2020.src.basic_families.Vertex import Vertex
 
 
 # A Combinatorial Tropical Curve has a name, set of edges, and set of legs
@@ -286,7 +221,7 @@ class BasicFamily(object):
         edgeCopies = set()
         for nextEdge in self.edges:
             # Keep the same name and length, but use the new versions of endpoints
-            nextEdgeCopy = edge(nextEdge.name, nextEdge.length,
+            nextEdgeCopy = Edge(nextEdge.name, nextEdge.length,
                                 vertexCopyDict[nextEdge.vert1], vertexCopyDict[nextEdge.vert2])
             edgeCopies.add(nextEdgeCopy)
 
@@ -296,7 +231,7 @@ class BasicFamily(object):
         legCopies = set()
         for nextLeg in self.legs:
             # Keep the sane name, but use the new version of the root
-            nextLegCopy = leg(nextLeg.name, vertexCopyDict[nextLeg.root])
+            nextLegCopy = Leg(nextLeg.name, vertexCopyDict[nextLeg.root])
             legCopies.add(nextLegCopy)
 
             if returnCopyInfo:
@@ -326,7 +261,7 @@ class BasicFamily(object):
             # If e is not a self loop, then the new vertex only bears the genus of the endpoints
             genus = e.vert1.genus + e.vert2.genus
 
-        v = vertex("(Contraction of " + e.name + ")", genus)
+        v = Vertex("(Contraction of " + e.name + ")", genus)
 
         # For each edge or leg adjacent to e, move endpoints to the contraction of e
         for nextEdge in copy.copy(self.edges) - {e}:
@@ -836,13 +771,13 @@ class BasicFamilyMorphism(object):
         return image
 
     def __call__(self, x):
-        if isinstance(x, vertex):
+        if isinstance(x, Vertex):
             assert x in self.domain.vertices, "The given input must be a domain vertex."
             return self.curveMorphismDict[x]
-        elif isinstance(x, edge):
+        elif isinstance(x, Edge):
             assert x in self.domain.edges, "The given input must be a domain edge."
             return self.curveMorphismDict[x]
-        elif isinstance(x, leg):
+        elif isinstance(x, Leg):
             assert x in self.domain.legs, "The given input must be a domain leg."
             return self.curveMorphismDict[x]
         elif isinstance(x, self.domain.monoid.Element):
