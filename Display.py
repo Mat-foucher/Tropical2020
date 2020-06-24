@@ -109,7 +109,7 @@ class Display(object):
                 modSpaceDisplay.add_edge(key.name, pair[1].name)
         
         graph = to_agraph(modSpaceDisplay)
-        graph.layout('dot')
+        graph.layout('neato')
         graph.draw(saveFilename)
         
         
