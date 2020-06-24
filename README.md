@@ -344,14 +344,14 @@ endpoint in `S` to `v1` and each endpoint in `T` to `v2`. Finally, add an edge f
 For example, consider the following portion of a tropical curve. A single genus-3 vertex and some connecting edges are
 displayed.
 
-![Alt text](Images/pre-split.svg)
+![Alt text](docs/Images/pre-split.svg)
 
 In order to partition the genus of this vertex, let `g1=2`, `g2=1`. To partition the endpoints of edges, 
 let `S` contain
 the connected endpoint of `e2` and the first endpoint of `e1`. Accordingly, let `T` contain the connected endpoint of
 `e3`, the second endpoint of `e1`, and the root of `l`. The result is displayed below:
 
-![Alt text](Images/post-split.svg)
+![Alt text](docs/Images/post-split.svg)
 
 The idea behind this type of specialization is to split a vertex into two pieces and distribute its data among those
 pieces.
@@ -367,11 +367,11 @@ specialization of `C` can be produced in the following manner as long as `v` has
 specialization of `C`, simply reduce the genus of `v` and introduce a new edge connecting `v` to itself. Taking the 
 same example as was used for the splitting specialization, consider the following portion of a curve:
 
-![Alt text](Images/pre-split.svg)
+![Alt text](docs/Images/pre-split.svg)
 
 This vertex has positive genus, so we can reduce the genus and introduce a new loop:
 
-![Alt text](Images/post-genus-reduction.svg)
+![Alt text](docs/Images/post-genus-reduction.svg)
 
 As with splitting specialization, this type of specialization does not necessarily preserve stability. The one case 
 where stability is not preserved is when `v` is a vertex with genus one and degree zero. If this vertex were
