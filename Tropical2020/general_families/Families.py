@@ -1,6 +1,4 @@
-from CombinatorialCurve import *
-from RPC import *
-from StrictPiecewiseLinearFunction import *
+from basic_families.StrictPiecewiseLinearFunction import *
 
 
 class Family(object):

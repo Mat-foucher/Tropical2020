@@ -1,6 +1,4 @@
-from CombinatorialCurve import *
-import copy
-import time
+from basic_families.CombinatorialCurve import *
 
 import re
 
@@ -218,9 +216,9 @@ class TropicalModuliSpace(object):
 
         # If the space is nonempty, then all of the curves are specializations of seedCurve
         seedCurve = BasicFamily("Seed curve with genus " + str(self._g) + ", " + str(self._n) + " legs, and 0 edges")
-        v = vertex("v", self._g)
+        v = Vertex("v", self._g)
         seedCurve.addVertex(v)
-        seedCurve.addLegs({leg("leg " + str(i), v) for i in range(self._n)})
+        seedCurve.addLegs({Leg("leg " + str(i), v) for i in range(self._n)})
         seedCurve.monoid = Monoid()
 
         # Let the seed grow!
@@ -268,12 +266,12 @@ class TropicalModuliSpace(object):
     @staticmethod
     def specializeBySplittingAtVertex(curve, vert, g1, g2, S, T):
         assert g1 + g2 == vert.genus
-        v1 = vertex("(First split of " + vert.name + ")", g1)
-        v2 = vertex("(Second split of " + vert.name + ")", g2)
+        v1 = Vertex("(First split of " + vert.name + ")", g1)
+        v2 = Vertex("(Second split of " + vert.name + ")", g2)
 
         for p in S:
             e, edgeNum = p
-            if isinstance(e, edge):
+            if isinstance(e, Edge):
                 if edgeNum == 1:
                     e.vert1 = v1
                 else:
@@ -283,7 +281,7 @@ class TropicalModuliSpace(object):
 
         for p in T:
             e, edgeNum = p
-            if isinstance(e, edge):
+            if isinstance(e, Edge):
                 if edgeNum == 1:
                     e.vert1 = v2
                 else:
@@ -293,7 +291,7 @@ class TropicalModuliSpace(object):
 
         curve.monoid.addgen("(Edge splitting " + vert.name + ")")
         newLength = curve.monoid.Element({"(Edge splitting " + vert.name + ")": 1})
-        e = edge("(Edge splitting " + vert.name + ")", newLength, v1, v2)
+        e = Edge("(Edge splitting " + vert.name + ")", newLength, v1, v2)
 
         curve.addEdge(e)
         curve.removeVertex(vert)
@@ -320,11 +318,11 @@ class TropicalModuliSpace(object):
 
         endpoints = curve.getEndpointsOfEdges(vert)
 
-        v = vertex("(Genus reduction of " + vert.name + ")", vert.genus - 1)
+        v = Vertex("(Genus reduction of " + vert.name + ")", vert.genus - 1)
 
         for p in endpoints:
             e, edgeNum = p
-            if isinstance(e, edge):
+            if isinstance(e, Edge):
                 if edgeNum == 1:
                     e.vert1 = v
                 else:
@@ -334,7 +332,7 @@ class TropicalModuliSpace(object):
 
         curve.monoid.addgen("(Genus reduction loop for " + vert.name + ")")
         newLength = curve.monoid.Element({"(Genus reduction loop for " + vert.name + ")": 1})
-        e = edge("(Genus reduction loop for " + vert.name + ")", newLength, v, v)
+        e = Edge("(Genus reduction loop for " + vert.name + ")", newLength, v, v)
 
         curve.addEdge(e)
         curve.removeVertex(vert)
@@ -378,7 +376,7 @@ class TropicalModuliSpace(object):
                     if m:
                         vName = m.group(1)
                         vGenus = m.group(2)
-                        v = vertex(vName, int(vGenus))
+                        v = Vertex(vName, int(vGenus))
                         vertices[vName] = v
 
                 edges = set()
@@ -391,7 +389,7 @@ class TropicalModuliSpace(object):
                         c.monoid.addgen(eName)
                         eLength = c.monoid.Element({eName: 1})
 
-                        e = edge(eName, eLength, vertices[eVert1Name], vertices[eVert2Name])
+                        e = Edge(eName, eLength, vertices[eVert1Name], vertices[eVert2Name])
                         edges.add(e)
 
                 legs = set()
@@ -399,7 +397,7 @@ class TropicalModuliSpace(object):
                     if m:
                         lName = m.group(0)
                         lRootName = m.group(1)
-                        legs.add(leg(lName, vertices[lRootName]))
+                        legs.add(Leg(lName, vertices[lRootName]))
 
                 c.addEdges(edges)
                 c.addLegs(legs)

@@ -1,4 +1,4 @@
-from RPC import *
+from basic_families.RPC import *
 import pdb
 
 M = Monoid()

@@ -1,4 +1,4 @@
-from CombinatorialCurve import *
+from basic_families.CombinatorialCurve import *
 
 
 class GraphIsoHelper(object):
