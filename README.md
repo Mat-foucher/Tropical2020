@@ -17,14 +17,46 @@ Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 The code for this project is divided into separate files, each for different classes that implement objects from the 
 overleaf document.
 
-The different files and their associated classes/purposes are:
+The project currently has the following structure. `Tropical2020` is structured as a python package and should be used
+as such. In order to run the tests, one can run `python3 -m Tropical2020.test.tests`. 
 
-- `CombinatorialCurve.py`: Vertices, Edges, Legs, and Basic Families.
+    .
+    |- docs
+    |   |-- Images
+    |
+    |- Tropical2020
+    |   |-- basic_families
+    |   |   |-- __init__.py
+    |   |   |-- BasicFamily.py
+    |   |   |-- Edge.py
+    |   |   |-- GraphIsoHelper.py
+    |   |   |-- Leg.py
+    |   |   |-- PiecewiseLinearFunction.py
+    |   |   |-- RPC.py
+    |   |   |-- Vertex.py
+    |   |
+    |   |-- general_families
+    |   |   |-- Graphics
+    |   |   |-- SavedModuliSpaces
+    |   |   |-- __init__.py
+    |   |   |-- Family.py
+    |   |   |-- generateAndSaveModuliSpace.py
+    |   |   |-- ModuliSpace.py
+    |   |   |-- PLFFamily.py
+    |   |
+    |   |-- test
+    |   |   |-- RPC-test.py
+    |   |   |-- tests.py
+    |   |
+    |   |-- __init__.py
+    |
+    |- README.md
+    |- todo.md
+
+Most of these files implement a class corresponding to their filename. Here are a few exceptions:
+
 - `GraphIsoHelper.py`: Provides convenience functions for testing if two graphs are isomorphic.
-- `StrictPiecewiseLinearFunction.py`: Piecewise Linear functions over Basic Families.
-- `ModuliSpaces.py`: Tropical Moduli spaces.
 - `RPC.py`: Abstract Monoids.
-- `Families.py`: Arbitrary Families and Piecewise Linear functions over a Family.
 - `tests.py`: Tests for most things. This file is a good place to see how things are used.
 - `generateAndSaveModuliSpace.py`: A short script to generate and save a Moduli Space as specified by command line
 arguments.
@@ -344,14 +376,14 @@ endpoint in `S` to `v1` and each endpoint in `T` to `v2`. Finally, add an edge f
 For example, consider the following portion of a tropical curve. A single genus-3 vertex and some connecting edges are
 displayed.
 
-![Alt text](Images/pre-split.svg)
+![Alt text](docs/Images/pre-split.svg)
 
 In order to partition the genus of this vertex, let `g1=2`, `g2=1`. To partition the endpoints of edges, 
 let `S` contain
 the connected endpoint of `e2` and the first endpoint of `e1`. Accordingly, let `T` contain the connected endpoint of
 `e3`, the second endpoint of `e1`, and the root of `l`. The result is displayed below:
 
-![Alt text](Images/post-split.svg)
+![Alt text](docs/Images/post-split.svg)
 
 The idea behind this type of specialization is to split a vertex into two pieces and distribute its data among those
 pieces.
@@ -367,11 +399,11 @@ specialization of `C` can be produced in the following manner as long as `v` has
 specialization of `C`, simply reduce the genus of `v` and introduce a new edge connecting `v` to itself. Taking the 
 same example as was used for the splitting specialization, consider the following portion of a curve:
 
-![Alt text](Images/pre-split.svg)
+![Alt text](docs/Images/pre-split.svg)
 
 This vertex has positive genus, so we can reduce the genus and introduce a new loop:
 
-![Alt text](Images/post-genus-reduction.svg)
+![Alt text](docs/Images/post-genus-reduction.svg)
 
 As with splitting specialization, this type of specialization does not necessarily preserve stability. The one case 
 where stability is not preserved is when `v` is a vertex with genus one and degree zero. If this vertex were

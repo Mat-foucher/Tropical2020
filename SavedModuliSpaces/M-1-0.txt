@@ -1,5 +1,0 @@
-Vertices: {(v0 with genus 1)}
-Edges: {}
-Legs: {}
-Curve ID Number: 0
-Contraction info: 
