@@ -1,5 +1,5 @@
-from basic_families.CombinatorialCurve import *
-from basic_families.StrictPiecewiseLinearFunction import *
+from basic_families.BasicFamily import *
+from basic_families.PiecewiseLinearFunction import *
 from general_families.ModuliSpaces import *
 import time
 

@@ -1,4 +1,4 @@
-from basic_families.CombinatorialCurve import *
+from basic_families.BasicFamily import *
 
 import re
 
