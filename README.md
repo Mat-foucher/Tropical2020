@@ -17,18 +17,6 @@ Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 The code for this project is divided into separate files, each for different classes that implement objects from the 
 overleaf document.
 
-The different files and their associated classes/purposes are:
-
-- `CombinatorialCurve.py`: Vertices, Edges, Legs, and Basic Families.
-- `GraphIsoHelper.py`: Provides convenience functions for testing if two graphs are isomorphic.
-- `StrictPiecewiseLinearFunction.py`: Piecewise Linear functions over Basic Families.
-- `ModuliSpaces.py`: Tropical Moduli spaces.
-- `RPC.py`: Abstract Monoids.
-- `Families.py`: Arbitrary Families and Piecewise Linear functions over a Family.
-- `tests.py`: Tests for most things. This file is a good place to see how things are used.
-- `generateAndSaveModuliSpace.py`: A short script to generate and save a Moduli Space as specified by command line
-arguments.
-
 The project currently has the following structure. `Tropical2020` is structured as a python package and should be used
 as such. In order to run the tests, one can run `python3 -m Tropical2020.test.tests`. 
 
@@ -64,6 +52,14 @@ as such. In order to run the tests, one can run `python3 -m Tropical2020.test.te
     |
     |- README.md
     |- todo.md
+
+Most of these files implement a class corresponding to their filename. Here are a few exceptions:
+
+- `GraphIsoHelper.py`: Provides convenience functions for testing if two graphs are isomorphic.
+- `RPC.py`: Abstract Monoids.
+- `tests.py`: Tests for most things. This file is a good place to see how things are used.
+- `generateAndSaveModuliSpace.py`: A short script to generate and save a Moduli Space as specified by command line
+arguments.
 
 ## Testing <a name="Testing"></a>
 
