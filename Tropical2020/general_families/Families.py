@@ -1,4 +1,4 @@
-from basic_families.PiecewiseLinearFunction import *
+from ..basic_families.PiecewiseLinearFunction import *
 
 
 class Family(object):

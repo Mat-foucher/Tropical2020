@@ -1,6 +1,6 @@
-from basic_families.BasicFamily import *
-from basic_families.PiecewiseLinearFunction import *
-from general_families.ModuliSpaces import *
+from ..basic_families.BasicFamily import *
+from ..basic_families.PiecewiseLinearFunction import *
+from ..general_families.ModuliSpaces import *
 import time
 
 

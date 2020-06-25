@@ -1,10 +1,10 @@
 import numpy as np
-from basic_families.GraphIsoHelper import *
-from basic_families.RPC import *
+from .GraphIsoHelper import *
+from .RPC import *
 
-from basic_families.Edge import Edge
-from basic_families.Leg import Leg
-from basic_families.Vertex import Vertex
+from .Edge import Edge
+from .Leg import Leg
+from .Vertex import Vertex
 
 
 # A Combinatorial Tropical Curve has a name, set of edges, and set of legs

@@ -1,5 +1,5 @@
 import sys
-from general_families.ModuliSpaces import *
+from .ModuliSpaces import *
 
 if len(sys.argv) != 3:
     print("Usage: python3 generateAndSaveModuliSpace.py g n")
