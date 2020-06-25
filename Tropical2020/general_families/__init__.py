@@ -1,2 +1,2 @@
-from .Families import *
-from .ModuliSpaces import *
+from .Family import *
+from .ModuliSpace import *
