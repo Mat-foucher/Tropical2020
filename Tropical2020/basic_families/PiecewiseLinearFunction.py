@@ -1,5 +1,4 @@
 from basic_families.BasicFamily import *
-#from ModuliSpaces import *
 
 
 class PiecewiseLinearFunction(object):

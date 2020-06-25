@@ -1,6 +1,3 @@
-from basic_families.CombinatorialCurve import *
-
-
 class GraphIsoHelper(object):
 
     @staticmethod
