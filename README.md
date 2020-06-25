@@ -29,6 +29,9 @@ The different files and their associated classes/purposes are:
 - `generateAndSaveModuliSpace.py`: A short script to generate and save a Moduli Space as specified by command line
 arguments.
 
+The folder `Tropical2020` has the structure of a python module and can be treated as such. In order to run the tests,
+one can run `python3 -m Tropical2020.test.tests`. 
+
 ## Testing <a name="Testing"></a>
 
 The `tests.py` file contains tests that give strong evidence to the correctness of the rest of the program. This is
