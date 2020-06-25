@@ -29,8 +29,41 @@ The different files and their associated classes/purposes are:
 - `generateAndSaveModuliSpace.py`: A short script to generate and save a Moduli Space as specified by command line
 arguments.
 
-The folder `Tropical2020` has the structure of a python module and can be treated as such. In order to run the tests,
-one can run `python3 -m Tropical2020.test.tests`. 
+The project currently has the following structure. `Tropical2020` is structured as a python package and should be used
+as such. In order to run the tests, one can run `python3 -m Tropical2020.test.tests`. 
+
+    .
+    |- docs
+    |   |-- Images
+    |
+    |- Tropical2020
+    |   |-- basic_families
+    |   |   |-- __init__.py
+    |   |   |-- BasicFamily.py
+    |   |   |-- Edge.py
+    |   |   |-- GraphIsoHelper.py
+    |   |   |-- Leg.py
+    |   |   |-- PiecewiseLinearFunction.py
+    |   |   |-- RPC.py
+    |   |   |-- Vertex.py
+    |   |
+    |   |-- general_families
+    |   |   |-- Graphics
+    |   |   |-- SavedModuliSpaces
+    |   |   |-- __init__.py
+    |   |   |-- Family.py
+    |   |   |-- generateAndSaveModuliSpace.py
+    |   |   |-- ModuliSpace.py
+    |   |   |-- PLFFamily.py
+    |   |
+    |   |-- test
+    |   |   |-- RPC-test.py
+    |   |   |-- tests.py
+    |   |
+    |   |-- __init__.py
+    |
+    |- README.md
+    |- todo.md
 
 ## Testing <a name="Testing"></a>
 
