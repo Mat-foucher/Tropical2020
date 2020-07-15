@@ -1,6 +1,6 @@
-from ..basic_families.BasicFamily import *
-from ..basic_families.PiecewiseLinearFunction import *
-from ..general_families.ModuliSpace import *
+from Tropical2020.basic_families.BasicFamily import *
+from Tropical2020.basic_families.PiecewiseLinearFunction import *
+from Tropical2020.general_families.ModuliSpace import *
 import time
 
 
@@ -112,7 +112,7 @@ class ModuliSpaceTests:
 
 
 """
-print("Starting new load test for M-1-2...")
+print("Starting new load tests for M-1-2...")
 m = TropicalModuliSpace(1, 2)
 m.loadModuliSpaceFromFile("SavedModuliSpaces/M-1-2.txt")
 print("Done loading space. Printing curves now...")

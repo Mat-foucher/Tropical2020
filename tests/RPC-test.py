@@ -1,4 +1,4 @@
-from ..basic_families.RPC import *
+from Tropical2020.basic_families.RPC import *
 import pdb
 
 M = Monoid()
