@@ -527,6 +527,3 @@ CurveTests.verifyIsomorphism(C, D)
 
 # Generate some small, known, moduli spaces
 ModuliSpaceTests.verifyCommonSizes()
-
-
-print("If you see this, then all previous assertations were true!")
