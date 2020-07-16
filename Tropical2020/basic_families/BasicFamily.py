@@ -9,6 +9,15 @@ from .Vertex import Vertex
 
 # A Combinatorial Tropical Curve has a name, set of edges, and set of legs
 class BasicFamily(object):
+    """
+    Represents a basic family of combinatorial tropical curves.
+
+    Attributes
+    ----------
+    name : str
+        an identifier for the family
+    """
+
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
     def __init__(self, name_):
         self.name = name_
