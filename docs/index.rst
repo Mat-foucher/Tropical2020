@@ -6,10 +6,13 @@
 Welcome to Tropical2020's documentation!
 ========================================
 
+If you are a developer and would like to contribute to the project, please see :ref:`dev-install`.
+
 .. toctree::
    :maxdepth: 4
    :caption: Contents:
    
+   dev-install
    source/modules
 
 
