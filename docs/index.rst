@@ -13,6 +13,7 @@ If you are a developer and would like to contribute to the project, please see :
    :caption: Contents:
    
    dev-install
+   contributing
    source/modules
 
 

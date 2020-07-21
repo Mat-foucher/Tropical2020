@@ -44,16 +44,14 @@ developing. From ``project/Tropical2020``, create and activate a virtual environ
     python3 -m venv env
     source env/bin/activate
 
-Then, install Sphinx:
-
-.. code-block:: none
-
-    pip3 install sphinx
-
 Finally, install the package in editable mode:
 
 .. code-block:: none
 
     pip3 install -e .
 
+To verify that everything has been installed correctly, you can run ``pytest`` from ``project/Tropical2020``. This will
+produce a lot of text output, but you should see at the bottom of the output that all tests ran successfully. To
+deactivate the virtual environment, simply run ``deactivate``.
 
+The project is now installed. To start working on it, read the guide about :ref:`contributing`.
