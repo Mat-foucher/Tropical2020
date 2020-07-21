@@ -6,31 +6,11 @@
 Welcome to Tropical2020's documentation!
 ========================================
 
-.. automodule:: Tropical2020.basic_families.BasicFamily
-    :members:
-.. automodule:: Tropical2020.basic_families.Edge
-    :members:
-.. automodule:: Tropical2020.basic_families.GraphIsoHelper
-    :members:
-.. automodule:: Tropical2020.basic_families.Leg
-    :members:
-.. automodule:: Tropical2020.basic_families.PiecewiseLinearFunction
-    :members:
-.. automodule:: Tropical2020.basic_families.RPC
-    :members:
-.. automodule:: Tropical2020.basic_families.Vertex
-    :members:
-.. automodule:: Tropical2020.general_families.Family
-    :members:
-.. automodule:: Tropical2020.general_families.ModuliSpace
-    :members:
-.. automodule:: Tropical2020.general_families.PLFFamily
-    :members:
-
-
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
+   
+   source/modules
 
 
 

@@ -29,6 +29,13 @@ author = 'Mathieu Foucher, Connor Meredith, Jonathan Wise'
 # ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon', 'sphinx_markdown_builder']
 
+# Napoleon options
+# Force ourselves to use consistent docstrings
+napoleon_google_docstring = False
+napoleon_use_ivar = True
+napoleon_use_param = False
+
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
