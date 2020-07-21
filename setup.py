@@ -13,7 +13,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Mat-foucher/Tropical2020",
-    packages=setuptools.find_packages(),
+    packages=['numpy', 'pytest'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent"
