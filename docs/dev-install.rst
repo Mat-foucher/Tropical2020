@@ -44,6 +44,14 @@ developing. From ``project/Tropical2020``, create and activate a virtual environ
     python3 -m venv env
     source env/bin/activate
 
+The project uses `pytest <https://docs.pytest.org/en/stable/>`_ for its testing and
+`Sphinx <https://www.sphinx-doc.org/en/master/>`_ for its documentation, so we will install those:
+
+.. code-block:: none
+
+    pip3 install pytest
+    pip3 install sphinx
+
 Finally, install the package in editable mode:
 
 .. code-block:: none
