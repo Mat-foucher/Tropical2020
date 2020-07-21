@@ -3,6 +3,7 @@ Classifying Tropical Surfaces Research Summer 2020 - CU Boulder
 
 ## Contents:
 
+
 1. [Introduction](#Introduction)
 2. [Testing](#Testing)
 3. [Basic Families](#BasicFamilies)
