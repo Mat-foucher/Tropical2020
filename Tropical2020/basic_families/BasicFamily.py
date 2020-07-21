@@ -16,10 +16,25 @@ class BasicFamily(object):
     ----------
     name : str
         an identifier for the family
+    monoid : Tropical2020.basic_families.RPC.Monoid
+        a monoid from which the edge lengths of the family are taken
+
+    Methods
+    -------
+    invalidateCaches()
+        Invalidates the vertex, genus, characteristic, and core caches
+    addVertex(v : Vertex)
+        Adds the specified vertex if it is not none
     """
 
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
-    def __init__(self, name_):
+    def __init__(self, name_: str):
+        """
+        Parameters
+        ----------
+        name_ : str
+            an identifier for the family
+        """
         self.name = name_
         self._vertices = set()
         self._edges = set()
@@ -43,6 +58,10 @@ class BasicFamily(object):
         self._coreCache = None
 
     def invalidateCaches(self):
+        """
+        Invalidates the vertex, genus, characteristic, and core caches
+        """
+
         self._vertexCacheValid = False
         self._genusCacheValid = False
         self._vertexCharacteristicCacheValid = False
@@ -54,7 +73,15 @@ class BasicFamily(object):
     def vertices(self):
         return self._vertices
 
-    def addVertex(self, v):
+    def addVertex(self, v: Vertex):
+        """
+        Adds the specified vertex if it is not none
+
+        Parameters
+        ----------
+        v : Vertex
+            the vertex to be added
+        """
         if v is not None:
             self._vertices.add(v)
 
