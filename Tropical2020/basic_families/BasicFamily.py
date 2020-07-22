@@ -16,15 +16,8 @@ class BasicFamily(object):
     ----------
     name : str
         an identifier for the family
-    monoid : Tropical2020.basic_families.RPC.Monoid
+    monoid : :class:`~Tropical2020.basic_families.RPC.Monoid`
         a monoid from which the edge lengths of the family are taken
-
-    Methods
-    -------
-    invalidateCaches()
-        Invalidates the vertex, genus, characteristic, and core caches
-    addVertex(v : Vertex)
-        Adds the specified vertex if it is not none
     """
 
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
@@ -35,6 +28,7 @@ class BasicFamily(object):
         name_ : str
             an identifier for the family
         """
+
         self.name = name_
         self._vertices = set()
         self._edges = set()
@@ -75,11 +69,11 @@ class BasicFamily(object):
 
     def addVertex(self, v: Vertex):
         """
-        Adds the specified vertex if it is not none
+        Adds the specified vertex if it is not ``None``
 
         Parameters
         ----------
-        v : Vertex
+        v : :class:`~Tropical2020.basic_families.Vertex.Vertex`
             the vertex to be added
         """
         if v is not None:
@@ -88,11 +82,38 @@ class BasicFamily(object):
             # Possibly need to recalculate genus/core/etc.
             self.invalidateCaches()
 
-    def addVertices(self, vertices):
+    def addVertices(self, vertices: set):
+        """
+        Adds a set of vertices
+
+        This function adds vertices by making a call to :func:`~addVertex` on each element of the vertices
+        parameter. This means that if ``None`` belongs to ``vertices``, then it will be skipped.
+
+        Parameters
+        ----------
+        vertices : set
+            A set of :class:`~Tropical2020.basic_families.Vertex` instances to be added
+        """
+
+        assert all(map(lambda x: isinstance(x, Vertex), vertices)), "vertices should be a set[Vertex]"
         for v in copy.copy(vertices):
             self.addVertex(v)
 
-    def removeVertex(self, v, removeDanglingVertices=False):
+    def removeVertex(self, v: Vertex, removeDanglingVertices: bool = False):
+        """
+        Removes a vertex and all connected edges/legs.
+
+        This function removes the specified vertex directly and removes connected edges and legs by making calls to
+        :func:`~removeEdge` and :func:`~removeLeg`.
+
+        Parameters
+        ----------
+        v : :class:`~Tropical2020.basic_families.Vertex.Vertex`
+            the vertex to be removed
+        removeDanglingVertices : bool, optional
+            whether or not to remove dangling vertices - used by :func:`~removeEdge`
+        """
+
         if v in self._vertices:
             self._vertices.remove(v)
 
@@ -105,7 +126,18 @@ class BasicFamily(object):
             # Possibly need to recalculate genus/core/etc.
             self.invalidateCaches()
 
-    def removeVertices(self, vertices):
+    def removeVertices(self, vertices: set):
+        """
+        Removes a set of vertices
+
+        This function removes the vertices in ``vertices`` by making calls to :func:`~removeVertex`.
+
+        Parameters
+        ----------
+        vertices : set
+            a set of vertices to remove
+        """
+
         for v in copy.copy(vertices):
             self.removeVertex(v)
 
@@ -115,27 +147,31 @@ class BasicFamily(object):
 
     @property
     def edgesWithVertices(self):
+        """
+        The set of vertices for which neither endpoint is `None`
+        """
+
         return {e for e in self.edges if not (e.vert1 is None or e.vert2 is None)}
 
     # Control how edges are set
     # edges_ should be a set of edges
     @edges.setter
-    def edges(self, edges_):
+    def edges(self, edges_: set):
         self._edges = edges_
         self.invalidateCaches()
 
-    def addEdge(self, e):
+    def addEdge(self, e: Edge):
         self._edges.add(e)
         self.addVertices(e.vertices)
 
         # Possibly need to recalculate genus/core/etc.
         self.invalidateCaches()
 
-    def addEdges(self, edges):
+    def addEdges(self, edges: set):
         for e in copy.copy(edges):
             self.addEdge(e)
 
-    def removeEdge(self, e, removeDanglingVertices=True):
+    def removeEdge(self, e: Edge, removeDanglingVertices: bool = True):
         if e in self._edges:
             self._edges.remove(e)
 
@@ -149,7 +185,7 @@ class BasicFamily(object):
             # Possibly need to recalculate genus/core/etc.
             self.invalidateCaches()
 
-    def removeEdges(self, edges):
+    def removeEdges(self, edges: set):
         for e in copy.copy(edges):
             self.removeEdge(e)
 
@@ -164,24 +200,24 @@ class BasicFamily(object):
     # Control how legs are set
     # legs_ should be a set of legs
     @legs.setter
-    def legs(self, legs_):
+    def legs(self, legs_: set):
         self._legs = legs_
 
         # Possibly need to recalculate genus/core/etc.
         self.invalidateCaches()
 
-    def addLeg(self, newLeg):
+    def addLeg(self, newLeg: Leg):
         self._legs.add(newLeg)
         self.addVertices(newLeg.vertices)
 
         # Possibly need to recalculate genus/core/etc.
         self.invalidateCaches()
 
-    def addLegs(self, newLegs):
+    def addLegs(self, newLegs: set):
         for newLeg in copy.copy(newLegs):
             self.addLeg(newLeg)
 
-    def removeLeg(self, badLeg, removeDanglingVertices=True):
+    def removeLeg(self, badLeg: Leg, removeDanglingVertices: bool = True):
         if badLeg in self._legs:
             self._legs.remove(badLeg)
 
@@ -195,7 +231,7 @@ class BasicFamily(object):
             # Possibly need to recalculate genus/core/etc.
             self.invalidateCaches()
 
-    def removeLegs(self, badLegs):
+    def removeLegs(self, badLegs: set):
         for badLeg in copy.copy(badLegs):
             self.removeLeg(badLeg)
 
@@ -225,19 +261,19 @@ class BasicFamily(object):
         return self._genusCache
 
     # Returns the degree of vertex v accounting for legs and self loops
-    def degree(self, v):
+    def degree(self, v: Vertex):
         return self.edgeDegree(v) + self.legDegree(v)
 
     # Returns the number of endpoints of finite edges at vertex v
-    def edgeDegree(self, v):
+    def edgeDegree(self, v: Vertex):
         return sum(1 for e in self.edges if e.vert1 == v) + sum(1 for e in self.edges if e.vert2 == v)
 
     # Returns the number of roots of legs at v
-    def legDegree(self, v):
+    def legDegree(self, v: Vertex):
         return sum(1 for attachedLeg in self.legs if attachedLeg.root == v)
 
     # Returns a copy of this curve where all vertices, edges, and legs are also copied shallowly
-    def getFullyShallowCopy(self, returnCopyInfo=False):
+    def getFullyShallowCopy(self, returnCopyInfo: bool = False):
         # copyInfo will be a dictionary whose keys are the legs, edges, and vertices of self
         # copyInfo[*] will be the copy of *
         copyInfo = {}
@@ -284,7 +320,7 @@ class BasicFamily(object):
             return curveCopy
 
     # Contract edge e in place
-    def contract(self, e):
+    def contract(self, e: Edge):
         # Don't contract a nonexistent edge
         assert e in self.edges
 
@@ -313,7 +349,7 @@ class BasicFamily(object):
         self.removeEdge(e)
 
     # Returns a new BasicFamily with edge e contracted
-    def getContraction(self, e, returnCopyInfo=False):
+    def getContraction(self, e: Edge, returnCopyInfo: bool = False):
         # To avoid accidentally modifying self, we work with a fully shallow copy
         contraction, copyInfoDict = self.getFullyShallowCopy(True)
 
@@ -328,7 +364,7 @@ class BasicFamily(object):
     # v should be a vertex
     # Returns the set of all elements of the form (e, n), where e is an edge or leg, n is 1 or 2,
     # and the n^th endpoint of e is v
-    def getEndpointsOfEdges(self, v):
+    def getEndpointsOfEdges(self, v: Vertex):
 
         endpoints = []
 
@@ -402,7 +438,7 @@ class BasicFamily(object):
         return sum(1 for e in self.edges if len(e.vertices) == 1)
 
     # Returns a list of all permutations of lst. A permutation of lst is itself a list.
-    def getPermutations(self, lst):
+    def getPermutations(self, lst: list):
         return GraphIsoHelper.getPermutations(lst)
 
     # Checks if the given data constitutes an isomorphism from self to other.
@@ -410,13 +446,13 @@ class BasicFamily(object):
     # vertices of self and other with all blocks of the partitions nonempty. The bijection f recovered from this data
     # is as follows: for each key k, and each index of domainOrderingDict[k],
     # f(domainOrderingDict[k][i]) = codomainOrderingDict[k][i].
-    def checkIfBijectionIsIsomorphism(self, other, domainOrderingDict, codomainOrderingDict):
+    def checkIfBijectionIsIsomorphism(self, other, domainOrderingDict: dict, codomainOrderingDict: dict):
         return GraphIsoHelper.checkIfBijectionIsIsomorphism(self, other, domainOrderingDict, codomainOrderingDict)
 
     # permDict should be of type Dict[Any, List[List[Vertex]]]. It should have the property that for any choice function
     # f for the values of permDict, f(k_1) + ... + f(k_n) is a permutation of self.vertices, where k_1, ..., k_n are
     # the keys of permDict. Moreover, every permutation of self.vertices should arise in this manner.
-    def getBijections(self, permDict):
+    def getBijections(self, permDict: dict):
         return GraphIsoHelper.getBijections(permDict)
 
     # Checks all bijections that preserve characteristic
