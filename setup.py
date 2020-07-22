@@ -14,6 +14,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Mat-foucher/Tropical2020",
     packages=setuptools.find_packages(),
+    install_requires=['numpy'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent"

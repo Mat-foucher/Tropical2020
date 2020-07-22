@@ -6,31 +6,25 @@
 Welcome to Tropical2020's documentation!
 ========================================
 
-.. automodule:: Tropical2020.basic_families.BasicFamily
-    :members:
-.. automodule:: Tropical2020.basic_families.Edge
-    :members:
-.. automodule:: Tropical2020.basic_families.GraphIsoHelper
-    :members:
-.. automodule:: Tropical2020.basic_families.Leg
-    :members:
-.. automodule:: Tropical2020.basic_families.PiecewiseLinearFunction
-    :members:
-.. automodule:: Tropical2020.basic_families.RPC
-    :members:
-.. automodule:: Tropical2020.basic_families.Vertex
-    :members:
-.. automodule:: Tropical2020.general_families.Family
-    :members:
-.. automodule:: Tropical2020.general_families.ModuliSpace
-    :members:
-.. automodule:: Tropical2020.general_families.PLFFamily
-    :members:
+In order to install this package, you can run the following from the command line:
 
+.. code-block:: none
+
+   git clone https://github.com/cmeredit/Tropical2020.git
+   cd Tropical2020
+   pip3 install .
+
+This will install the package and its dependencies. The cloned folder can then be deleted.
+
+If you are a developer and would like to contribute to the project, please see :ref:`dev-install`.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
+   
+   dev-install
+   contributing
+   source/modules
 
 
 
