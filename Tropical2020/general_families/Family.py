@@ -60,3 +60,60 @@ class Family(object):
             return True
 
         return filter(isMaximal, self.basicFamilies)
+
+    def subdivide(self, basicFamily: BasicFamily, elt):
+        """
+        Subdivides the family in place at ``basicFamily`` and ``elt``
+
+        This function subdivides the family in place. ``basicFamily`` is replaced with three other
+        basic families, all of which are obtained by modifying the underlying monoid of ``basicFamily``.
+        Letting ``M`` denote the monoid associated to ``basicFamily``, the three new basic families are
+        identical to ``basicFamily`` except their underlying monoids are ``M[elt]``, ``M[-elt]``, and
+        ``M[elt, -elt]``.
+
+        Parameters
+        ----------
+        basicFamily : :class:`~Tropical2020.basic_families.BasicFamily.BasicFamily`
+            the basic family at which to subdivide
+        elt : ``basicFamily.monoid.Element``
+            the element determining the subdivision
+
+        Warnings
+        --------
+        ``elt`` must be an instance of ``basicFamily``'s :class:`~Tropical2020.basic_families.RPC.Monoid`.
+        """
+
+        assert isinstance(elt, basicFamily.monoid.Element), \
+            "`elt` must be an element of `basicFamily`'s monoid."
+
+        # Copy the basic family to be subdivided
+        # todo: How do we copy monoid relations?
+        famWithElt = basicFamily.getFullyShallowCopy()
+        famWithNegElt = basicFamily.getFullyShallowCopy()
+        famWithBoth = basicFamily.getFullyShallowCopy()
+
+        # At this point, famWithElt, famWithNegElt, and famWithBoth are supposed to be ready.
+        # todo: How do we copy monoid homomorphisms?
+
+        pass
+
+    def getSubdivision(self, basicFamily: BasicFamily, elt):
+        """
+        Returns the subdivision at ``basicFamily`` and ``elt``
+
+        This function deeply copies the family, calls
+        :func:`~Tropical2020.general_families.Family.Family.subdivide` on the copy, and then returns it.
+
+        Parameters
+        ----------
+        basicFamily : :class:`~Tropical2020.basic_families.BasicFamily.BasicFamily`
+            the basic family at which to subdivide
+        elt : ``basicFamily.monoid.Element``
+            the element determining the subdivision
+
+        Warnings
+        --------
+        ``elt`` must be an instance of ``basicFamily``'s :class:`~Tropical2020.basic_families.RPC.Monoid`.
+        """
+
+        pass
