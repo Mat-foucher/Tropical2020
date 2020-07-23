@@ -89,15 +89,28 @@ class Family(object):
         # todo: How do we copy monoid relations?
         # todo: How do we copy monoid homomorphisms?
 
-        def _addElement(fam: BasicFamily, x: list) -> BasicFamily:
+        def _invertDict(d: dict) -> dict:
+            inverted = {}
+            for k in d:
+                inverted[d[k]] = k
+            return inverted
+
+        def _addElement(fam: BasicFamily, x: list) -> (BasicFamily, dict):
             famCopy, copyInfo = fam.getFullyShallowCopy(returnCopyInfo=True)
             famCopy.monoid = Monoid(fam.monoid.gens + x, fam.monoid.rels)
 
             for arrow in [arrow for arrow in self.morphisms if arrow.domain == fam]:
 
                 newMorphismDict = {}
+                invertedCopyInfo = _invertDict(copyInfo)
 
                 # Compose the inverse of the copying map with the arrow
+                for vertex in famCopy.vertices:
+                    newMorphismDict[vertex] = arrow(invertedCopyInfo[vertex])
+                for edge in famCopy.edges:
+                    newMorphismDict[edge] = arrow(invertedCopyInfo[edge])
+                for leg in famCopy.legs:
+                    newMorphismDict[leg] = arrow(invertedCopyInfo[leg])
 
                 arrowCopy = BasicFamilyMorphism(famCopy, arrow.codomain, newMorphismDict, ???)
 
@@ -119,11 +132,11 @@ class Family(object):
 
                 self.morphisms.add(arrowCopy)
 
-            return famCopy
+            return (famCopy, copyInfo)
 
-        famWithElt = _addElement(basicFamily, [elt])
-        famWithNegElt = _addElement(basicFamily, [-elt])
-        famWithBoth = _addElement(basicFamily, [elt, -elt])
+        famWithElt, copyInfoE = _addElement(basicFamily, [elt])
+        famWithNegElt, copyInfoNE = _addElement(basicFamily, [-elt])
+        famWithBoth, copyInfoB = _addElement(basicFamily, [elt, -elt])
 
         # todo: Add arrows to famWithBoth from famWithElt and famWithNegElt
 
