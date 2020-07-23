@@ -86,16 +86,46 @@ class Family(object):
         assert isinstance(elt, basicFamily.monoid.Element), \
             "`elt` must be an element of `basicFamily`'s monoid."
 
-        # Copy the basic family to be subdivided
         # todo: How do we copy monoid relations?
-        famWithElt = basicFamily.getFullyShallowCopy()
-        famWithNegElt = basicFamily.getFullyShallowCopy()
-        famWithBoth = basicFamily.getFullyShallowCopy()
-
-        # At this point, famWithElt, famWithNegElt, and famWithBoth are supposed to be ready.
         # todo: How do we copy monoid homomorphisms?
 
-        pass
+        def _addElement(fam: BasicFamily, x: list) -> BasicFamily:
+            famCopy, copyInfo = fam.getFullyShallowCopy(returnCopyInfo=True)
+            famCopy.monoid = Monoid(fam.monoid.gens + x, fam.monoid.rels)
+
+            for arrow in [arrow for arrow in self.morphisms if arrow.domain == fam]:
+
+                newMorphismDict = {}
+
+                # Compose the inverse of the copying map with the arrow
+
+                arrowCopy = BasicFamilyMorphism(famCopy, arrow.codomain, newMorphismDict, ???)
+
+                self.morphisms.add(arrowCopy)
+
+            for arrow in [arrow for arrow in self.morphisms if arrow.codomain == fam]:
+
+                newMorphismDict = {}
+
+                # Compose arrow with the copying map
+                for vertex in arrow.domain.vertices:
+                    newMorphismDict[vertex] = copyInfo[arrow[vertex]]
+                for edge in arrow.domain.edges:
+                    newMorphismDict[edge] = copyInfo[arrow(edge)]
+                for leg in arrow.domain.legs:
+                    newMorphismDict[leg] = copyInfo[arrow(leg)]
+
+                arrowCopy = BasicFamilyMorphism(arrow.domain, famCopy, newMorphismDict, ???)
+
+                self.morphisms.add(arrowCopy)
+
+            return famCopy
+
+        famWithElt = _addElement(basicFamily, [elt])
+        famWithNegElt = _addElement(basicFamily, [-elt])
+        famWithBoth = _addElement(basicFamily, [elt, -elt])
+
+        # todo: Add arrows to famWithBoth from famWithElt and famWithNegElt
 
     def getSubdivision(self, basicFamily: BasicFamily, elt):
         """
