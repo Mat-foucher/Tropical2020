@@ -95,6 +95,7 @@ class Family(object):
                 inverted[d[k]] = k
             return inverted
 
+        # Copies fam, adds everything in x to its monoid, and copies appropriate arrows
         def _addElement(fam: BasicFamily, x: list) -> (BasicFamily, dict):
             famCopy, copyInfo = fam.getFullyShallowCopy(returnCopyInfo=True)
             famCopy.monoid = Monoid(fam.monoid.gens + x, fam.monoid.rels)
@@ -132,7 +133,7 @@ class Family(object):
 
                 self.morphisms.add(arrowCopy)
 
-            return (famCopy, copyInfo)
+            return famCopy, copyInfo
 
         famWithElt, copyInfoE = _addElement(basicFamily, [elt])
         famWithNegElt, copyInfoNE = _addElement(basicFamily, [-elt])
