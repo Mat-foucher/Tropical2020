@@ -65,6 +65,13 @@ class BasicFamily(object):
     # It is the collection of vertices that are endpoints of edges or roots of legs
     @property
     def vertices(self):
+        """
+        holds a set of :class:`~Tropical2020.basic_families.Vertex.Vertex` instances.
+
+        The vertices in a basic family can not be modified without considering the edges and
+        legs of the family, so we control how they are get and set.
+        """
+
         return self._vertices
 
     def addVertex(self, v: Vertex):
@@ -143,6 +150,13 @@ class BasicFamily(object):
 
     @property
     def edges(self):
+        """
+        holds a set of :class:`~Tropical2020.basic_families.Edge.Edge` instances.
+
+        The edges in a basic family can not be modified without considering the vertices and
+        legs of the family, so we control how they are get and set.
+        """
+
         return self._edges
 
     @property
@@ -157,10 +171,27 @@ class BasicFamily(object):
     # edges_ should be a set of edges
     @edges.setter
     def edges(self, edges_: set):
+        """
+        sets the specified edges and invalidates caches
+
+        Parameters
+        ----------
+        edges_ : set
+        """
+
         self._edges = edges_
         self.invalidateCaches()
 
     def addEdge(self, e: Edge):
+        """
+        Adds the specified edge and its endpoints, and invalidates caches
+
+        Parameters
+        ----------
+        e : :class:`~Tropical2020.basic_families.Edge.Edge`
+            the edge to be added
+        """
+
         self._edges.add(e)
         self.addVertices(e.vertices)
 
@@ -168,10 +199,34 @@ class BasicFamily(object):
         self.invalidateCaches()
 
     def addEdges(self, edges: set):
+        """
+        Adds each edge in the given set
+
+        Calls `addEdge` on each edge in ``edges``.
+
+        Parameters
+        ----------
+        edges : set
+        """
+
         for e in copy.copy(edges):
             self.addEdge(e)
 
     def removeEdge(self, e: Edge, removeDanglingVertices: bool = True):
+        """
+        Removes the specified edge
+
+        Optionally, if ``removeDanglingVertices`` is set to ``True``, then after edge ``e`` is
+        removed, any vertex of degree zero will also be removed. Also invalidates caches.
+
+        Parameters
+        ----------
+        e : :class:`~Tropical2020.basic_families.Edge.Edge`
+            the edge to be removed
+        removeDanglingVertices : bool
+            whether or not to also remove dangling vertices after ``e`` is removed
+        """
+
         if e in self._edges:
             self._edges.remove(e)
 
@@ -186,6 +241,17 @@ class BasicFamily(object):
             self.invalidateCaches()
 
     def removeEdges(self, edges: set):
+        """
+        Removes each edge in the given set
+
+        Makes a call to `removeEdge` on each element of ``edges``
+
+        Parameters
+        ----------
+        edges : set
+            the set of edges to be removed
+        """
+
         for e in copy.copy(edges):
             self.removeEdge(e)
 
