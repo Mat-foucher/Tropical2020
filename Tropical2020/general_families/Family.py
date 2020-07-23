@@ -60,3 +60,27 @@ class Family(object):
             return True
 
         return filter(isMaximal, self.basicFamilies)
+
+    def subdivide(self, basicFamily: BasicFamily, elt):
+        """
+        Subdivide the family in place at ``basicFamily`` based at ``elt``
+
+        This function subdivides the family in place. ``basicFamily`` is replaced with three other
+        basic families, all of which are obtained by modifying the underlying monoid of ``basicFamily``.
+        Letting ``M`` denote the monoid associated to ``basicFamily``, the three new basic families are
+        identical to ``basicFamily`` except their underlying monoids are ``M[elt]``, ``M[-elt]``, and
+        ``M[elt, -elt]``.
+
+        Parameters
+        ----------
+        basicFamily : :class:`~Tropical2020.basic_families.BasicFamily.BasicFamily`
+            the basic family at which to subdivide
+        elt : ``basicFamily.m.Element``
+            the element determining the subdivision
+
+        Warnings
+        --------
+        ``elt`` must be an instance of ``basicFamily``'s :class:`~Tropical2020.basic_families.RPC.Monoid`.
+        """
+
+        pass
