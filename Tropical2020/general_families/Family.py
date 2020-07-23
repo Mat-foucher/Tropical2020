@@ -75,13 +75,25 @@ class Family(object):
         ----------
         basicFamily : :class:`~Tropical2020.basic_families.BasicFamily.BasicFamily`
             the basic family at which to subdivide
-        elt : ``basicFamily.m.Element``
+        elt : ``basicFamily.monoid.Element``
             the element determining the subdivision
 
         Warnings
         --------
         ``elt`` must be an instance of ``basicFamily``'s :class:`~Tropical2020.basic_families.RPC.Monoid`.
         """
+
+        assert isinstance(elt, basicFamily.monoid.Element), \
+            "`elt` must be an element of `basicFamily`'s monoid."
+
+        # Copy the basic family to be subdivided
+        # todo: How do we copy monoid relations?
+        famWithElt = basicFamily.getFullyShallowCopy()
+        famWithNegElt = basicFamily.getFullyShallowCopy()
+        famWithBoth = basicFamily.getFullyShallowCopy()
+
+        # At this point, famWithElt, famWithNegElt, and famWithBoth are supposed to be ready.
+        # todo: How do we copy monoid homomorphisms?
 
         pass
 
@@ -96,7 +108,7 @@ class Family(object):
         ----------
         basicFamily : :class:`~Tropical2020.basic_families.BasicFamily.BasicFamily`
             the basic family at which to subdivide
-        elt : ``basicFamily.m.Element``
+        elt : ``basicFamily.monoid.Element``
             the element determining the subdivision
 
         Warnings
