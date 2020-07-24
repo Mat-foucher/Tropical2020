@@ -9,15 +9,14 @@ from .Vertex import Vertex
 
 # A Combinatorial Tropical Curve has a name, set of edges, and set of legs
 class BasicFamily(object):
-    """
-    Represents a basic family of combinatorial tropical curves.
+    """Represents a basic family of combinatorial tropical curves.
 
     Attributes
     ----------
     name : str
-        an identifier for the family
+        An identifier for the family.
     monoid : :class:`~Tropical2020.basic_families.RPC.Monoid`
-        a monoid from which the edge lengths of the family are taken
+        A monoid from which the edge lengths of the family are taken.
     """
 
     # name_ should be a string identifier - only unique if the user is careful (or lucky) to make it so
@@ -26,7 +25,7 @@ class BasicFamily(object):
         Parameters
         ----------
         name_ : str
-            an identifier for the family
+            An identifier for the family.
         """
 
         self.name = name_
@@ -52,9 +51,7 @@ class BasicFamily(object):
         self._coreCache = None
 
     def invalidateCaches(self):
-        """
-        Invalidates the vertex, genus, characteristic, and core caches
-        """
+        """Invalidates the vertex, genus, characteristic, and core caches"""
 
         self._vertexCacheValid = False
         self._genusCacheValid = False
@@ -65,8 +62,7 @@ class BasicFamily(object):
     # It is the collection of vertices that are endpoints of edges or roots of legs
     @property
     def vertices(self):
-        """
-        holds a set of :class:`~Tropical2020.basic_families.Vertex.Vertex` instances.
+        """Holds a set of :class:`~Tropical2020.basic_families.Vertex.Vertex` instances.
 
         The vertices in a basic family can not be modified without considering the edges and
         legs of the family, so we control how they are get and set.
@@ -75,13 +71,12 @@ class BasicFamily(object):
         return self._vertices
 
     def addVertex(self, v: Vertex):
-        """
-        Adds the specified vertex if it is not ``None``
+        """Adds the specified vertex if it is not ``None``.
 
         Parameters
         ----------
         v : :class:`~Tropical2020.basic_families.Vertex.Vertex`
-            the vertex to be added
+            The vertex to be added.
         """
         if v is not None:
             self._vertices.add(v)
@@ -90,8 +85,7 @@ class BasicFamily(object):
             self.invalidateCaches()
 
     def addVertices(self, vertices: set):
-        """
-        Adds a set of vertices
+        """Adds the given set of vertices.
 
         This function adds vertices by making a call to :func:`~addVertex` on each element of the vertices
         parameter. This means that if ``None`` belongs to ``vertices``, then it will be skipped.
@@ -99,7 +93,7 @@ class BasicFamily(object):
         Parameters
         ----------
         vertices : set
-            A set of :class:`~Tropical2020.basic_families.Vertex` instances to be added
+            The set of :class:`~Tropical2020.basic_families.Vertex` instances to be added.
         """
 
         assert all(map(lambda x: isinstance(x, Vertex), vertices)), "vertices should be a set[Vertex]"
@@ -107,18 +101,17 @@ class BasicFamily(object):
             self.addVertex(v)
 
     def removeVertex(self, v: Vertex, removeDanglingVertices: bool = False):
-        """
-        Removes a vertex and all connected edges/legs.
+        """Removes a vertex and all connected edges/legs.
 
-        This function removes the specified vertex directly and removes connected edges and legs by making calls to
-        :func:`~removeEdge` and :func:`~removeLeg`.
+        This function removes the specified vertex directly and removes connected edges and legs
+        by making calls to :func:`~removeEdge` and :func:`~removeLeg`.
 
         Parameters
         ----------
         v : :class:`~Tropical2020.basic_families.Vertex.Vertex`
-            the vertex to be removed
+            The vertex to be removed.
         removeDanglingVertices : bool, optional
-            whether or not to remove dangling vertices - used by :func:`~removeEdge`
+            Whether or not to remove dangling vertices - used by :func:`~removeEdge`.
         """
 
         if v in self._vertices:
@@ -134,15 +127,14 @@ class BasicFamily(object):
             self.invalidateCaches()
 
     def removeVertices(self, vertices: set):
-        """
-        Removes a set of vertices
+        """Removes a set of vertices.
 
         This function removes the vertices in ``vertices`` by making calls to :func:`~removeVertex`.
 
         Parameters
         ----------
         vertices : set
-            a set of vertices to remove
+            The set of :class:`~Tropical2020.basic_families.Vertex.Vertex` instanced to remove.
         """
 
         for v in copy.copy(vertices):
@@ -150,8 +142,7 @@ class BasicFamily(object):
 
     @property
     def edges(self):
-        """
-        holds a set of :class:`~Tropical2020.basic_families.Edge.Edge` instances.
+        """Holds a set of :class:`~Tropical2020.basic_families.Edge.Edge` instances.
 
         The edges in a basic family can not be modified without considering the vertices and
         legs of the family, so we control how they are get and set.
@@ -161,8 +152,7 @@ class BasicFamily(object):
 
     @property
     def edgesWithVertices(self):
-        """
-        The set of vertices for which neither endpoint is `None`
+        """The set of vertices for which neither endpoint is `None`.
         """
 
         return {e for e in self.edges if not (e.vert1 is None or e.vert2 is None)}
@@ -171,8 +161,7 @@ class BasicFamily(object):
     # edges_ should be a set of edges
     @edges.setter
     def edges(self, edges_: set):
-        """
-        sets the specified edges and invalidates caches
+        """Sets the specified edges and invalidates caches.
 
         Parameters
         ----------
@@ -183,13 +172,12 @@ class BasicFamily(object):
         self.invalidateCaches()
 
     def addEdge(self, e: Edge):
-        """
-        Adds the specified edge and its endpoints, and invalidates caches
+        """Adds the specified edge and its endpoints, and invalidates caches.
 
         Parameters
         ----------
         e : :class:`~Tropical2020.basic_families.Edge.Edge`
-            the edge to be added
+            The edge to be added.
         """
 
         self._edges.add(e)
@@ -199,22 +187,21 @@ class BasicFamily(object):
         self.invalidateCaches()
 
     def addEdges(self, edges: set):
-        """
-        Adds each edge in the given set
+        """Adds each edge in the given set.
 
         Calls `addEdge` on each edge in ``edges``.
 
         Parameters
         ----------
         edges : set
+            The set of :class"`Tropical2020.basic_families.Edge.Edge` instances to be added.
         """
 
         for e in copy.copy(edges):
             self.addEdge(e)
 
     def removeEdge(self, e: Edge, removeDanglingVertices: bool = True):
-        """
-        Removes the specified edge
+        """Removes the specified edge.
 
         Optionally, if ``removeDanglingVertices`` is set to ``True``, then after edge ``e`` is
         removed, any vertex of degree zero will also be removed. Also invalidates caches.
@@ -222,9 +209,9 @@ class BasicFamily(object):
         Parameters
         ----------
         e : :class:`~Tropical2020.basic_families.Edge.Edge`
-            the edge to be removed
+            The edge to be removed.
         removeDanglingVertices : bool
-            whether or not to also remove dangling vertices after ``e`` is removed
+            Whether or not to also remove dangling vertices after ``e`` is removed.
         """
 
         if e in self._edges:
@@ -241,15 +228,14 @@ class BasicFamily(object):
             self.invalidateCaches()
 
     def removeEdges(self, edges: set):
-        """
-        Removes each edge in the given set
+        """Removes each edge in the given set.
 
-        Makes a call to `removeEdge` on each element of ``edges``
+        Makes a call to `removeEdge` on each element of ``edges``.
 
         Parameters
         ----------
         edges : set
-            the set of edges to be removed
+            The set of edges to be removed.
         """
 
         for e in copy.copy(edges):
@@ -315,11 +301,34 @@ class BasicFamily(object):
 
     # The Betti number is a read only property computed upon access
     @property
-    def bettiNumber(self):
+    def bettiNumber(self) -> int:
+        """The Betti number of the curve (computed on access).
+
+        This is computed as the number of edges (with vertices),
+        minus the number of vertices, plus one.
+
+        Returns
+        -------
+        int
+            The Betti number of the curve.
+        """
+
         return self.numEdgesWithVertices - self.numVertices + 1
 
     @property
-    def genus(self):
+    def genus(self) -> int:
+        """The (possibly cached) genus of the curve.
+
+        This is computed as the :func:`Betti number <bettiNumber>` of the curve plus
+        the genuses of each vertex. If a cached copy of the genus is available, then
+        it is used. Otherwise, a new value is computed and cached.
+
+        Returns
+        -------
+        int
+            The genus of the curve.
+        """
+
         # If the cached copy of genus is invalid, then recalculate it
         if not self._genusCacheValid:
             self._genusCache = self.bettiNumber + sum([v.genus for v in self.vertices])
@@ -327,19 +336,79 @@ class BasicFamily(object):
         return self._genusCache
 
     # Returns the degree of vertex v accounting for legs and self loops
-    def degree(self, v: Vertex):
+    def degree(self, v: Vertex) -> int:
+        """The number of endpoints of edges and legs at ``v``.
+
+        Parameters
+        ----------
+        v : :class:`~Tropical2020.basic_families.Vertex.Vertex`
+            The vertex whose degree is to be computed.
+
+        Returns
+        -------
+        int
+            The degree of the supplied vertex.
+        """
+
         return self.edgeDegree(v) + self.legDegree(v)
 
     # Returns the number of endpoints of finite edges at vertex v
-    def edgeDegree(self, v: Vertex):
+    def edgeDegree(self, v: Vertex) -> int:
+        """The number of endpoints of finite edges at ``v``.
+
+        Parameters
+        ----------
+        v : :class:`~Tropical2020.basic_families.Vertex.Vertex`
+            The vertex whose (edge) degree is to be computed.
+
+        Returns
+        -------
+        int
+            The (edge) degree of the supplied vertex.
+        """
+
         return sum(1 for e in self.edges if e.vert1 == v) + sum(1 for e in self.edges if e.vert2 == v)
 
     # Returns the number of roots of legs at v
     def legDegree(self, v: Vertex):
+        """The number of legs rooted at ``v``.
+
+        Parameters
+        ----------
+        v : :class:`~Tropical2020.basic_families.Vertex.Vertex`
+            The vertex whose (leg) degree is to be computed.
+
+        Returns
+        -------
+        int
+            The (leg) degree of the supplied vertex.
+        """
+
         return sum(1 for attachedLeg in self.legs if attachedLeg.root == v)
 
     # Returns a copy of this curve where all vertices, edges, and legs are also copied shallowly
     def getFullyShallowCopy(self, returnCopyInfo: bool = False):
+        """Returns a copy of this family where all vertices, edges, and legs are also copied.
+
+        Creates and returns a fully shallow copy of this family. This means that all vertices,
+        edges, and legs are also copied. If the optional parameter ``returnCopyInfo`` is
+        set to ``True``, then some information about the copying is returned as well. Specifically,
+        a dictionary is also returned whose keys are the vertices, edges, and legs of the original
+        family, and the values are the copied versions of those vertices, edges, and legs.
+
+        Parameters
+        ----------
+        returnCopyInfo : bool, optional
+            Whether or not to track and return how the copying was performed.
+
+        Returns
+        -------
+        BasicFamily, dict (optional)
+            The copied family and optionally, the copy information.
+        """
+
+        # todo: Use the monoid copying function once it's written.
+
         # copyInfo will be a dictionary whose keys are the legs, edges, and vertices of self
         # copyInfo[*] will be the copy of *
         copyInfo = {}
