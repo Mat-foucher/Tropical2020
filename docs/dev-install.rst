@@ -6,7 +6,9 @@ Installation for Developers
 This guide will show you how to install the project using the command line.
 
 This project uses `Sphinx <https://www.sphinx-doc.org/en/master/>`_ to automatically generate documentation from
-`Numpy docstrings <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_. This documentation
+`Numpy docstrings <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_
+(examples can be found `here <https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html>`_).
+This documentation
 is used by `GitHub Pages <https://pages.github.com/>`_ to host the documentation you're reading right now. For this
 reason, the generated documentation is kept in its dedicated ``gh-pages`` branch.
 
