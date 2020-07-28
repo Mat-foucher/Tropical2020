@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 from .GraphIsoHelper import *
 from .RPC import *
 
@@ -312,7 +313,7 @@ class BasicFamily(object):
         removeDanglingVertices : bool
             Whether or not to also remove dangling vertices after ``leg`` is removed.
         """
-        
+
         if leg in self._legs:
             self._legs.remove(leg)
 
@@ -702,45 +703,55 @@ class BasicFamily(object):
 
     # This function will check if the tropical curve is connected (in the style of Def 3.10)
     @property
-    def isConnected(self):
+    def isConnected(self) -> bool:
+        """Computes whether or not the basic family is connected.
 
+        This function computes the `connected component <https://en.wikipedia.org/wiki/Component_(graph_theory)>`_
+        of an arbitrarily chosen vertex. The basic family is connected if and only if this connected component
+        is the whole family.
+
+        Returns
+        -------
+        bool
+            ``True`` if the family is connected, ``False`` otherwise.
+        """
+
+        # Fix an ordering of the vertices
+        vertex_list = list(self.vertices)
+
+        # Construct the (symmetric) adjacency matrix ``A``
         A = np.zeros((self.numVertices, self.numVertices))
-        _vertices = list(self.vertices)
+        for edge in self.edges:
+            i = vertex_list.index(edge.vert1)
+            j = vertex_list.index(edge.vert2)
 
-        for x in self.edges:
-            v1 = x.vert1
-            v2 = x.vert2
-
-            i = _vertices.index(v1)
-            j = _vertices.index(v2)
-
-            # print(i, j)
-            # So that the connections made by the edges are symmetric ((v1,v2) = (v2,v1))
+            # Record the connection
             A[i][j] = 1
             A[j][i] = 1
 
-        # So that the while loop works
-        go = True
-        numbers = []
-        newNumbers = [0]
+        # In order to test for connectedness, we start at an arbitrary vertex (in this case, whichever vertex has
+        # index 0) and travel to any adjacent vertex that has not yet been visited. This continues until every vertex
+        # in the connected component of the starting vertex has been visited.
 
-        while go:
-            numbers.extend(newNumbers)
-            brandNewNumbers = []
-            for i in newNumbers:
-                for k in range(self.numVertices):
-                    if A[i][k] == 1:
-                        if k not in numbers:
-                            brandNewNumbers.append(k)
+        # Initialize the visited and new indices
+        visitedVertexIndices = set()
+        newIndices = {0}
 
-            newNumbers = []
-            newNumbers.extend(brandNewNumbers)
-            brandNewNumbers = []
-            go = len(newNumbers) > 0
+        # While there are still new indices, visit them and search for more
+        while newIndices:
+            # Add the indices we found in the previous loop
+            visitedVertexIndices |= newIndices
 
-        return len(numbers) == self.numVertices
+            # All potential connections from elements of ``newIndices`` to some other index
+            possibleConnections = itertools.product(newIndices, range(self.numVertices))
 
+            # Collect all indices that (1) are connected to some element of ``newIndices`` and (2) have not yet been
+            # visited
+            newIndices = {k for (i, k) in possibleConnections if k not in visitedVertexIndices and A[i][k]}
 
+        # Compare the size of the connected component of the starting vertex to the total number of vertices. The
+        # family is connected if and only if the connected component of the starting vertex is the whole family.
+        return len(visitedVertexIndices) == self.numVertices
 
     @property
     def core(self):
@@ -870,8 +881,6 @@ class BasicFamily(object):
                 currentTree = currentTree.parent
 
             return ancestorEdges
-
-
 
     @property
     def spanningTree(self):
