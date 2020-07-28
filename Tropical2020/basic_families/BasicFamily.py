@@ -141,7 +141,7 @@ class BasicFamily(object):
             self.removeVertex(v)
 
     @property
-    def edges(self):
+    def edges(self) -> set:
         """Holds a set of :class:`~Tropical2020.basic_families.Edge.Edge` instances.
 
         The edges in a basic family can not be modified without considering the vertices and
@@ -151,8 +151,8 @@ class BasicFamily(object):
         return self._edges
 
     @property
-    def edgesWithVertices(self):
-        """The set of vertices for which neither endpoint is `None`.
+    def edgesWithVertices(self) -> set:
+        """The set of edges for which neither endpoint is `None`.
         """
 
         return {e for e in self.edges if not (e.vert1 is None or e.vert2 is None)}
@@ -167,6 +167,8 @@ class BasicFamily(object):
         ----------
         edges_ : set
         """
+
+        assert all(map(lambda x: isinstance(x, Edge), edges_)), "Every element of `edges_` must be an edge."
 
         self._edges = edges_
         self.invalidateCaches()
@@ -242,23 +244,43 @@ class BasicFamily(object):
             self.removeEdge(e)
 
     @property
-    def legs(self):
+    def legs(self) -> set:
+        """Holds a set of :class:`~Tropical2020.basic_families.Leg.Leg` instances.
+
+        The legs in a basic family can not be modified without considering the vertices and
+        edges of the family, so we control how they are get and set.
+        """
+
         return self._legs
 
     @property
     def legsWithVertices(self):
+        """The set of legs whose root is not `None`.
+        """
+
         return {nextLeg for nextLeg in self.legs if nextLeg.root is not None}
 
     # Control how legs are set
     # legs_ should be a set of legs
     @legs.setter
     def legs(self, legs_: set):
+        """Updates the legs property to the supplied set and invalidates caches.
+        """
+
         self._legs = legs_
 
         # Possibly need to recalculate genus/core/etc.
         self.invalidateCaches()
 
     def addLeg(self, newLeg: Leg):
+        """Adds the supplied leg and its root and invalidates caches.
+
+        Parameters
+        ----------
+        newLeg : :class:`~Tropical2020.basic_families.Leg.Leg`
+            The leg to be added.
+        """
+
         self._legs.add(newLeg)
         self.addVertices(newLeg.vertices)
 
@@ -266,37 +288,77 @@ class BasicFamily(object):
         self.invalidateCaches()
 
     def addLegs(self, newLegs: set):
+        """Adds each of the specified legs by making calls to :func:`addLeg`.
+
+        Parameters
+        ----------
+        newLegs : set
+            The legs to be added.
+        """
+
         for newLeg in copy.copy(newLegs):
             self.addLeg(newLeg)
 
-    def removeLeg(self, badLeg: Leg, removeDanglingVertices: bool = True):
-        if badLeg in self._legs:
-            self._legs.remove(badLeg)
+    def removeLeg(self, leg: Leg, removeDanglingVertices: bool = True):
+        """Removes the specified leg.
+
+        Optionally, if ``removeDanglingVertices`` is set to ``True``, then after edge ``leg`` is
+        removed, any vertex of degree zero will also be removed. Also invalidates caches.
+
+        Parameters
+        ----------
+        leg : :class:`~Tropical2020.basic_families.Leg.Leg`
+            The leg to be removed.
+        removeDanglingVertices : bool
+            Whether or not to also remove dangling vertices after ``leg`` is removed.
+        """
+        
+        if leg in self._legs:
+            self._legs.remove(leg)
 
             # The root of a leg is "dangling" if it becomes isolated after removing the leg
             # By default, removing a leg removes such a vertex
             if removeDanglingVertices:
-                for v in badLeg.vertices:
+                for v in leg.vertices:
                     if self.degree(v) == 0:
                         self.removeVertex(v)
 
             # Possibly need to recalculate genus/core/etc.
             self.invalidateCaches()
 
-    def removeLegs(self, badLegs: set):
-        for badLeg in copy.copy(badLegs):
+    def removeLegs(self, legs: set):
+        """Removes each leg in the given set.
+
+        Makes a call to :func:`removeLeg` on each element of ``legs``.
+
+        Parameters
+        ----------
+        legs : set
+            The set of legs to be removed.
+        """
+
+        for badLeg in copy.copy(legs):
             self.removeLeg(badLeg)
 
     @property
-    def numVertices(self):
+    def numVertices(self) -> int:
+        """The number of vertices in the basic family.
+        """
+
         return len(self.vertices)
 
     @property
-    def numEdges(self):
+    def numEdges(self) -> int:
+        """The number of edges in the basic family.
+        """
+
         return len(self.edges)
 
     @property
-    def numEdgesWithVertices(self):
+    def numEdgesWithVertices(self) -> int:
+        """The number of edges with both endpoints in the basic family.
+        """
+
         return len(self.edgesWithVertices)
 
     # The Betti number is a read only property computed upon access
