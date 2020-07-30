@@ -3,32 +3,26 @@ import pdb
 
 def test_RPC():
 
-    M = Monoid()
-    X = "x"
-    Y = "y"
-    M.addgen(X)
-    M.addgen(Y)
-    x = M.Element({X:1})
-    y = M.Element({Y:1})
+	X = "x"
+	Y = "y"
+	M = Monoid([X,Y])
 
-    assert not M.eq(x,y)
+	x = M.Element({X:1})
+	y = M.Element({Y:1})
 
-    M.addrel(x-y)
+	assert not M.eq(x,y)
 
-    assert M.eq(x,y)
+	N = M.extend(rels=[x-y])
 
-
-    P = Monoid()
-    P.addgen(1)
-    P.addgen(2)
-    P.addgen(3)
-    x = P.Element({1:1})
-    y = P.Element({2:1})
-    z = P.Element({3:1})
-    P.addrel(x + y - 2 * z)
+	F = MonoidHomomorphism(M,N)	
+	
+	assert N.eq(F(x),F(y))
 
 
-    P.compute_dual()
+	P = Monoid([1,2,3],[{1:1,2:1,3:-2}])
+	x = P.Element({1:1})
+	y = P.Element({2:1})
+	z = P.Element({3:1})
 
 
-    w = y - x
+	w = y - x
