@@ -12,19 +12,7 @@ def lcm( a, b ):
 	return a*b/gcd(a,b)
 
 class Monoid( object ):
-	def __init__( m, gens=[], rels={} ):
-		m.gens = list( gens )		# must store as a list so iterations 
-									# are always in the same order
-									# this should be changd to a tuple
-
-		m.rels = { }
-
-		m.dual = None
-
-		for R in rels:
-			m.addrel( R )
-
-		m.compute_dual()
+	def __init__( m, gens=[], rels=[] ):
 
 		class Element( object ):
 			# elements here mean elements of the associated group
@@ -91,15 +79,26 @@ class Monoid( object ):
 			
 		m.Element = Element
 
+		m.gens = list( gens )		
+
+		m.rels = { }
+
+		m.dual = None
+
+		for R in rels:
+			m.__addrel( R )
+
+		m.__compute_dual()
+
 	def zero( self ):
 		return self.Element( { } )
 
+	def extend( M, gens=[], rels=[] ): 
+		return Monoid( M.gens + gens, list(M.rels) + rels )
 
-	def addgen( self, gen ):			# this should be removed;
-										# just make this part of __init__
-		self.gens.append( gen )
-
-	def addrel( self, rel ):
+	def __addrel( self, rel ):
+		# if rel passed as dict, convert to element
+		if type(rel) == dict: rel = self.Element( rel )
 		for x in self.gens:
 			if x in self.rels.keys():
 				# if there is already a relation with an x coefficient,
@@ -114,11 +113,9 @@ class Monoid( object ):
 				for v in rel.coeffs.values(): d = math.gcd(d,v)
 				self.rels[x] = rel // d
 				break
-		if self.dual:   # if the dual has already been computed, we need to
-						# recompute because the relations have changed
-			self.compute_dual()
 
-	def compute_dual( M ):
+	# this should be private
+	def __compute_dual( M ):
 		M.dual = set()
 
 		basis = [ x for x in M.gens if x not in M.rels.keys() ]
@@ -237,9 +234,13 @@ class Monoid( object ):
 		return sum( ( x[z] * A[z] for z in x.coeffs ), M.zero() )
 
 class MonoidHomomorphism( object ):
-	def __init__( F, domain, codomain, matrix ):
+	def __init__( F, domain, codomain, matrix=None ):
 		assert isinstance( domain, Monoid )
 		assert isinstance( codomain, Monoid )
+
+		if matrix == None:
+			matrix = { x : codomain.Element({x:1}) for x in domain.gens }
+
 		assert isinstance( matrix, dict )
 		assert set( matrix.keys() ) == set( domain.gens )
 		assert all( ( isinstance( matrix[x], codomain.Element ) 
