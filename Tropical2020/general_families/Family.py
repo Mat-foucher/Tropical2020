@@ -1,10 +1,12 @@
-from typing import Dict
+from typing import Any, Dict, Iterator, Set, Tuple
 
-from ..basic_families.PiecewiseLinearFunction import *
+from ..basic_families.BasicFamily import BasicFamily
+from ..basic_families.BasicFamily import BasicFamilyMorphism
+from ..basic_families.RPC import MonoidHomomorphism
 
 
 class Family(object):
-    def __init__(self, basicFamilies, morphisms):
+    def __init__(self, basicFamilies: Set[BasicFamily], morphisms: Set[BasicFamilyMorphism]) -> None:
 
         # Type checking
         if not isinstance(basicFamilies, set):
@@ -21,13 +23,13 @@ class Family(object):
         self.morphisms = morphisms
 
     # Returns the set of ancestors of the given basic family
-    def getAncestors(self, basicFamily):
+    def getAncestors(self, basicFamily: BasicFamily) -> Set[BasicFamily]:
 
         # Type checking
         assert isinstance(basicFamily, BasicFamily)
 
         # Get the morphisms that map into the given basic family
-        def isIncoming(morphism):
+        def isIncoming(morphism: BasicFamilyMorphism) -> bool:
             return morphism.codomain == basicFamily
         incomingArrows = filter(isIncoming, self.morphisms)
 
@@ -35,21 +37,22 @@ class Family(object):
         return {arrow.domain for arrow in incomingArrows}
 
     # Returns the maximal ancestors of the given basic family
-    def getMaximalAncestors(self, basicFamily):
+    def getMaximalAncestors(self, basicFamily: BasicFamily) -> Set[BasicFamily]:
 
         # Type checking
         assert isinstance(basicFamily, BasicFamily)
 
         # Get the morphisms that map into the given basic family from a maximal family
-        def isIncoming(morphism):
+        def isIncoming(morphism: BasicFamilyMorphism) -> bool:
             return morphism.codomain == basicFamily
-        incomingArrows = filter(isIncoming, self.maximalCurvesIter())
+        incomingArrowDomains: Set[BasicFamily] = {arrow.domain for arrow in filter(isIncoming, self.morphisms)}
 
-        # Get the set of domains of the morphisms that map into the given basic family
-        return {arrow.domain for arrow in incomingArrows}
+        maximalCurves = list(self.maximalCurvesIter())
+
+        return {fam for fam in incomingArrowDomains if fam in maximalCurves}
 
     # Returns an iterator of all basic families that are not contractions of any other family
-    def maximalCurvesIter(self):
+    def maximalCurvesIter(self) -> Iterator[BasicFamily]:
 
         def isMaximal(basicFam):
 
@@ -132,7 +135,7 @@ class Family(object):
 
                     # Compose arrow with the copying map
                     for vertex in arrow.domain.vertices:
-                        newMorphismDict[vertex] = copyInfo[arrow[vertex]]
+                        newMorphismDict[vertex] = copyInfo[arrow(vertex)]
                     for edge in arrow.domain.edges:
                         newMorphismDict[edge] = copyInfo[arrow(edge)]
                     for leg in arrow.domain.legs:
