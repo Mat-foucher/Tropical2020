@@ -26,5 +26,6 @@ guidelines for contributing to the project.
     4. Merge your feature branch into ``base_branch``.
     5. If ``base_branch`` is ``master``, then navigate to ``project/Tropical2020-docs/html``, add and commit any
        changes, and push to ``gh-pages``.
+
   Congratulations! Your feature is now part of ``base_branch``! If ``base_branch`` was ``master``, then your changes
   are now also reflected in the project documentation.

@@ -15,8 +15,6 @@ For automatically generated documentation, please see [this website](https://cme
 
 ## Introduction <a name="Introduction"></a>
 
-For automatically generated documentation, see [these files](docs/_build/markdown/index.md).
-
 ### What is the code, and how to use it:
 
 The code for this project is divided into separate files, each for different classes that implement objects from the 
