@@ -521,18 +521,17 @@ class BasicFamily(object):
     def contract(self, e: Edge) -> None:
 
         """Contracts an edge in place on the basic family.
+
         The assertion is made that the edge exists, else an error is raised.
-        If the edge is a self loop, then the genus contribution of the loop will be placed in the new vertex. If the edge is NOT a self loop, then we have that the new vertex only bears the genus of the endpoints.
+        If the edge is a self loop, then the genus contribution of the loop will be placed in the new vertex.
+        If the edge is NOT a self loop, then we have that the new vertex only bears the genus of the endpoints.
+
         Furthermore, each edge or leg adjacent to the edge has their endpoints moved to the contraction of the edge.
 
         Parameters
         ----------
         e : :class:`~Tropical2020.basic_families.Edge.Edge`
             The edge to be contracted.
-        Returns
-        -------
-        contraction, copyInfoDict (optional)
-            The new basic family with ``e`` contracted and copyInfoDict (optional), a fully shallow copy of the basic family (self).
         """
         # Don't contract a nonexistent edge
         assert e in self.edges
@@ -564,16 +563,22 @@ class BasicFamily(object):
     # Returns a new BasicFamily with edge e contracted
     def getContraction(self, e: Edge, returnCopyInfo: bool = False):
 
-        """Returns a new BasicFamily with the edge e contracted.
+        """Returns a new BasicFamily with the edge ``e`` contracted.
+
         To avoid accidentally modifying self, we use a fully shallow copy.
 
         Parameters
         ----------
         e : :class:`~Tropical2020.basic_families.Edge.Edge`
             The edge to be contracted in the new BasicFamily.
-        
-        bool returnCopyInfo
-            returns the 
+        returnCopyInfo : bool (optional)
+            Whether or not to track and return how the copying was performed.
+
+        Returns
+        -------
+        BasicFamily, Dict (optional)
+            The new basic family with ``e`` contracted and copyInfoDict (optional),
+            a fully shallow copy of the basic family (self).
         """
 
         # To avoid accidentally modifying self, we work with a fully shallow copy
