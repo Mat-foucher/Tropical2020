@@ -1,3 +1,5 @@
+from typing import Dict
+
 from ..basic_families.PiecewiseLinearFunction import *
 
 
@@ -86,78 +88,86 @@ class Family(object):
         assert isinstance(elt, basicFamily.monoid.Element), \
             "`elt` must be an element of `basicFamily`'s monoid."
 
-        # todo: How do we copy monoid relations?
-        # todo: How do we copy monoid homomorphisms?
-
         def _invertDict(d: dict) -> dict:
             inverted = {}
             for k in d:
                 inverted[d[k]] = k
             return inverted
 
+        # returns g \circ f
+        def _composeDicts(g: Dict[Any, Any], f: Dict[Any, Any]) -> Dict[Any, Any]:
+            newDict = {}
+            for key in f:
+                newDict[key] = g[f[key]]
+            return newDict
+
         # Copies fam, adds everything in x to its monoid, and copies appropriate arrows
-        def _addElement(fam: BasicFamily, x: list) -> (BasicFamily, dict):
+        def _addElement(fam: BasicFamily, x: list) -> Tuple[BasicFamily, dict]:
             famCopy, copyInfo = fam.getFullyShallowCopy(returnCopyInfo=True)
-            famCopy.monoid = Monoid(fam.monoid.gens + x, fam.monoid.rels)
+            famCopy.monoid = famCopy.monoid.extend(gens=x)
 
-            for arrow in [arrow for arrow in self.morphisms if arrow.domain == fam]:
+            for arrow in self.morphisms:
+                if arrow.domain == fam:
+                    newMorphismDict = {}
+                    invertedCopyInfo = _invertDict(copyInfo)
 
-                newMorphismDict = {}
-                invertedCopyInfo = _invertDict(copyInfo)
+                    # Compose the inverse of the copying map with the arrow
+                    for vertex in famCopy.vertices:
+                        newMorphismDict[vertex] = arrow(invertedCopyInfo[vertex])
+                    for edge in famCopy.edges:
+                        newMorphismDict[edge] = arrow(invertedCopyInfo[edge])
+                    for leg in famCopy.legs:
+                        newMorphismDict[leg] = arrow(invertedCopyInfo[leg])
 
-                # Compose the inverse of the copying map with the arrow
-                for vertex in famCopy.vertices:
-                    newMorphismDict[vertex] = arrow(invertedCopyInfo[vertex])
-                for edge in famCopy.edges:
-                    newMorphismDict[edge] = arrow(invertedCopyInfo[edge])
-                for leg in famCopy.legs:
-                    newMorphismDict[leg] = arrow(invertedCopyInfo[leg])
+                    newMonoidMorphismMatrix = arrow.monoidMorphism.matrix
+                    for gen in x:
+                        newMonoidMorphismMatrix[gen] = arrow(gen)
 
-                #arrowCopy = BasicFamilyMorphism(famCopy, arrow.codomain, newMorphismDict, ???)
+                    arrowCopy = BasicFamilyMorphism(famCopy, arrow.codomain, newMorphismDict, newMonoidMorphismMatrix)
 
-                #self.morphisms.add(arrowCopy)
+                    self.morphisms.add(arrowCopy)
 
-            for arrow in [arrow for arrow in self.morphisms if arrow.codomain == fam]:
+                elif arrow.codomain == fam:
+                    newMorphismDict = {}
 
-                newMorphismDict = {}
+                    # Compose arrow with the copying map
+                    for vertex in arrow.domain.vertices:
+                        newMorphismDict[vertex] = copyInfo[arrow[vertex]]
+                    for edge in arrow.domain.edges:
+                        newMorphismDict[edge] = copyInfo[arrow(edge)]
+                    for leg in arrow.domain.legs:
+                        newMorphismDict[leg] = copyInfo[arrow(leg)]
 
-                # Compose arrow with the copying map
-                for vertex in arrow.domain.vertices:
-                    newMorphismDict[vertex] = copyInfo[arrow[vertex]]
-                for edge in arrow.domain.edges:
-                    newMorphismDict[edge] = copyInfo[arrow(edge)]
-                for leg in arrow.domain.legs:
-                    newMorphismDict[leg] = copyInfo[arrow(leg)]
+                    # In this case, we just need to extend the codomain
+                    newMonoidMorphism = MonoidHomomorphism(arrow.domain.monoid, fam.monoid, arrow.monoidMorphism.matrix)
 
-                #arrowCopy = BasicFamilyMorphism(arrow.domain, famCopy, newMorphismDict, ???)
+                    arrowCopy = BasicFamilyMorphism(arrow.domain, famCopy, newMorphismDict, newMonoidMorphism)
 
-                #self.morphisms.add(arrowCopy)
+                    self.morphisms.add(arrowCopy)
 
+            self.basicFamilies.add(famCopy)
             return famCopy, copyInfo
 
         famWithElt, copyInfoE = _addElement(basicFamily, [elt])
         famWithNegElt, copyInfoNE = _addElement(basicFamily, [-elt])
         famWithBoth, copyInfoB = _addElement(basicFamily, [elt, -elt])
 
-        # todo: Add arrows to famWithBoth from famWithElt and famWithNegElt
+        self.basicFamilies.remove(basicFamily)
 
-    def getSubdivision(self, basicFamily: BasicFamily, elt):
-        """
-        Returns the subdivision at ``basicFamily`` and ``elt``
+        # Determines how elements of famWithElt correspond to famWithBoth
+        arrowEltToBoth: BasicFamilyMorphism = BasicFamilyMorphism(
+            famWithElt,
+            famWithBoth,
+            _composeDicts(copyInfoB, _invertDict(copyInfoE)),
+            MonoidHomomorphism(famWithElt.monoid, famWithBoth.monoid)
+        )
+        self.morphisms.add(arrowEltToBoth)
 
-        This function deeply copies the family, calls
-        :func:`~Tropical2020.general_families.Family.Family.subdivide` on the copy, and then returns it.
-
-        Parameters
-        ----------
-        basicFamily : :class:`~Tropical2020.basic_families.BasicFamily.BasicFamily`
-            the basic family at which to subdivide
-        elt : ``basicFamily.monoid.Element``
-            the element determining the subdivision
-
-        Warnings
-        --------
-        ``elt`` must be an instance of ``basicFamily``'s :class:`~Tropical2020.basic_families.RPC.Monoid`.
-        """
-
-        pass
+        # Determines how elements of famWithNegElt correspond to famWithBoth
+        arrowNegEltToBoth: BasicFamilyMorphism = BasicFamilyMorphism(
+            famWithNegElt,
+            famWithBoth,
+            _composeDicts(copyInfoB, _invertDict(copyInfoNE)),
+            MonoidHomomorphism(famWithNegElt.monoid, famWithBoth.monoid)
+        )
+        self.morphisms.add(arrowNegEltToBoth)
