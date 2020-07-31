@@ -288,7 +288,8 @@ class TropicalModuliSpace(object):
             else:
                 e.root = v2
 
-        curve.monoid.addgen("(Edge splitting " + vert.name + ")")
+        # curve.monoid.addgen("(Edge splitting " + vert.name + ")")
+        curve.monoid = curve.monoid.extend(gens=["(Edge splitting " + vert.name + ")"])
         newLength = curve.monoid.Element({"(Edge splitting " + vert.name + ")": 1})
         e = Edge("(Edge splitting " + vert.name + ")", newLength, v1, v2)
 
@@ -329,7 +330,8 @@ class TropicalModuliSpace(object):
             else:
                 e.root = v
 
-        curve.monoid.addgen("(Genus reduction loop for " + vert.name + ")")
+        #curve.monoid.addgen("(Genus reduction loop for " + vert.name + ")")
+        curve.monoid = curve.monoid.extend(gens=["(Genus reduction loop for " + vert.name + ")"])
         newLength = curve.monoid.Element({"(Genus reduction loop for " + vert.name + ")": 1})
         e = Edge("(Genus reduction loop for " + vert.name + ")", newLength, v, v)
 

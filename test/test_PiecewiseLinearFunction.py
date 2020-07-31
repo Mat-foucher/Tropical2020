@@ -19,22 +19,14 @@ class SPLFTests:
 
 
 # Set up a free monoid for sake of convenience
-freeMonoid = Monoid()
-freeMonoid.addgen("a")
+freeMonoid = Monoid(gens=["a", "b", "c", "d", "e", "f", "g", "h"])
 freeElementA = freeMonoid.Element({"a": 1})
-freeMonoid.addgen("b")
 freeElementB = freeMonoid.Element({"b": 1})
-freeMonoid.addgen("c")
 freeElementC = freeMonoid.Element({"c": 1})
-freeMonoid.addgen("d")
 freeElementD = freeMonoid.Element({"d": 1})
-freeMonoid.addgen("e")
 freeElementE = freeMonoid.Element({"e": 1})
-freeMonoid.addgen("f")
 freeElementF = freeMonoid.Element({"f": 1})
-freeMonoid.addgen("g")
 freeElementG = freeMonoid.Element({"g": 1})
-freeMonoid.addgen("h")
 freeElementH = freeMonoid.Element({"h": 1})
 
 

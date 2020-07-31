@@ -113,9 +113,9 @@ class Family(object):
                 for leg in famCopy.legs:
                     newMorphismDict[leg] = arrow(invertedCopyInfo[leg])
 
-                arrowCopy = BasicFamilyMorphism(famCopy, arrow.codomain, newMorphismDict, ???)
+                #arrowCopy = BasicFamilyMorphism(famCopy, arrow.codomain, newMorphismDict, ???)
 
-                self.morphisms.add(arrowCopy)
+                #self.morphisms.add(arrowCopy)
 
             for arrow in [arrow for arrow in self.morphisms if arrow.codomain == fam]:
 
@@ -129,9 +129,9 @@ class Family(object):
                 for leg in arrow.domain.legs:
                     newMorphismDict[leg] = copyInfo[arrow(leg)]
 
-                arrowCopy = BasicFamilyMorphism(arrow.domain, famCopy, newMorphismDict, ???)
+                #arrowCopy = BasicFamilyMorphism(arrow.domain, famCopy, newMorphismDict, ???)
 
-                self.morphisms.add(arrowCopy)
+                #self.morphisms.add(arrowCopy)
 
             return famCopy, copyInfo
 
