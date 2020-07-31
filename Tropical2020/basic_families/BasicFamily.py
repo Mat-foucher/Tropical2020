@@ -471,8 +471,6 @@ class BasicFamily(object):
             The copied family and optionally, the copy information.
         """
 
-        # todo: Use the monoid copying function once it's written.
-
         # copyInfo will be a dictionary whose keys are the legs, edges, and vertices of self
         # copyInfo[*] will be the copy of *
         copyInfo: Dict[Union[Vertex, Leg, Edge], Union[Vertex, Leg, Edge]] = {}
@@ -511,7 +509,7 @@ class BasicFamily(object):
         curveCopy = BasicFamily(self.name)
         curveCopy.addEdges(edgeCopies)
         curveCopy.addLegs(legCopies)
-        curveCopy.monoid = copy.copy(self.monoid)
+        curveCopy.monoid = self.monoid
 
         if returnCopyInfo:
             return curveCopy, copyInfo
