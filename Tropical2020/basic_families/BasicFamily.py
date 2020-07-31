@@ -154,13 +154,6 @@ class BasicFamily(object):
 
         return self._edges
 
-    @property
-    def edgesWithVertices(self) -> Set[Edge]:
-        """The set of edges for which neither endpoint is `None`.
-        """
-
-        return {e for e in self.edges if not (e.vert1 is None or e.vert2 is None)}
-
     # Control how edges are set
     @edges.setter
     def edges(self, edges_: Set[Edge]) -> None:
@@ -175,6 +168,13 @@ class BasicFamily(object):
 
         self._edges = edges_
         self.invalidateCaches()
+
+    @property
+    def edgesWithVertices(self) -> Set[Edge]:
+        """The set of edges for which neither endpoint is `None`.
+        """
+
+        return {e for e in self.edges if not (e.vert1 is None or e.vert2 is None)}
 
     def addEdge(self, e: Edge) -> None:
         """Adds the specified edge and its endpoints, and invalidates caches.
@@ -256,13 +256,6 @@ class BasicFamily(object):
 
         return self._legs
 
-    @property
-    def legsWithVertices(self) -> Set[Leg]:
-        """The set of legs whose root is not `None`.
-        """
-
-        return {nextLeg for nextLeg in self.legs if nextLeg.root is not None}
-
     # Control how legs are set
     @legs.setter
     def legs(self, legs_: Set[Leg]) -> None:
@@ -273,6 +266,13 @@ class BasicFamily(object):
 
         # Possibly need to recalculate genus/core/etc.
         self.invalidateCaches()
+
+    @property
+    def legsWithVertices(self) -> Set[Leg]:
+        """The set of legs whose root is not `None`.
+        """
+
+        return {nextLeg for nextLeg in self.legs if nextLeg.root is not None}
 
     def addLeg(self, newLeg: Leg) -> None:
         """Adds the supplied leg and its root and invalidates caches.
