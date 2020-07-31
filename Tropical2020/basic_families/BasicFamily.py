@@ -520,7 +520,6 @@ class BasicFamily(object):
 
     # Contract edge e in place
     def contract(self, e: Edge) -> None:
-
         """Contracts an edge in place on the basic family.
 
         The assertion is made that the edge exists, else an error is raised.
@@ -534,6 +533,7 @@ class BasicFamily(object):
         e : :class:`~Tropical2020.basic_families.Edge.Edge`
             The edge to be contracted.
         """
+
         # Don't contract a nonexistent edge
         assert e in self.edges
 
@@ -563,7 +563,6 @@ class BasicFamily(object):
 
     # Returns a new BasicFamily with edge e contracted
     def getContraction(self, e: Edge, returnCopyInfo: bool = False) -> Union["BasicFamily", Tuple["BasicFamily", Dict]]:
-
         """Returns a new BasicFamily with the edge ``e`` contracted.
 
         To avoid accidentally modifying self, we use a fully shallow copy.
