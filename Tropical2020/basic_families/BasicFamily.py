@@ -4,6 +4,7 @@ from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 import numpy as np  # type: ignore
 
 from .GraphIsoHelper import *
+from PiecewiseLinearFunction.py import *
 from .RPC import *
 from .Edge import Edge
 from .Leg import Leg
@@ -37,6 +38,19 @@ class BasicFamily(object):
         self._legs: Set[Leg] = set()
         self.monoid: Monoid = Monoid()
 
+        #Initialize plf as zero function everywhere by default, using a hallow copy of the basic family for the domain:
+        _domain = copy.copy(self)
+
+        #Assigning functionvalues to be zero by default:
+        zeroDict = {}
+
+        for i in self.vertices:
+            zeroDict[i] = 0.0
+        for j in self.legs:
+            zeroDict[j] = 0.0
+
+        self.PLF = PiecewiseLinearFunction(_domain, zeroDict)
+         
         # Variables for caching vertices
         self._vertexCacheValid: bool = False
         self._vertexCache: Set[Vertex] = set()
