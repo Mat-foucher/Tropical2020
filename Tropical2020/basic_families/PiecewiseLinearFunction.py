@@ -1,4 +1,4 @@
-from .BasicFamily import *
+from BasicFamily.py import *
 
 
 class PiecewiseLinearFunction(object):

@@ -4,7 +4,6 @@ from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 import numpy as np  # type: ignore
 
 from .GraphIsoHelper import *
-from PiecewiseLinearFunction.py import *
 from .RPC import *
 from .Edge import Edge
 from .Leg import Leg
