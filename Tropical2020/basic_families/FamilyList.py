@@ -16,7 +16,6 @@ class FamilyList(object):
     def Monoid(self):
         return self.Monoid_
 
-    def AssignLengthsToEdges(self, dict):
-        
-
-
+    def AssignLengthsToEdges(self, dict_):
+        for i in dict_:
+            assert dict_[i].is_integer()
