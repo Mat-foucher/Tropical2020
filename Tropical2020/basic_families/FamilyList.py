@@ -1,11 +1,11 @@
-from .BasicFamily import *
+#from .BasicFamily import *
 from .RPC import *
 
 class FamilyList(object):
-    def __init__(self, _BasicFamily, _Monoid, _LengthDictionary, _LegLengthVector):
+    def __init__(self, _BasicFamily, _Monoid, _SlopeDictionary, _LegLengthVector):
         self.BasicFamily_ = _BasicFamily
         self.Monoid_ = _Monoid
-        self.LengthDictionary = _LengthDictionary
+        self.SlopeDictionary = _SlopeDictionary
         self.LegLengthVector = _LegLengthVector
 
     @property

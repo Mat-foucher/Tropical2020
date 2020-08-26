@@ -40,15 +40,6 @@ class BasicFamily(object):
         #Initialize plf as zero function everywhere by default, using a hallow copy of the basic family for the domain:
         _domain = copy.copy(self)
 
-        #Assigning functionvalues to be zero by default:
-        zeroDict = {}
-
-        for i in self.vertices:
-            zeroDict[i] = 0.0
-        for j in self.legs:
-            zeroDict[j] = 0.0
-
-        self.PLF = PiecewiseLinearFunction(_domain, zeroDict)
          
         # Variables for caching vertices
         self._vertexCacheValid: bool = False
